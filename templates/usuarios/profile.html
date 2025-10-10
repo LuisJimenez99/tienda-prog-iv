@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="profile-container">
+    <h2>Mi Cuenta</h2>
+    
+    <div class="profile-info">
+        <p><strong>Nombre de Usuario:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Nombre Completo:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    </div>
+    
+    <hr>
+    
+    <div class="profile-details">
+        <h3>Mis Datos de Envío</h3>
+        <!-- Usamos el filtro 'default' para mostrar un texto amigable si el usuario aún no ha completado estos datos -->
+        <p><strong>Teléfono:</strong> {{ user.perfil.telefono|default:"No especificado" }}</p>
+        <p><strong>Dirección:</strong> {{ user.perfil.direccion|default:"No especificada" }}</p>
+        <p><strong>Ciudad:</strong> {{ user.perfil.ciudad|default:"No especificada" }}</p>
+        <p><strong>Código Postal:</strong> {{ user.perfil.codigo_postal|default:"No especificado" }}</p>
+    </div>
+
+    <!-- En el futuro, aquí podrás añadir un botón que lleve a un formulario para editar el perfil -->
+    <a href="#" class="btn-principal" style="margin-top: 20px; display: inline-block;">Editar Mis Datos</a>
+</div>
+{% endblock %}
+

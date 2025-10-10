@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda de Viandas</title>
+    <!-- Carga los estilos CSS. Asegúrate de que el nombre del archivo (styles.css) sea correcto -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <header>
+        <!-- Incluimos la barra de navegación. Se mostrará en TODAS las páginas que usen este esqueleto -->
+        {% include 'header_content.html' %}
+    </header>
+
+    <main>
+        <!-- === EL HUECO PARA EL CONTENIDO === -->
+        <!-- Este bloque es un espacio vacío que cada página (inicio.html, lista_productos.html, etc.) -->
+        <!-- se encargará de rellenar con su propio contenido. -->
+        {% block content %}
+        {% endblock %}
+    </main>
+     <!-- === INICIO DEL MINI-CARRITO FLOTANTE === -->
+<!-- El fondo oscuro semitransparente -->
+<div id="mini-cart-overlay" class="mini-cart-overlay"></div>
+
+<!-- El panel del carrito que se desliza desde la derecha -->
+<div id="mini-cart" class="mini-cart">
+    
+    <!-- Cabecera del carrito -->
+    <div class="mini-cart-header">
+        <h3>Mi Carrito</h3>
+        <button id="close-cart-btn" class="close-cart-btn">&times;</button>
+    </div>
+
+    <!-- Contenedor para los productos -->
+    <div id="mini-cart-items" class="mini-cart-items">
+        <!-- Los productos del carrito se insertarán aquí con JavaScript -->
+        <p class="cart-empty-msg">Tu carrito está vacío.</p>
+    </div>
+
+    <!-- Pie del carrito con el total y el botón de finalizar compra -->
+    <div class="mini-cart-footer">
+        <div class="cart-total">
+            <strong>Total:</strong>
+            <span id="cart-total-price">$0.00</span>
+        </div>
+        <!-- Este enlace te llevará a la futura página de checkout -->
+        <a href="#" class="btn-checkout">Finalizar Compra</a>
+    </div>
+
+</div>
+<!-- === FIN DEL MINI-CARRITO FLOTANTE === -->
+    <footer>
+       
+        {% include 'footer_content.html' %}
+    </footer>
+
+    <!-- Si en el futuro necesitas JavaScript, puedes agregarlo aquí -->
+     <script src="{% static 'js/main.js' %}"></script> 
+</html>

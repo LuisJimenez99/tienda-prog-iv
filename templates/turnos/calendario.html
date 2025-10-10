@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="opcion-calendario-wrapper">
+    <div class="opcion-calendario">
+        <h1>Elige tu Turno</h1>
+        <p class="descripcion">Selecciona un día disponible en el calendario para ver los horarios. Luego, elige la hora que prefieras para tu consulta.</p>
+        
+        <div class="contenedor-turnos">
+            
+            <!-- Calendario Grid -->
+            <div class="calendario-grid">
+                <div class="mes-header">
+                    <button id="prev-month" type="button" disabled>&lt;</button>
+                    <h3 id="month-name">{{ month_name }} {{ year }}</h3>
+                    <button id="next-month" type="button" disabled>&gt;</button>
+                </div>
+                <div class="dias-semana">
+                    <div>LU</div> <div>MA</div> <div>MI</div> <div>JU</div> <div>VI</div> <div>SA</div> <div>DO</div>
+                </div>
+                <div class="dias-calendario" id="dias-calendario">
+                    {% for week in month_calendar %}
+                        {% for day in week %}
+                            {% if day.month == current_month %}
+                                <div class="dia 
+                                    {% if day in dias_disponibles %}disponible{% endif %} 
+                                    {% if day == today %}hoy{% endif %}" 
+                                    data-date="{{ day|date:'Y-m-d' }}">
+                                    {{ day.day }}
+                                </div>
+                            {% else %}
+                                <div class="dia otro-mes">{{ day.day }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Horarios Disponibles -->
+            <div class="horarios-disponibles">
+                <h3 id="horarios-titulo" class="titulo-seccion-turnos">Selecciona un día</h3>
+                <div id="horarios-lista" class="horarios-lista">
+                    <p class="horarios-placeholder">Los horarios disponibles aparecerán aquí.</p>
+                </div>
+                <!-- El atributo type="button" es crucial para evitar que la página se recargue -->
+                <button class="boton-confirmar" type="button" disabled>Confirmar Turno</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos del Calendario */
+    .opcion-calendario-wrapper { background-color: #fff; padding: 60px 20px; }
+    .opcion-calendario { max-width: 900px; margin: 0 auto; }
+    .contenedor-turnos { display: flex; gap: 30px; }
+    .calendario-grid { flex: 1.5; }
+    .horarios-disponibles { flex: 1; }
+    .mes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .mes-header button { background: none; border: 1px solid #ccc; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
+    .mes-header button:disabled { cursor: not-allowed; opacity: 0.5; }
+    .dias-semana { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: #999; font-size: 0.8rem; margin-bottom: 10px;}
+    .dias-calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .dia { padding: 10px; border-radius: 8px; }
+    .dia.otro-mes { color: #ccc; }
+    .dia.disponible { cursor: pointer; font-weight: 600; }
+    .dia.disponible:hover { background-color: #f0f0f0; }
+    .dia.hoy { border: 2px solid #78857A; padding: 8px; }
+    .dia.seleccionado { background-color: #78857A; color: #fff; }
+    .horarios-lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;}
+    .horario-item { padding: 12px; border: 1px solid #ccc; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+    .horario-item:hover { border-color: #78857A; }
+    .horario-item.seleccionado { background-color: #78857A; color: #fff; border-color: #78857A; }
+    .horarios-placeholder { color: #999; grid-column: 1 / -1; text-align: center; }
+    .titulo-seccion-turnos { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .boton-confirmar { display: block; width: 100%; padding: 15px; background-color: #78857A; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background-color 0.3s ease; }
+    .boton-confirmar:hover { background-color: #647066; }
+    .boton-confirmar:disabled { background-color: #ccc; cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+        .contenedor-turnos { flex-direction: column; }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const diasCalendario = document.getElementById('dias-calendario');
+    const horariosLista = document.getElementById('horarios-lista');
+    const horariosTitulo = document.getElementById('horarios-titulo');
+    const btnConfirmar = document.querySelector('.boton-confirmar');
+    let diaSeleccionado = null;
+    let horaSeleccionada = null;
+
+    diasCalendario.addEventListener('click', e => {
+        const diaClickeado = e.target.closest('.dia.disponible');
+        if (diaClickeado) {
+            if (diaSeleccionado) diaSeleccionado.classList.remove('seleccionado');
+            diaSeleccionado = diaClickeado;
+            diaSeleccionado.classList.add('seleccionado');
+            
+            const fecha = diaSeleccionado.dataset.date;
+            horariosTitulo.textContent = `Horarios para el ${new Date(fecha + 'T03:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+            horariosLista.innerHTML = '<p class="horarios-placeholder">Cargando...</p>';
+            btnConfirmar.disabled = true;
+            horaSeleccionada = null;
+
+            fetch(`/turnos/api/horarios/${fecha}/`)
+                .then(response => response.json())
+                .then(data => {
+                    horariosLista.innerHTML = '';
+                    if (data.horarios && data.horarios.length > 0) {
+                        data.horarios.forEach(hora => {
+                            const div = document.createElement('div');
+                            div.className = 'horario-item';
+                            div.textContent = hora;
+                            div.dataset.hora = hora;
+                            horariosLista.appendChild(div);
+                        });
+                    } else {
+                        horariosLista.innerHTML = '<p class="horarios-placeholder">No hay horarios disponibles para este día.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener horarios:", error);
+                    horariosLista.innerHTML = '<p class="horarios-placeholder">Error al cargar horarios.</p>';
+                });
+        }
+    });
+
+    horariosLista.addEventListener('click', e => {
+        const horarioClickeado = e.target.closest('.horario-item');
+        if (horarioClickeado) {
+            if (horaSeleccionada) horaSeleccionada.classList.remove('seleccionado');
+            horaSeleccionada = horarioClickeado;
+            horaSeleccionada.classList.add('seleccionado');
+            btnConfirmar.disabled = false;
+        }
+    });
+
+    btnConfirmar.addEventListener('click', () => {
+        if (diaSeleccionado && horaSeleccionada) {
+            const fecha = diaSeleccionado.dataset.date;
+            const hora = horaSeleccionada.dataset.hora;
+            const checkoutUrl = `/turnos/checkout/?fecha=${fecha}&hora=${hora}`;
+            window.location.href = checkoutUrl;
+        } else {
+            alert("Por favor, asegúrate de seleccionar un día y una hora.");
+        }
+    });
+});
+</script>
+{% endblock %}
+

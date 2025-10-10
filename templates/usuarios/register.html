@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-form-container">
+    <h2>Crear una Cuenta</h2>
+    
+    <!-- Formulario que envía los datos a la vista 'register_view' usando el método POST -->
+    <form method="post">
+        <!-- Token de seguridad CSRF, obligatorio en los formularios de Django -->
+        {% csrf_token %}
+        
+        <!-- Django renderiza automáticamente los campos del formulario de registro que creamos -->
+        <!-- (Usuario, Email, Nombre, Apellido, Contraseñas) -->
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn-principal">Registrarse</button>
+    </form>
+    
+    <!-- Enlace para dirigir a los usuarios que ya tienen una cuenta a la página de login -->
+    <p class="auth-switch">¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia Sesión</a></p>
+</div>
+{% endblock %}

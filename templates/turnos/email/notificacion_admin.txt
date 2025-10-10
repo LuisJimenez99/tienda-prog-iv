@@ -1,0 +1,12 @@
+
+    Hola,
+
+    Has recibido una nueva solicitud de turno.
+
+    Detalles:
+    - Cliente: {{ turno.cliente.first_name }} {{ turno.cliente.last_name }} ({{ turno.cliente.username }})
+    - Email: {{ turno.cliente.email }}
+    - Fecha: {{ turno.fecha|date:"d/m/Y" }}
+    - Hora: {{ turno.hora|time:"H:i" }}
+
+    El estado del turno es "Pendiente de Pago". Por favor, verifica el pago y confirma el turno en el panel de administrador.

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-form-container">
+    <h2>Iniciar Sesión</h2>
+    
+    <!-- Formulario para el inicio de sesión -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Django renderiza el formulario de autenticación estándar (usuario y contraseña) -->
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn-principal">Ingresar</button>
+    </form>
+    
+    <!-- Enlace para usuarios que no tienen una cuenta y necesitan registrarse -->
+    <p class="auth-switch">¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate</a></p>
+</div>
+{% endblock %}
+

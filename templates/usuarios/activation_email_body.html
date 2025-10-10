@@ -1,0 +1,10 @@
+    Hola {{ user.first_name }},
+
+    ¡Gracias por registrarte en NutriTienda!
+
+    Por favor, haz clic en el siguiente enlace para confirmar tu email y activar tu cuenta:
+    http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+    ¡Saludos!
+    El equipo de NutriTienda
+    

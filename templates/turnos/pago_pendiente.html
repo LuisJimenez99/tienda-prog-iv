@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="confirmacion-box">
+        <h2><i class="fas fa-clock"></i> Pago Pendiente</h2>
+        <p>Tu pago está siendo procesado. Esto es normal si elegiste pagar en un punto de pago en efectivo (como Rapipago o Pagofácil).</p>
+        <p class="resumen-confirmado">
+            Tu turno para el <strong>{{ turno.fecha|date:"l, d \d\e F" }}</strong> a las <strong>{{ turno.hora|time:"H:i" }} hs</strong> quedará confirmado una vez que se acredite el pago.
+        </p>
+        <p>Recibirás un email de confirmación cuando esto ocurra. No necesitas hacer nada más.</p>
+        <a href="{% url 'inicio' %}" class="btn-principal" style="margin-top: 20px;">Volver al Inicio</a>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="confirmacion-box">
+        <h2><i class="fas fa-times-circle"></i> Hubo un Problema con el Pago</h2>
+        <p>Lamentablemente, no se pudo procesar tu pago y tu turno no ha sido agendado.</p>
+        <p>Esto puede ocurrir por fondos insuficientes o un error en los datos de la tarjeta. No se ha realizado ningún cobro.</p>
+        <p>Por favor, intenta nuevamente desde el calendario o elige otro medio de pago.</p>
+        <a href="{% url 'calendario' %}" class="btn-principal" style="margin-top: 20px;">Volver al Calendario</a>
+    </div>
+</div>
+{% endblock %}
+

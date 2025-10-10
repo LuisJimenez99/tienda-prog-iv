@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="productos-page-wrapper">
+    <h2 class="titulo-seccion">Nuestro Catálogo</h2>
+
+    <div class="productos-page-layout">
+        
+        <!-- ================================== -->
+        <!-- === BARRA LATERAL DE FILTROS === -->
+        <!-- ================================== -->
+        <aside class="filtros-sidebar">
+            <h4>Filtrar por Categoría</h4>
+            <ul class="lista-categorias">
+                <!-- 1. Enlace para quitar los filtros y ver "Todos" los productos -->
+                <li><a href="{% url 'lista_productos' %}">Todos</a></li>
+                
+                <!-- 2. Bucle para crear un enlace por cada categoría que exista en la base de datos -->
+                <!--    La vista nos pasa la variable 'categorias' para esto. -->
+                {% for categoria in categorias %}
+                <li>
+                    <!-- El 'href' construye una URL como: /productos/?categoria=1 -->
+                    <a href="?categoria={{ categoria.id }}">{{ categoria.nombre }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+        <!-- === FIN DE LA BARRA LATERAL === -->
+
+        <!-- ================================== -->
+        <!-- ===   GRID DE PRODUCTOS        === -->
+        <!-- ================================== -->
+        <main class="productos-grid-container">
+            <!-- 3. Comprobamos si la variable 'productos' tiene algo -->
+            {% if productos %}
+                <div class="contenedor-grid-productos">
+                    {% for producto in productos %}
+                        <!-- Usamos la misma tarjeta de producto que en el inicio -->
+                        <div class="tarjeta-producto">
+                            <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
+                                <div class="tarjeta-imagen-contenedor">
+                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
+                                </div>
+                            </a>
+                            <div class="tarjeta-contenido">
+                                <h3 class="tarjeta-titulo">
+                                    <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
+                                </h3>
+                                <p class="tarjeta-precio">${{ producto.precio }}</p>
+                                <button class="btn-comprar add-to-cart-btn" 
+                                        data-id="{{ producto.id }}" 
+                                        data-nombre="{{ producto.nombre }}" 
+                                        data-precio="{{ producto.precio }}"
+                                        data-imagen="{{ producto.imagen.url }}">
+                                    Comprar
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- 4. Si 'productos' está vacío, mostramos un mensaje amigable -->
+                <p class="no-results-msg">No se encontraron productos que coincidan con tu búsqueda.</p>
+            {% endif %}
+        </main>
+        <!-- === FIN DEL GRID === -->
+
+    </div>
+</div>
+{% endblock %}
+

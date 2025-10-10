@@ -1,0 +1,13 @@
+     Hola {{ turno.cliente.first_name }},
+
+    Hemos recibido tu solicitud de turno para una consulta. ¡Gracias por confiar en nosotros!
+
+    Aquí están los detalles de tu cita:
+    - Fecha: {{ turno.fecha|date:"l, d \d\e F" }}
+    - Hora: {{ turno.hora|time:"H:i" }} hs
+
+    El estado de tu turno es "Pendiente de Pago". Una vez que procesemos tu pago, te enviaremos la confirmación final.
+
+    ¡Saludos!
+    [Tu Nombre]
+    NutriTienda
