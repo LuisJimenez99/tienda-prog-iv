@@ -70,15 +70,13 @@ def checkout_turno_view(request):
             "title": f"Consulta Nutricional - {fecha_str} a las {hora_str}",
             "quantity": 1, "unit_price": float(settings.PRECIO_CONSULTA), "currency_id": "ARS"
         }],
-        "payer": {
-            "email": request.user.email,
-        },
+        "payer": { "email": request.user.email },
         "back_urls": {
             "success": request.build_absolute_uri(reverse('pago_exitoso')),
             "failure": request.build_absolute_uri(reverse('pago_fallido')),
             "pending": request.build_absolute_uri(reverse('pago_pendiente')),
         },
-        # "auto_return": "approved", # <-- ELIMINAMOS ESTA LÍNEA QUE CAUSABA EL CONFLICTO
+        # Confiamos únicamente en 'back_urls', que es el método estándar y robusto.
         "external_reference": turno.id,
     }
     
@@ -112,9 +110,7 @@ def confirmar_reserva_view(request):
         messages.error(request, "No se encontró un turno pendiente.")
         return redirect('calendario')
     turno = get_object_or_404(TurnoReservado, id=turno_id)
-    # Aquí puedes añadir la lógica para enviar el email de confirmación de transferencia
     return render(request, 'turnos/confirmacion_turno.html', {'turno': turno})
-
 
 def pago_exitoso_view(request):
     turno_id = request.GET.get('external_reference')

@@ -1,89 +1,90 @@
 {% extends 'base.html' %}
 {% load static %}
 
-<!-- Todo el contenido de la página de inicio va dentro de este bloque -->
 {% block content %}
 
-<!-- 1. Contenido que antes estaba en main_content.html (la sección principal) -->
-<div class="seccion-principal">
-    <div class="componente-principal">
-        <div class="contenedor-imagen">
-            <!-- CORRECCIÓN: Usamos la etiqueta 'static' para que Django encuentre la imagen -->
-            <img class="imagen-principal" src="{% static 'images/imagen1.jpg' %}" alt="Viandas saludables en una mesa">
-        </div>
-
-        <div class="contenedor-contenido">
-            <p class="titulo">
-                Te ayudamos a lograr tus objetivos, <br> sin perder el placer de comer.
-            </p>
-
-            <p class="descripcion">
-                Te ofrecemos viandas nutritivas y asesoramiento profesional para que alimentarte bien sea simple, rico y
-                sostenible en el tiempo.
-            </p>
-
-            <div class="contenedor-botones">
-                <button class="btn-elegante">Viandas</button>
-                <button class="btn-elegante">Consultas</button>
+    <!-- 1. Sección principal -->
+    <div class="seccion-principal">
+        <div class="componente-principal">
+            <div class="contenedor-imagen">
+                <img class="imagen-principal" src="{% static 'images/imagen1.jpg' %}" alt="Viandas saludables en una mesa">
+            </div>
+            <div class="contenedor-contenido">
+                <p class="titulo">
+                    Te ayudamos a lograr tus objetivos, <br> sin perder el placer de comer.
+                </p>
+                <p class="descripcion">
+                    Te ofrecemos viandas nutritivas y asesoramiento profesional para que alimentarte bien sea simple, rico y sostenible en el tiempo.
+                </p>
+                <div class="contenedor-botones">
+                    <a href="{% url 'lista_productos' %}" class="btn-elegante">Viandas</a>
+                    <a href="{% url 'calendario' %}" class="btn-elegante">Consultas</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- 2. Contenido que también estaba en main_content.html (la sección de productos destacados) -->
-<section class="seccion-productos">
-    <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
-    <div class="contenedor-grid-productos">
-        <!-- Bucle de Django para mostrar cada producto destacado -->
-        {% for producto in productos %}
-        <div class="tarjeta-producto">
-            <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
-    <div class="tarjeta-imagen-contenedor">
-        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
-    </div>
-</a>
-<div class="tarjeta-contenido">
-    <h3 class="tarjeta-titulo">
-        <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
-    </h3>
-                <p class="tarjeta-precio">${{ producto.precio }}</p>
-                <button class="btn-comprar add-to-cart-btn" data-id="{{ producto.id }}"
-                    data-nombre="{{ producto.nombre }}" data-precio="{{ producto.precio }}"
-                    data-imagen="{{ producto.imagen.url }}">
-                    Comprar
-                </button>
+    <!-- 2. Sección de productos destacados -->
+    <section class="seccion-productos">
+        <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
+        <div class="contenedor-grid-productos">
+            {% for producto in productos %}
+                <div class="tarjeta-producto">
+                    <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
+                        <div class="tarjeta-imagen-contenedor">
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
+                        </div>
+                    </a>
+                    <div class="tarjeta-contenido">
+                        <h3 class="tarjeta-titulo">
+                            <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
+                        </h3>
+                        <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+                        
+                        <!-- === INICIO DEL CAMBIO: Contenedor para dos botones === -->
+                        <div class="tarjeta-botones">
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver Producto</a>
+                            <button class="btn-agregar-carrito add-to-cart-btn" 
+                                    data-id="{{ producto.id }}" 
+                                    data-nombre="{{ producto.nombre }}" 
+                                    data-precio="{{ producto.precio }}"
+                                    data-imagen="{{ producto.imagen.url }}">
+                                Agregar
+                            </button>
+                        </div>
+                        <!-- === FIN DEL CAMBIO === -->
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Sección de Receta Aleatoria -->
+    {% if receta %}
+    <section class="seccion-receta">
+        <div id="receta-card" class="receta-card">
+            <div class="receta-imagen-contenedor">
+                <img id="receta-imagen" src="{{ receta.imagen.url }}" alt="{{ receta.nombre }}">
+            </div>
+            <div class="receta-contenido">
+                <h3 class="subtitulo-seccion">¿Sin ideas para hoy?</h3>
+                <h2 id="receta-nombre" class="titulo-receta">{{ receta.nombre }}</h2>
+                <div id="receta-detalles" class="receta-detalles">
+                    <h4><i class="fas fa-clock"></i> Tiempo: <span id="receta-tiempo">{{ receta.tiempo_preparacion }}</span></h4>
+                    <h4><i class="fas fa-list-ul"></i> Ingredientes:</h4>
+                    <p id="receta-ingredientes">{{ receta.ingredientes }}</p>
+                    <h4><i class="fas fa-utensils"></i> Pasos:</h4>
+                    <p id="receta-instrucciones">{{ receta.instrucciones }}</p>
+                </div>
+                <div class="receta-botones">
+                    <button id="ver-receta-btn" class="btn-principal" type="button">Ver Receta Completa</button>
+                    <button id="otra-receta-btn" class="btn-secundario" type="button">Probar otra</button>
+                </div>
             </div>
         </div>
-        {% endfor %}
-    </div>
-</section>
-
-{% if receta %}<!-- Solo muestra la sección si la vista encontró una receta -->
-<section class="seccion-receta">
-    <div class="receta-card">
-
-        <div class="receta-imagen-contenedor">
-            <!-- Muestra la imagen de la receta -->
-            <img src="{{ receta.imagen.url }}" alt="{{ receta.nombre }}">
-        </div>
-
-        <div class="receta-contenido">
-            <h3 class="subtitulo-seccion">¿Sin ideas para hoy?</h3>
-            <!-- Muestra el nombre de la receta -->
-            <h2 class="titulo-receta">{{ receta.nombre }}</h2>
-            <p class="descripcion-receta">
-                Prueba esta deliciosa y saludable receta. ¡Sorprende a todos con un plato nutritivo y fácil de preparar!
-            </p>
-            <div class="receta-botones">
-                <!-- En el futuro, este enlace llevará a la página de detalles de la receta -->
-                <a href="#" class="btn-principal">Ver Receta Completa</a>
-                <!-- Este enlace recarga la página de inicio para obtener otra receta al azar -->
-                <a href="{% url 'inicio' %}" class="btn-secundario">Probar otra</a>
-            </div>
-        </div>
-
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
 {% endblock %}
+

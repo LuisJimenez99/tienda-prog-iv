@@ -14,14 +14,23 @@ body {
     font-family: 'Poppins', sans-serif;
     background-color: #ECF0E5;
     color: #333;
+    padding-top: 85px; 
 }
 .navbar {
-    display: flex;
+        display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 40px;
     background-color: #ECF0E5;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e0e0e0;
+    
+    /* === CAMBIOS PARA EL MENÚ FIJO === */
+    position: fixed; /* O 'sticky'. 'Fixed' es más compatible. */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Se asegura de que el nav esté siempre por encima de todo. */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Sombra sutil */
 }
 
 .nav-logo a {
@@ -119,15 +128,6 @@ body {
     color: #fff;
 }
 
-
-/* =================================
-   ESTILOS GENERALES Y FUENTES
-   ================================= */
-
-
-
-
-
 /* =================================
    SECCIÓN PRINCIPAL (IMAGEN Y TEXTO)
    ================================= */
@@ -211,7 +211,7 @@ body {
 }
 
 .tarjeta-producto {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -249,7 +249,7 @@ body {
 
 .tarjeta-precio {
     font-size: 1.1rem;
-    color: #78857A;
+    color: #000000;
     font-weight: 500;
     margin-bottom: 20px;
 }
@@ -273,6 +273,7 @@ body {
     box-sizing: border-box;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    text-decoration: none;
 }
 
 .btn-elegante:hover {
@@ -1314,3 +1315,46 @@ body {
     background-color: #78857A;
     color: #fff;
 }
+
+
+/* =================================
+   BOTONES EN TARJETAS DE PRODUCTO
+   ================================= */
+
+/* Contenedor que agrupa los dos botones */
+.tarjeta-botones {
+    display: flex;
+    gap: 10px; /* Espacio entre los dos botones */
+    margin-top: 15px;
+}
+
+/* Estilos comunes para ambos botones: tamaño, fuente, etc. */
+.tarjeta-botones .add-to-cart-btn,
+.tarjeta-botones .btn-ver-producto {
+    flex: 1; /* Hacemos que ambos botones ocupen el 50% del espacio */
+    padding: 10px 5px; /* Altura reducida para un look más delicado */
+    font-size: 0.9rem;
+    font-family: inherit; /* ¡CORRECCIÓN AQUÍ! Fuerza a los botones a usar la fuente 'Poppins' */
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border: 1px solid #78857A; /* Borde del mismo color verde */
+}
+
+/* Estilo unificado de color verde sólido para ambos botones */
+.tarjeta-botones .add-to-cart-btn,
+.tarjeta-botones .btn-ver-producto {
+    background-color: #78857A;
+    color: #FFFFFF;
+}
+
+/* Efecto hover para ambos botones */
+.tarjeta-botones .add-to-cart-btn:hover,
+.tarjeta-botones .btn-ver-producto:hover {
+    background-color: #647066;
+    border-color: #647066;
+}
+

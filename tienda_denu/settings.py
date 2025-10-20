@@ -145,3 +145,5 @@ MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
 # Define el precio de tu consulta aquí para gestionarlo fácilmente
 # ¡Asegúrate de que sea un número flotante (con .00)!
 PRECIO_CONSULTA = 15000.00
+
+LOGIN_URL = 'login'

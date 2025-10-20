@@ -4,16 +4,46 @@
 {% block content %}
 <div class="checkout-wrapper">
     <div class="confirmacion-box">
-        <!-- Puedes añadir un ícono de Font Awesome si lo tienes configurado -->
+        
+        <!-- Título principal de la confirmación -->
         <h2><i class="fas fa-check-circle"></i> ¡Turno Confirmado!</h2>
+        
         <p>Tu pago ha sido aprobado y tu turno ha sido agendado exitosamente.</p>
-        <p class="resumen-confirmado">
-            <strong>Fecha:</strong> {{ turno.fecha|date:"l, d \d\e F" }} <br>
-            <strong>Hora:</strong> {{ turno.hora|time:"H:i" }} hs.
-        </p>
-        <p>Recibirás un email con todos los detalles en breve. ¡Muchas gracias!</p>
-        <a href="{% url 'inicio' %}" class="btn-principal" style="margin-top: 20px;">Volver al Inicio</a>
+        
+        <!-- Un recuadro con el resumen del turno para que el usuario lo vea claramente -->
+        <div class="resumen-confirmado">
+            <p><strong>Fecha:</strong> {{ turno.fecha|date:"l, d \de F" }}</p>
+            <p><strong>Hora:</strong> {{ turno.hora|time:"H:i" }} hs.</p>
+        </div>
+        
+        <p>Recibirás un email con todos los detalles en breve. ¡Muchas gracias por tu confianza!</p>
+        
+        <!-- Botón claro para que el usuario pueda volver a la página principal -->
+        <a href="{% url 'inicio' %}" class="btn-principal" style="margin-top: 30px; display: inline-block; text-decoration: none;">Volver al Inicio</a>
     </div>
 </div>
+
+<!-- Añadimos un pequeño estilo extra para el recuadro del resumen -->
+<style>
+    .resumen-confirmado {
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 25px 0;
+    }
+    .resumen-confirmado p {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    .resumen-confirmado p:last-child {
+        margin-bottom: 0;
+    }
+    .confirmacion-box h2 .fas { /* Para el ícono de check verde */
+        color: #2ecc71;
+        margin-right: 10px;
+    }
+</style>
 {% endblock %}
 
