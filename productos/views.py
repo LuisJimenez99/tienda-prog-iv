@@ -1,48 +1,42 @@
-from django.shortcuts import render, get_object_or_404 # 1. Añadimos la importación de 'get_object_or_404'
-from .models import Producto
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-# Asegúrate de importar Receta si la API está en este archivo
-from recetas.models import Receta 
+from django.db.models import Q
+from .models import Producto, Categoria
+from django.urls import reverse # <-- ¡ESTA ES LA LÍNEA QUE FALTABA!
 
-# --- Vista para la lista de productos (sin cambios) ---
+# ... (tu vista lista_productos y detalle_producto se quedan como están) ...
+
 def lista_productos(request):
     productos = Producto.objects.filter(disponible=True)
-    contexto = {'productos': productos}
+    categorias = Categoria.objects.all()
+    query = request.GET.get('q')
+    if query:
+        productos = productos.filter(
+            Q(nombre__icontains=query) | Q(descripcion__icontains=query)
+        )
+    categoria_id = request.GET.get('categoria')
+    if categoria_id:
+        productos = productos.filter(categoria__id=categoria_id)
+    contexto = { 'productos': productos, 'categorias': categorias, }
     return render(request, 'productos/lista_productos.html', contexto)
 
-# --- 2. VISTA NUEVA PARA EL DETALLE DEL PRODUCTO ---
 def detalle_producto(request, producto_id):
-    """
-    Esta función busca un producto por su ID y muestra su página de detalle.
-    """
-    # 3. La lógica principal:
-    #    'get_object_or_404' es la forma más segura de buscar un objeto.
-    #    Intenta encontrar un 'Producto' cuyo 'id' coincida con el 'producto_id' de la URL.
-    #    Si no lo encuentra, Django mostrará automáticamente una página de error "404 Not Found".
     producto = get_object_or_404(Producto, id=producto_id)
-    
-    # 4. Preparamos el contexto (los datos que enviaremos al HTML).
-    #    En este caso, solo contiene el producto que encontramos.
-    contexto = {
-        'producto': producto
-    }
-
-    # 5. Renderizamos la nueva plantilla HTML y le pasamos el contexto.
+    contexto = { 'producto': producto }
     return render(request, 'productos/detalle_producto.html', contexto)
 
 
-# --- Vista para la API de recetas (sin cambios) ---
-def random_receta_api(request):
-    receta = Receta.objects.exclude(imagen__exact='').order_by('?').first()
-    if receta:
-        data = {
-            'nombre': receta.nombre,
-            'imagen_url': receta.imagen.url,
-            'ingredientes': receta.ingredientes,
-            'instrucciones': receta.instrucciones,
-            'tiempo_preparacion': receta.tiempo_preparacion,
-        }
-        return JsonResponse(data)
-    else:
-        return JsonResponse({'error': 'No se encontraron recetas'}, status=404)
-
+# --- VISTA DE API PARA LA BÚSQUEDA EN VIVO ---
+def live_search_api(request):
+    query = request.GET.get('q', '')
+    productos_sugeridos = []
+    if query and len(query) > 2:
+        productos = Producto.objects.filter(nombre__icontains=query, disponible=True)[:5]
+        for producto in productos:
+            productos_sugeridos.append({
+                'id': producto.id,
+                'nombre': producto.nombre,
+                'url': reverse('detalle_producto', args=[producto.id]), # Ahora 'reverse' está definido
+                'imagen_url': producto.imagen.url if producto.imagen else ''
+            })
+    return JsonResponse({'productos': productos_sugeridos})

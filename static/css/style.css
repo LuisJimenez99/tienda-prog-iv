@@ -1095,3 +1095,57 @@ body {
     }
 }
 
+/* =================================
+   BÚSQUEDA EN VIVO (LIVE SEARCH)
+   ================================= */
+.search-wrapper {
+    position: relative;
+}
+
+.live-search-results {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 250px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 1001;
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.live-search-results.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
