@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'carrito',
+    'envios',
 ]
 
 MIDDLEWARE = [
@@ -98,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # ... (sin cambios)
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-ar'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -147,7 +149,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-PRECIO_CONSULTA = 15000.00
+PRECIO_CONSULTA = 1500.00
+
 
 LOGIN_URL = 'account_login'
 SITE_ID = 1
@@ -160,23 +163,18 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Define qué método se usa para iniciar sesión (usuario, email, o ambos)
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_LOGIN_METHODS = {"username", "email"}  # permite login con usuario o email
+ACCOUNT_SIGNUP_FIELDS = [
+    "username*",   # el * indica que es obligatorio
+    "email*", 
+    "password1*", 
+    "password2*",
+]
 
-# El email es requerido para registrarse
-ACCOUNT_EMAIL_REQUIRED = True
-
-# El usuario debe verificar su dirección de email
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
-# El usuario debe ingresar su contraseña dos veces en el formulario de registro
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
-
-# Nombre de usuario mínimo
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # o 'mandatory' si querés verificar
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_USERNAME_MIN_LENGTH = 4
-
-# URL a la que se redirige después de iniciar sesión
-LOGIN_REDIRECT_URL = '/'
-
-# URL a la que se redirige después de cerrar sesión
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_PASSWORD_MIN_LENGTH = 6
+ACCOUNT_SESSION_REMEMBER = True
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

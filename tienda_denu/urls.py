@@ -13,14 +13,22 @@ urlpatterns = [
     path('productos/', include('productos.urls')),
     path('turnos/', include('turnos.urls')),
     path('recetas/', include('recetas.urls')),
+    path('carrito/', include('carrito.urls')),
 
-    # --- CORRECCIÓN CLAVE AQUÍ ---
-    # 1. Dejamos que 'allauth' maneje toda la autenticación bajo '/accounts/'.
+    # --- LÍNEA NUEVA AQUÍ ---
+    # Le decimos a Django que cualquier URL que empiece con 'envios/'
+    # debe ser manejada por el archivo 'envios/urls.py'
+    path('envios/', include('envios.urls')),
+
+    # Autenticación (allauth)
     path('accounts/', include('allauth.urls')),
     
-    # 2. Creamos un nuevo prefijo para nuestras vistas de usuario personalizadas.
+    # Perfil de usuario personalizado
     path('mi-cuenta/', include('usuarios.urls')),
 ]
 
+# Servir archivos estáticos y multimedia en modo DEBUG
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

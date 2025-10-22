@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Carga el SDK de Mercado Pago -->
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+
+<div class="checkout-wrapper">
+    <h2>Finalizar Compra</h2>
+
+    <div class="resumen-pedido">
+        <h3>Resumen del Pedido #{{ pedido.id }}</h3>
+        <ul class="lista-items-pedido">
+            {% for item in pedido.items.all %}
+                <li>
+                    <span>{{ item.cantidad }} x {{ item.producto.nombre }}</span>
+                    <span>${{ item.get_costo|floatformat:2 }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="total-pedido">
+            <strong>Total:</strong>
+            <strong>${{ pedido.total|floatformat:2 }}</strong>
+        </div>
+    </div>
+
+    <div class="datos-envio-resumen">
+        <h3>Datos de Envío</h3>
+        <p>{{ pedido.cliente.first_name }} {{ pedido.cliente.last_name }}</p>
+        <p>{{ pedido.direccion_envio }}</p>
+        <p>{{ pedido.ciudad_envio }}, CP {{ pedido.codigo_postal_envio }}</p>
+        <p>Teléfono: {{ pedido.telefono_contacto }}</p>
+        <a href="{% url 'edit_profile' %}?next={{ request.path }}" class="link-editar-datos">Editar datos</a>
+    </div>
+
+    <div class="metodos-pago">
+        <h3>Elige tu Método de Pago</h3>
+        <div class="pago-opcion">
+            <h4>1. Paga online con Mercado Pago</h4>
+            <p>Tarjetas de crédito, débito y otros medios de pago.</p>
+            <div id="wallet_container" style="margin-top: 15px;"></div>
+        </div>
+        <div class="pago-opcion">
+            <h4>2. Transferencia Bancaria</h4>
+            <p>Realiza la transferencia y envía el comprobante por WhatsApp. Tu pedido quedará pendiente hasta confirmar el pago.</p>
+            <div class="datos-transferencia">
+                <strong>Alias/CBU:</strong> {{ datos_pago.cbu_alias|default:"No configurado" }}
+            </div>
+             
+             <!-- <a href="#" class="btn-principal" style="margin-top: 20px;">Confirmar Pago por Transferencia</a> -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const mp = new MercadoPago('{{ public_key }}', { locale: 'es-AR' });
+    mp.bricks().create("wallet", "wallet_container", {
+        initialization: { preferenceId: "{{ preference_id }}" },
+        customization: { texts: { valueProp: 'smart_option' } }
+    });
+</script>
+{% endblock %}

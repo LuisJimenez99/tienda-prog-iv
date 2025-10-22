@@ -1,12 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // --- 1. CARGAR CARRITO DESDE localStorage ---
-    // Intentamos cargar el carrito desde localStorage.
-    // JSON.parse convierte el texto guardado de nuevo en un array de JavaScript.
-    // Si no hay nada guardado (||), empezamos con un carrito vacío [].
     let cart = JSON.parse(localStorage.getItem('miTiendaCarrito')) || [];
 
-    // --- ELEMENTOS DEL DOM (sin cambios) ---
+    // --- ELEMENTOS DEL DOM ---
     const cartIcon = document.querySelector('.nav-carrito');
     const cartCounter = document.querySelector('.cart-counter');
     const miniCart = document.getElementById('mini-cart');
@@ -17,20 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartTotalPriceEl = document.getElementById('cart-total-price');
     const searchInput = document.querySelector('.search-input');
     const searchResultsContainer = document.getElementById('live-search-results');
+    const btnCheckout = document.querySelector('.btn-checkout'); // Botón en el mini-carrito
 
-
-    // --- FUNCIONES ---
-
-    // --- 2. FUNCIÓN PARA GUARDAR EL CARRITO ---
-    // Esta función convierte nuestro array 'cart' en texto con JSON.stringify
-    // y lo guarda en localStorage bajo la clave 'miTiendaCarrito'.
+    // --- FUNCIONES DEL CARRITO ---
     const saveCartToLocalStorage = () => {
         localStorage.setItem('miTiendaCarrito', JSON.stringify(cart));
     };
 
     const toggleMiniCart = () => {
-        miniCart.classList.toggle('visible');
-        miniCartOverlay.classList.toggle('visible');
+        if (miniCart && miniCartOverlay) {
+           miniCart.classList.toggle('visible');
+           miniCartOverlay.classList.toggle('visible');
+        }
     };
 
     const addToCart = (product) => {
@@ -40,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             cart.push({ ...product, quantity: 1 });
         }
-        updateCartDisplay(); // Esta función ahora también guardará el carrito
+        updateCartDisplay();
     };
     
     const updateQuantity = (productId, change) => {
@@ -51,10 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 cart = cart.filter(item => item.id !== productId);
             }
         }
-        updateCartDisplay(); // Esta función ahora también guardará el carrito
+        updateCartDisplay();
     };
 
     const updateCartDisplay = () => {
+        if (!miniCartItemsContainer || !cartCounter || !cartTotalPriceEl) return; 
+
         miniCartItemsContainer.innerHTML = '';
         let totalItems = 0;
         let totalPrice = 0;
@@ -86,85 +83,175 @@ document.addEventListener('DOMContentLoaded', () => {
         
         cartCounter.textContent = totalItems;
         cartTotalPriceEl.textContent = `$${totalPrice.toFixed(2)}`;
-        
-        // --- 3. GUARDAMOS EN CADA ACTUALIZACIÓN ---
-        // Cada vez que la vista del carrito se actualiza, guardamos el estado actual.
         saveCartToLocalStorage();
     };
 
-    // --- EVENT LISTENERS (sin cambios) ---
-    cartIcon.addEventListener('click', toggleMiniCart);
-    closeCartBtn.addEventListener('click', toggleMiniCart);
-    miniCartOverlay.addEventListener('click', toggleMiniCart);
+    // --- EVENT LISTENERS DEL CARRITO ---
+    if (cartIcon) cartIcon.addEventListener('click', toggleMiniCart);
+    if (closeCartBtn) closeCartBtn.addEventListener('click', toggleMiniCart);
+    if (miniCartOverlay) miniCartOverlay.addEventListener('click', toggleMiniCart);
 
     addToCartButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             const productData = e.target.closest('.add-to-cart-btn').dataset;
             const product = {
-                id: productData.id,
-                nombre: productData.nombre,
-                precio: productData.precio,
-                imagen: productData.imagen,
+                id: productData.id, nombre: productData.nombre, 
+                precio: productData.precio, imagen: productData.imagen,
             };
             addToCart(product);
         });
     });
     
-    miniCartItemsContainer.addEventListener('click', (e) => {
-        const target = e.target;
-        if (target.classList.contains('quantity-btn')) {
-            const productId = target.dataset.id;
-            const change = parseInt(target.dataset.change, 10);
-            updateQuantity(productId, change);
-        }
-        if (target.classList.contains('remove-item-btn')) {
-            const productId = target.dataset.id;
-            const product = cart.find(item => item.id === productId);
-            if (product) updateQuantity(productId, -product.quantity);
-        }
-    });
+    if (miniCartItemsContainer) {
+        miniCartItemsContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('quantity-btn')) {
+                const productId = target.dataset.id;
+                const change = parseInt(target.dataset.change, 10);
+                updateQuantity(productId, change);
+            }
+            if (target.classList.contains('remove-item-btn')) {
+                const productId = target.dataset.id;
+                const product = cart.find(item => item.id === productId);
+                if (product) updateQuantity(productId, -product.quantity);
+            }
+        });
+    }
 
-    // --- 4. INICIALIZACIÓN ---
-    // Al cargar la página, llamamos a esta función una vez para que
-    // muestre el contenido del carrito que acabamos de cargar de localStorage.
-    updateCartDisplay();
+    // --- EVENT LISTENER PARA FINALIZAR COMPRA (PRODUCTOS) ---
+    if (btnCheckout) {
+        btnCheckout.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío.');
+                return;
+            }
+            btnCheckout.textContent = 'Procesando...';
+            btnCheckout.disabled = true;
 
+            fetch('/carrito/api/crear-pedido/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cart: cart })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => { throw new Error(errData.error || `Error ${response.status}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.redirect_url) {
+                    cart = [];
+                    saveCartToLocalStorage(); 
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error || 'Hubo un error al crear el pedido.');
+                    if (data.redirect_url) { window.location.href = data.redirect_url; }
+                    btnCheckout.textContent = 'Finalizar Compra';
+                    btnCheckout.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error al finalizar compra:', error);
+                alert(`Error: ${error.message}`);
+                btnCheckout.textContent = 'Finalizar Compra';
+                btnCheckout.disabled = false;
+            });
+        });
+    }
 
-if (searchInput) {
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value;
-
-        if (query.length > 2) {
-            fetch(`/productos/api/live-search/?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    searchResultsContainer.innerHTML = '';
-                    if (data.productos.length > 0) {
-                        data.productos.forEach(producto => {
-                            const item = document.createElement('a');
-                            item.href = producto.url;
-                            item.className = 'search-result-item';
-                            item.innerHTML = `
-                                <img src="${producto.imagen_url}" alt="${producto.nombre}">
-                                <span>${producto.nombre}</span>
-                            `;
-                            searchResultsContainer.appendChild(item);
-                        });
-                        searchResultsContainer.classList.add('visible');
-                    } else {
+    // --- LÓGICA PARA LA BÚSQUEDA EN VIVO ---
+    if (searchInput && searchResultsContainer) {
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value;
+            if (query.length > 2) {
+                fetch(`/productos/api/live-search/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResultsContainer.innerHTML = ''; 
+                        if (data.productos && data.productos.length > 0) {
+                            data.productos.forEach(producto => {
+                                const item = document.createElement('a');
+                                item.href = producto.url;
+                                item.className = 'search-result-item';
+                                item.innerHTML = `
+                                    <img src="${producto.imagen_url || ''}" alt="${producto.nombre}"> 
+                                    <span>${producto.nombre}</span>
+                                `;
+                                searchResultsContainer.appendChild(item);
+                            });
+                            searchResultsContainer.classList.add('visible');
+                        } else {
+                            searchResultsContainer.classList.remove('visible');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener sugerencias:', error);
+                        searchResultsContainer.innerHTML = '';
                         searchResultsContainer.classList.remove('visible');
-                    }
-                });
-        } else {
-            searchResultsContainer.classList.remove('visible');
-        }
-    });
+                    });
+            } else {
+                searchResultsContainer.classList.remove('visible');
+            }
+        });
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-wrapper')) {
-            searchResultsContainer.classList.remove('visible');
-        }
-    });
-}
-});
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) { 
+                searchResultsContainer.classList.remove('visible');
+            }
+        });
+    }
+
+    // --- LÓGICA DEL CALCULADOR DE ENVÍO ---
+    const btnCalcularEnvio = document.getElementById('cp-calcular-btn');
+    const cpInput = document.getElementById('cp-input');
+    const shippingResults = document.getElementById('shipping-results');
+
+    if (btnCalcularEnvio) {
+        btnCalcularEnvio.addEventListener('click', () => {
+            const cp = cpInput.value;
+            if (!cp || isNaN(cp)) {
+                shippingResults.innerHTML = '<p class="shipping-error">Por favor, ingresa un código postal válido.</p>';
+                return;
+            }
+
+            shippingResults.innerHTML = '<p class="shipping-loading">Calculando...</p>';
+
+            fetch(`/envios/api/calcular-envio/?cp=${cp}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    shippingResults.innerHTML = '';
+                    if (data.metodos && data.metodos.length > 0) {
+                        let html = '<ul>';
+                        data.metodos.forEach(metodo => {
+                            html += `
+                                <li class="shipping-option">
+                                    <span class="shipping-name">${metodo.nombre} (${metodo.descripcion})</span>
+                                    <span class="shipping-price">${metodo.precio}</span>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        shippingResults.innerHTML = html;
+                    } else {
+                         shippingResults.innerHTML = '<p class="shipping-error">No hay envíos para este CP.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al calcular envío:', error);
+                    shippingResults.innerHTML = `<p class="shipping-error">${error.message}</p>`;
+                });
+        });
+    }
+    
+    // --- INICIALIZACIÓN FINAL ---
+    updateCartDisplay(); // Muestra el carrito al cargar la página
+
+}); // Fin del DOMContentLoaded
 

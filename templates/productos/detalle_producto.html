@@ -25,7 +25,15 @@
                     <label for="cantidad">Cantidad:</label>
                     <input type="number" id="cantidad" value="1" min="1" max="{{ producto.stock }}">
                 </div>
-               
+               <div class="shipping-calculator">
+    <label for="cp-input">Medios de envío</label>
+    <div class="cp-form">
+        <input type="text" id="cp-input" placeholder="Tu código postal">
+        <button type="button" id="cp-calcular-btn" class="btn-secundario">CALCULAR</button>
+    </div>
+    <!-- Los resultados del cálculo aparecerán aquí -->
+    <div id="shipping-results" class="shipping-results-container"></div>
+</div>
                 <button class="btn-principal add-to-cart-btn" 
         data-id="{{ producto.id }}" 
         data-nombre="{{ producto.nombre }}" 

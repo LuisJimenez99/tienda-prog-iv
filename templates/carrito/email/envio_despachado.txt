@@ -1,0 +1,14 @@
+Hola {{ cliente.first_name }},
+
+¡Buenas noticias! Tu pedido #{{ pedido.id }} ha sido despachado.
+
+Has elegido el método: {{ pedido.metodo_envio_elegido|default:"Envío Estándar" }}
+
+Tu código de seguimiento es:
+{{ pedido.codigo_seguimiento }}
+
+Puedes usar este código para seguir tu paquete en el sitio web del correo.
+(Aquí puedes pegar el enlace de la web de Andreani/Correo para que el cliente haga el seguimiento)
+
+Gracias por tu compra,
+El equipo de NutriTienda.

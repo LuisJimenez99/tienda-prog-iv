@@ -1,63 +1,78 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 <div class="productos-page-wrapper">
-    <h2 class="titulo-seccion">Nuestro Catálogo</h2>
+  <h2 class="titulo-seccion">Nuestro Catálogo</h2>
 
-    <div class="productos-page-layout">
-        
-       
-        <aside class="filtros-sidebar">
-            <h4>Filtrar por Categoría</h4>
-            <ul class="lista-categorias">
-                <li><a href="{% url 'lista_productos' %}">Todos</a></li>
-                {% for categoria in categorias %}
-                <li>
-                    <a href="?categoria={{ categoria.id }}">{{ categoria.nombre }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </aside>
+  <div class="productos-page-layout">
+    <aside class="filtros-sidebar">
+      <h4>Filtrar por Categoría</h4>
+      <ul class="lista-categorias">
+        <li><a href="{% url 'lista_productos' %}">Todos</a></li>
+        {% for categoria in categorias %}
+        <li>
+          <a href="?categoria={{ categoria.id }}">{{ categoria.nombre }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </aside>
 
-        
-        <main class="productos-grid-container">
-            {% if productos %}
-                
-                <div class="contenedor-grid-productos">
-                    {% for producto in productos %}
-                        <div class="tarjeta-producto">
-                            <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
-                                <div class="tarjeta-imagen-contenedor">
-                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
-                                </div>
-                            </a>
-                            <div class="tarjeta-contenido">
-                                <h3 class="tarjeta-titulo">
-                                    <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
-                                </h3>
-                                <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
-                                
-                                <div class="tarjeta-botones">
-                                    <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver Producto</a>
-                                    <button class="add-to-cart-btn" 
-                                            data-id="{{ producto.id }}" 
-                                            data-nombre="{{ producto.nombre }}" 
-                                            data-precio="{{ producto.precio }}"
-                                            data-imagen="{{ producto.imagen.url }}">
-                                        Agregar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="no-results-msg">No se encontraron productos que coincidan con tu búsqueda.</p>
-            {% endif %}
-        </main>
+    <main class="productos-grid-container">
+      {% if productos %}
 
-    </div>
+      <div class="contenedor-grid-productos">
+        {% for producto in productos %}
+        <div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %}">
+          <a
+            href="{% url 'detalle_producto' producto.id %}"
+            class="tarjeta-link"
+          >
+            <div class="tarjeta-imagen-contenedor">
+              <img
+                src="{{ producto.imagen.url }}"
+                alt="{{ producto.nombre }}"
+                class="tarjeta-imagen"
+              />
+            </div>
+          </a>
+          <div class="tarjeta-contenido">
+            <h3 class="tarjeta-titulo">
+              <a href="{% url 'detalle_producto' producto.id %}"
+                >{{ producto.nombre }}</a
+              >
+            </h3>
+            <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+
+            <div class="tarjeta-botones">
+              {% if producto.stock > 0 %}
+              <!-- Si hay stock, mostramos los botones normales -->
+              <a
+                href="{% url 'detalle_producto' producto.id %}"
+                class="btn-ver-producto"
+                >Ver Producto</a
+              >
+              <button
+                class="add-to-cart-btn"
+                data-id="{{ producto.id }}"
+                data-nombre="{{ producto.nombre }}"
+                data-precio="{{ producto.precio }}"
+                data-imagen="{{ producto.imagen.url }}"
+              >
+                Agregar
+              </button>
+              {% else %}
+              <!-- Si no hay stock, mostramos un mensaje -->
+              <span class="sin-stock-mensaje">Sin Stock</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="no-results-msg">
+        No se encontraron productos que coincidan con tu búsqueda.
+      </p>
+      {% endif %}
+    </main>
+  </div>
 </div>
 {% endblock %}
-

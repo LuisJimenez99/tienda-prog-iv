@@ -1,90 +1,113 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 
-{% block content %}
-
-    
-    <div class="seccion-principal">
-        <div class="componente-principal">
-            <div class="contenedor-imagen">
-                <img class="imagen-principal" src="{% static 'images/imagen1.jpg' %}" alt="Viandas saludables en una mesa">
-            </div>
-            <div class="contenedor-contenido">
-                <p class="titulo">
-                    Te ayudamos a lograr tus objetivos, <br> sin perder el placer de comer.
-                </p>
-                <p class="descripcion">
-                    Te ofrecemos viandas nutritivas y asesoramiento profesional para que alimentarte bien sea simple, rico y sostenible en el tiempo.
-                </p>
-                <div class="contenedor-botones">
-                    <a href="{% url 'lista_productos' %}" class="btn-elegante">Viandas</a>
-                    <a href="{% url 'calendario' %}" class="btn-elegante">Consultas</a>
-                </div>
-            </div>
-        </div>
+<div class="seccion-principal">
+  <div class="componente-principal">
+    <div class="contenedor-imagen">
+      <img
+        class="imagen-principal"
+        src="{% static 'images/imagen1.jpg' %}"
+        alt="Viandas saludables en una mesa"
+      />
     </div>
+    <div class="contenedor-contenido">
+      <p class="titulo">
+        Te ayudamos a lograr tus objetivos, <br />
+        sin perder el placer de comer.
+      </p>
+      <p class="descripcion">
+        Te ofrecemos viandas nutritivas y asesoramiento profesional para que
+        alimentarte bien sea simple, rico y sostenible en el tiempo.
+      </p>
+      <div class="contenedor-botones">
+        <a href="{% url 'lista_productos' %}" class="btn-elegante">Viandas</a>
+        <a href="{% url 'calendario' %}" class="btn-elegante">Consultas</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-    
-    <section class="seccion-productos">
-        <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
-        <div class="contenedor-grid-productos">
-            {% for producto in productos %}
-                <div class="tarjeta-producto">
-                    <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
-                        <div class="tarjeta-imagen-contenedor">
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
-                        </div>
-                    </a>
-                    <div class="tarjeta-contenido">
-                        <h3 class="tarjeta-titulo">
-                            <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
-                        </h3>
-                        <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
-                        
-                        
-                        <div class="tarjeta-botones">
-                            <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver Producto</a>
-                            <button class="btn-agregar-carrito add-to-cart-btn" 
-                                    data-id="{{ producto.id }}" 
-                                    data-nombre="{{ producto.nombre }}" 
-                                    data-precio="{{ producto.precio }}"
-                                    data-imagen="{{ producto.imagen.url }}">
-                                Agregar
-                            </button>
-                        </div>
-                        
-
-                    </div>
-                </div>
-            {% endfor %}
+<section class="seccion-productos">
+  <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
+  <div class="contenedor-grid-productos">
+    {% for producto in productos %}
+    <div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %}">
+      <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
+        <div class="tarjeta-imagen-contenedor">
+          <img
+            src="{{ producto.imagen.url }}"
+            alt="{{ producto.nombre }}"
+            class="tarjeta-imagen"
+          />
         </div>
-    </section>
+      </a>
+      <div class="tarjeta-contenido">
+        <h3 class="tarjeta-titulo">
+          <a href="{% url 'detalle_producto' producto.id %}"
+            >{{ producto.nombre }}</a
+          >
+        </h3>
+        <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
 
-  
-    {% if receta %}
-    <section class="seccion-receta">
-        <div id="receta-card" class="receta-card">
-            <div class="receta-imagen-contenedor">
-                <img id="receta-imagen" src="{{ receta.imagen.url }}" alt="{{ receta.nombre }}">
-            </div>
-            <div class="receta-contenido">
-                <h3 class="subtitulo-seccion">¿Sin ideas para hoy?</h3>
-                <h2 id="receta-nombre" class="titulo-receta">{{ receta.nombre }}</h2>
-                <div id="receta-detalles" class="receta-detalles">
-                    <h4><i class="fas fa-clock"></i> Tiempo: <span id="receta-tiempo">{{ receta.tiempo_preparacion }}</span></h4>
-                    <h4><i class="fas fa-list-ul"></i> Ingredientes:</h4>
-                    <p id="receta-ingredientes">{{ receta.ingredientes }}</p>
-                    <h4><i class="fas fa-utensils"></i> Pasos:</h4>
-                    <p id="receta-instrucciones">{{ receta.instrucciones }}</p>
-                </div>
-                <div class="receta-botones">
-                    <button id="ver-receta-btn" class="btn-principal" type="button">Ver Receta Completa</button>
-                    <button id="otra-receta-btn" class="btn-secundario" type="button">Probar otra</button>
-                </div>
-            </div>
+        <div class="tarjeta-botones">
+          {% if producto.stock > 0 %}
+          <!-- Si hay stock, mostramos los botones normales -->
+          <a
+            href="{% url 'detalle_producto' producto.id %}"
+            class="btn-ver-producto"
+            >Ver Producto</a
+          >
+          <button
+            class="add-to-cart-btn"
+            data-id="{{ producto.id }}"
+            data-nombre="{{ producto.nombre }}"
+            data-precio="{{ producto.precio }}"
+            data-imagen="{{ producto.imagen.url }}"
+          >
+            Agregar
+          </button>
+          {% else %}
+          <!-- Si no hay stock, mostramos un mensaje -->
+          <span class="sin-stock-mensaje">Sin Stock</span>
+          {% endif %}
         </div>
-    </section>
-    {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 
-{% endblock %}
-
+{% if receta %}
+<section class="seccion-receta">
+  <div id="receta-card" class="receta-card">
+    <div class="receta-imagen-contenedor">
+      <img
+        id="receta-imagen"
+        src="{{ receta.imagen.url }}"
+        alt="{{ receta.nombre }}"
+      />
+    </div>
+    <div class="receta-contenido">
+      <h3 class="subtitulo-seccion">¿Sin ideas para hoy?</h3>
+      <h2 id="receta-nombre" class="titulo-receta">{{ receta.nombre }}</h2>
+      <div id="receta-detalles" class="receta-detalles">
+        <h4>
+          <i class="fas fa-clock"></i> Tiempo:
+          <span id="receta-tiempo">{{ receta.tiempo_preparacion }}</span>
+        </h4>
+        <h4><i class="fas fa-list-ul"></i> Ingredientes:</h4>
+        <p id="receta-ingredientes">{{ receta.ingredientes }}</p>
+        <h4><i class="fas fa-utensils"></i> Pasos:</h4>
+        <p id="receta-instrucciones">{{ receta.instrucciones }}</p>
+      </div>
+      <div class="receta-botones">
+        <button id="ver-receta-btn" class="btn-principal" type="button">
+          Ver Receta Completa
+        </button>
+        <button id="otra-receta-btn" class="btn-secundario" type="button">
+          Probar otra
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %} {% endblock %}
