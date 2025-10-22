@@ -5,18 +5,18 @@
 <div class="producto-detalle-wrapper">
     <div class="producto-detalle-container">
         
-        <!-- Columna de la Imagen -->
+      
         <div class="producto-imagen-galeria">
             <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
         </div>
 
-        <!-- Columna de la Información -->
+       
         <div class="producto-info">
             <h1 class="producto-nombre">{{ producto.nombre }}</h1>
             <p class="producto-precio">${{ producto.precio|floatformat:2 }}</p>
             
             <div class="producto-descripcion">
-                <!-- Usamos 'linebreaks' para respetar los saltos de línea que pongas en el admin -->
+                
                 <p>{{ producto.descripcion|linebreaks }}</p>
             </div>
 
@@ -25,19 +25,19 @@
                     <label for="cantidad">Cantidad:</label>
                     <input type="number" id="cantidad" value="1" min="1" max="{{ producto.stock }}">
                 </div>
-                <!-- El botón de compra con los mismos data-attributes para que funcione el JS del carrito -->
-                <button class="btn-comprar add-to-cart-btn" 
-                        data-id="{{ producto.id }}" 
-                        data-nombre="{{ producto.nombre }}" 
-                        data-precio="{{ producto.precio }}"
-                        data-imagen="{{ producto.imagen.url }}">
-                    Agregar al Carrito
-                </button>
+               
+                <button class="btn-principal add-to-cart-btn" 
+        data-id="{{ producto.id }}" 
+        data-nombre="{{ producto.nombre }}" 
+        data-precio="{{ producto.precio }}"
+        data-imagen="{{ producto.imagen.url }}">
+    Agregar al Carrito
+</button>
             </div>
             
             <div class="info-adicional">
                 <p><strong>Stock disponible:</strong> {{ producto.stock }} unidades</p>
-                <!-- Aquí puedes añadir más información en el futuro -->
+                
             </div>
         </div>
 

@@ -1149,3 +1149,99 @@ body {
     object-fit: cover;
     border-radius: 4px;
 }
+
+
+/* Contenedor principal para los formularios */
+.auth-form-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.auth-form-container h2 {
+    font-family: 'Lora', serif;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Estilos para los párrafos que genera allauth */
+.auth-form-container form p {
+    margin-bottom: 20px;
+}
+
+.auth-form-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.auth-form-container input[type="text"],
+.auth-form-container input[type="email"],
+.auth-form-container input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.auth-form-container .btn-principal {
+    width: 100%;
+    padding: 15px;
+    border: none;
+}
+
+/* Contenedor para el botón de Google */
+.social-login {
+    text-align: center;
+    margin: 25px 0;
+    border-top: 1px solid #eee;
+    padding-top: 25px;
+}
+
+.social-login p {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Estilo del botón de Google */
+.btn-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-social.google {
+    background-color: #fff;
+    color: #444;
+    border: 1px solid #ccc;
+}
+
+.btn-social.google:hover {
+    background-color: #f8f8f8;
+}
+
+/* Enlace para cambiar entre login y registro */
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.auth-switch a {
+    color: #78857A;
+    font-weight: 500;
+}

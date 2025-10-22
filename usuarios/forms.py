@@ -1,13 +1,15 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Perfil
 
-# Creamos un formulario de registro personalizado que hereda del de Django
-class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text='Requerido. Ingrese un email válido.')
-    first_name = forms.CharField(max_length=30, required=True, help_text='Requerido.')
-    last_name = forms.CharField(max_length=30, required=True, help_text='Requerido.')
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField()
 
-    class Meta(UserCreationForm.Meta):
+    class Meta:
         model = User
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
+        fields = ['first_name', 'last_name', 'email']
+        
+class PerfilUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Perfil
+        fields = ['telefono', 'direccion', 'ciudad', 'codigo_postal']

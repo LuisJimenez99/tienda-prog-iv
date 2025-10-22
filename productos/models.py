@@ -14,10 +14,6 @@ class Categoria(models.Model):
 
 class Producto(models.Model):
         nombre = models.CharField(max_length=100)
-        # --- CAMPO NUEVO ---
-        # Enlazamos cada producto a una categoría.
-        # on_delete=models.SET_NULL significa que si se borra una categoría,
-        # los productos de esa categoría no se borran, solo se quedan sin categoría.
         categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
         
         descripcion = models.TextField(blank=True, null=True)

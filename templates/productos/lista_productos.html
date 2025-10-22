@@ -7,7 +7,7 @@
 
     <div class="productos-page-layout">
         
-        <!-- Barra Lateral de Filtros -->
+       
         <aside class="filtros-sidebar">
             <h4>Filtrar por Categoría</h4>
             <ul class="lista-categorias">
@@ -20,11 +20,10 @@
             </ul>
         </aside>
 
-        <!-- Contenedor Principal del Grid de Productos -->
+        
         <main class="productos-grid-container">
             {% if productos %}
-                <!-- === DIV CLAVE CORREGIDO AQUÍ === -->
-                <!-- Este div con la clase 'contenedor-grid-productos' es el que crea la grilla. -->
+                
                 <div class="contenedor-grid-productos">
                     {% for producto in productos %}
                         <div class="tarjeta-producto">

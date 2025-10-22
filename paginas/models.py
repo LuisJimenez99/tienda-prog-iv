@@ -4,7 +4,7 @@ class Pagina(models.Model):
     titulo = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, help_text="Versión del título amigable para URLs (ej: sobre-mi)")
     
-    # --- CAMPOS NUEVOS PARA EL DISEÑO ---
+   
     imagen_principal = models.ImageField(
         upload_to='paginas/', 
         null=True, blank=True, 

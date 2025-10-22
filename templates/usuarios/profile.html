@@ -15,15 +15,15 @@
     
     <div class="profile-details">
         <h3>Mis Datos de Envío</h3>
-        <!-- Usamos el filtro 'default' para mostrar un texto amigable si el usuario aún no ha completado estos datos -->
         <p><strong>Teléfono:</strong> {{ user.perfil.telefono|default:"No especificado" }}</p>
         <p><strong>Dirección:</strong> {{ user.perfil.direccion|default:"No especificada" }}</p>
         <p><strong>Ciudad:</strong> {{ user.perfil.ciudad|default:"No especificada" }}</p>
         <p><strong>Código Postal:</strong> {{ user.perfil.codigo_postal|default:"No especificado" }}</p>
     </div>
 
-    <!-- En el futuro, aquí podrás añadir un botón que lleve a un formulario para editar el perfil -->
-    <a href="#" class="btn-principal" style="margin-top: 20px; display: inline-block;">Editar Mis Datos</a>
+    <!-- === CAMBIO CLAVE AQUÍ === -->
+    <!-- Reemplazamos el href="#" por la URL dinámica de Django -->
+    <a href="{% url 'edit_profile' %}" class="btn-principal" style="margin-top: 20px; display: inline-block;">Editar Mis Datos</a>
 </div>
 {% endblock %}
 

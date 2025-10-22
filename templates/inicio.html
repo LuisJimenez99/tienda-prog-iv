@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    <!-- 1. Sección principal -->
+    
     <div class="seccion-principal">
         <div class="componente-principal">
             <div class="contenedor-imagen">
@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <!-- 2. Sección de productos destacados -->
+    
     <section class="seccion-productos">
         <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
         <div class="contenedor-grid-productos">
@@ -41,7 +41,7 @@
                         </h3>
                         <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
                         
-                        <!-- === INICIO DEL CAMBIO: Contenedor para dos botones === -->
+                        
                         <div class="tarjeta-botones">
                             <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver Producto</a>
                             <button class="btn-agregar-carrito add-to-cart-btn" 
@@ -52,7 +52,7 @@
                                 Agregar
                             </button>
                         </div>
-                        <!-- === FIN DEL CAMBIO === -->
+                        
 
                     </div>
                 </div>
@@ -60,7 +60,7 @@
         </div>
     </section>
 
-    <!-- Sección de Receta Aleatoria -->
+  
     {% if receta %}
     <section class="seccion-receta">
         <div id="receta-card" class="receta-card">

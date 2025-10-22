@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load allauth i18n %}
+
+{% block content %}
+<div class="auth-form-container">
+    <h2>Confirmar Inicio de Sesión</h2>
+
+    <p>Estás a punto de iniciar sesión usando tu cuenta de Google:</p>
+    <p><strong>{{ account.extra_data.email }}</strong></p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        
+        {{ form.as_p }}
+
+        <button type="submit" class="btn-principal">Continuar</button>
+    </form>
+    
+    <p class="auth-switch" style="margin-top: 15px;">
+        <a href="{% url 'account_login' %}">Cancelar y volver</a>
+    </p>
+</div>
+{% endblock %}

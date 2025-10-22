@@ -5,14 +5,14 @@
 <div class="pagina-wrapper">
     <div class="pagina-container sobre-mi-layout">
 
-        <!-- Columna de la Imagen -->
+        
         <div class="sobre-mi-imagen-col">
             {% if pagina.imagen_principal %}
                 <img src="{{ pagina.imagen_principal.url }}" alt="{{ pagina.titulo }}">
             {% endif %}
         </div>
 
-        <!-- Columna del Texto -->
+        
         <div class="sobre-mi-texto-col">
             <h1 class="pagina-titulo">{{ pagina.titulo }}</h1>
             {% if pagina.subtitulo %}
@@ -30,7 +30,7 @@
             </div>
             {% endif %}
 
-            <!-- Llamada a la acción -->
+           
             <div class="sobre-mi-cta">
                 <h4>¿Lista para empezar?</h4>
                 <p>Explora mis servicios y da el primer paso hacia una vida más saludable.</p>

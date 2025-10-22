@@ -1,96 +1,41 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from .forms import UserUpdateForm, PerfilUpdateForm
 
-# Importaciones para el sistema de activación de cuenta
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.template.loader import render_to_string
-from .tokens import account_activation_token
-from django.core.mail import EmailMessage
-from django.contrib.sites.shortcuts import get_current_site
-
-# --- VISTA DE REGISTRO CON ACTIVACIÓN ---
-def register_view(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            
-            current_site = get_current_site(request)
-            mail_subject = 'Activa tu cuenta de NutriTienda'
-            message = render_to_string('usuarios/activation_email_body.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            to_email = form.cleaned_data.get('email')
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
-            
-            return redirect('register_done')
-        else:
-            messages.error(request, "Por favor, corrige los errores a continuación.")
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'usuarios/register.html', {'form': form})
-
-# --- VISTA DE ACTIVACIÓN DE CUENTA ---
-def activate_view(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        login(request, user)
-        messages.success(request, '¡Felicidades! Tu cuenta ha sido activada y has iniciado sesión.')
-        return redirect('register_complete')
-    else:
-        messages.error(request, 'El enlace de activación es inválido.')
-        return redirect('inicio')
-
-# --- VISTA DE LOGIN SEGURA (ACTUALIZADA) ---
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('inicio')
-                else:
-                    messages.error(request, "Esta cuenta está inactiva. Por favor, verifica tu email para activarla.")
-            else:
-                messages.error(request, "Usuario o contraseña incorrectos.")
-        else:
-            messages.error(request, "Usuario o contraseña incorrectos.")
-            
-    form = AuthenticationForm()
-    return render(request, 'usuarios/login.html', {'form': form})
-
-# --- VISTA DE CIERRE DE SESIÓN ---
-def logout_view(request):
-    logout(request)
-    messages.info(request, "Has cerrado sesión exitosamente.")
-    return redirect('inicio')
-
-# --- VISTA DE PERFIL ---
+# --- Vista para mostrar la página de perfil del usuario ---
 @login_required
 def profile_view(request):
+    # Simplemente renderiza la plantilla del perfil.
+    # El decorador @login_required se asegura de que solo los usuarios
+    # que han iniciado sesión puedan ver esta página.
     return render(request, 'usuarios/profile.html')
+
+# --- Vista para editar el perfil del usuario ---
+@login_required
+def edit_profile_view(request):
+    # request.method == 'POST' se cumple cuando el usuario hace clic en "Guardar Cambios"
+    if request.method == 'POST':
+        # Cargamos los datos enviados en los formularios, vinculándolos al usuario actual
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        perfil_form = PerfilUpdateForm(request.POST, instance=request.user.perfil)
+        
+        # Verificamos si ambos formularios son válidos
+        if user_form.is_valid() and perfil_form.is_valid():
+            user_form.save() # Guardamos los cambios en el modelo User
+            perfil_form.save() # Guardamos los cambios en el modelo Perfil
+            messages.success(request, '¡Tu perfil ha sido actualizado exitosamente!')
+            return redirect('profile') # Redirigimos de vuelta a la página de perfil
+    else:
+        # Si la página se carga por primera vez (método GET),
+        # mostramos los formularios con la información actual del usuario.
+        user_form = UserUpdateForm(instance=request.user)
+        perfil_form = PerfilUpdateForm(instance=request.user.perfil)
+
+    contexto = {
+        'user_form': user_form,
+        'perfil_form': perfil_form
+    }
+
+    return render(request, 'usuarios/edit_profile.html', contexto)
 

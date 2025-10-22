@@ -2,9 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Producto, Categoria
-from django.urls import reverse # <-- ¡ESTA ES LA LÍNEA QUE FALTABA!
+from django.urls import reverse
 
-# ... (tu vista lista_productos y detalle_producto se quedan como están) ...
+
 
 def lista_productos(request):
     productos = Producto.objects.filter(disponible=True)
@@ -26,7 +26,7 @@ def detalle_producto(request, producto_id):
     return render(request, 'productos/detalle_producto.html', contexto)
 
 
-# --- VISTA DE API PARA LA BÚSQUEDA EN VIVO ---
+
 def live_search_api(request):
     query = request.GET.get('q', '')
     productos_sugeridos = []
@@ -36,7 +36,7 @@ def live_search_api(request):
             productos_sugeridos.append({
                 'id': producto.id,
                 'nombre': producto.nombre,
-                'url': reverse('detalle_producto', args=[producto.id]), # Ahora 'reverse' está definido
+                'url': reverse('detalle_producto', args=[producto.id]), 
                 'imagen_url': producto.imagen.url if producto.imagen else ''
             })
     return JsonResponse({'productos': productos_sugeridos})

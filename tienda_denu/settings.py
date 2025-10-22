@@ -37,11 +37,17 @@ INSTALLED_APPS = [
     'paginas',
     'configuracion',
     'usuarios',
+    'django.contrib.sites', 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -141,9 +147,36 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-
-# Define el precio de tu consulta aquí para gestionarlo fácilmente
-# ¡Asegúrate de que sea un número flotante (con .00)!
 PRECIO_CONSULTA = 15000.00
 
-LOGIN_URL = 'login'
+LOGIN_URL = 'account_login'
+SITE_ID = 1
+
+LOGIN_REDIRECT_URL = '/'  
+LOGOUT_REDIRECT_URL = '/' 
+AUTHENTICATION_BACKENDS = [
+   
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Define qué método se usa para iniciar sesión (usuario, email, o ambos)
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+
+# El email es requerido para registrarse
+ACCOUNT_EMAIL_REQUIRED = True
+
+# El usuario debe verificar su dirección de email
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+# El usuario debe ingresar su contraseña dos veces en el formulario de registro
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+
+# Nombre de usuario mínimo
+ACCOUNT_USERNAME_MIN_LENGTH = 4
+
+# URL a la que se redirige después de iniciar sesión
+LOGIN_REDIRECT_URL = '/'
+
+# URL a la que se redirige después de cerrar sesión
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
