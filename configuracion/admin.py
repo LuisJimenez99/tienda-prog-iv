@@ -1,7 +1,10 @@
 from django.contrib import admin
 from .models import DatosPago, HeroSectionConfig # Importamos AMBOS modelos
 from django.utils.html import format_html
+from .models import CarruselImagen # Asegúrate de importar el nuevo modelo
+from django.utils.html import format_html # Necesario para la previsualización
 
+ 
 # Admin para los Datos de Pago (que ya tenías)
 @admin.register(DatosPago)
 class DatosPagoAdmin(admin.ModelAdmin):
@@ -43,3 +46,28 @@ class HeroSectionConfigAdmin(admin.ModelAdmin):
         if HeroSectionConfig.objects.exists():
             return False
         return True
+    
+@admin.register(CarruselImagen)
+class CarruselImagenAdmin(admin.ModelAdmin):
+    list_display = ('get_imagen_preview', 'titulo', 'orden', 'activo', 'link_url')
+    # Hacemos que 'orden' y 'activo' se puedan editar directamente en la lista
+    list_editable = ('orden', 'activo',)
+    list_filter = ('activo',)
+    search_fields = ('titulo',)
+
+    def get_imagen_preview(self, obj):
+        if obj.imagen:
+            return format_html('<img src="{}" style="max-height: 75px; max-width: 150px; object-fit: cover;" />', obj.imagen.url)
+        return "No hay imagen"
+    get_imagen_preview.short_description = "Previsualización"
+
+    # Organizamos los campos en el formulario de edición
+    fieldsets = (
+        (None, {
+            'fields': ('activo', 'orden', 'imagen', 'titulo')
+        }),
+        ('Enlace (Opcional)', {
+            'classes': ('collapse',), # Lo hace colapsable
+            'fields': ('link_url', 'abrir_en_nueva_pestana')
+        }),
+    )    

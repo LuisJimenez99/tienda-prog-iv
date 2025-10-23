@@ -31,7 +31,35 @@
             </div>
         </div>
     </div>
-
+    {% if imagenes_carrusel %}
+    <section class="carrusel-seccion">
+        <div class="carrusel-container" id="mi-carrusel">
+            <div class="carrusel-inner">
+                {% for item in imagenes_carrusel %}
+                <div class="carrusel-item {% if forloop.first %}active{% endif %}">
+                    {% if item.link_url %}
+                        <a href="{{ item.link_url }}" {% if item.abrir_en_nueva_pestana %}target="_blank"{% endif %}>
+                            <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
+                        </a>
+                    {% else %}
+                        <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
+                    {% endif %}
+                    {% if item.titulo %}
+                        <div class="carrusel-caption">{{ item.titulo }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carrusel-control prev" data-slide="prev">&#10094;</button>
+            <button class="carrusel-control next" data-slide="next">&#10095;</button>
+            <div class="carrusel-indicators">
+                {% for item in imagenes_carrusel %}
+                <span class="indicator-dot {% if forloop.first %}active{% endif %}" data-slide-to="{{ forloop.counter0 }}"></span>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
     <!-- 2. Sección de productos destacados (sin cambios) -->
     <section class="seccion-productos">
         <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>

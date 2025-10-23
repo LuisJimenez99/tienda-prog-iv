@@ -44,3 +44,43 @@ class HeroSectionConfig(models.Model):
             # Desactiva cualquier otra configuración activa antes de guardar esta
             HeroSectionConfig.objects.filter(activa=True).exclude(pk=self.pk).update(activa=False)
         super().save(*args, **kwargs)
+        
+class CarruselImagen(models.Model):
+    titulo = models.CharField(
+        max_length=200, 
+        blank=True, null=True, 
+        verbose_name="Título (Opcional)", 
+        help_text="Este texto aparecerá sobre la imagen."
+    )
+    imagen = models.ImageField(
+        upload_to='carrusel/', 
+        verbose_name="Imagen del carrusel",
+        help_text="Sube la imagen para este slide."
+    )
+    link_url = models.URLField(
+        max_length=300, 
+        blank=True, null=True, 
+        verbose_name="Enlace (Opcional)", 
+        help_text="URL a la que dirigirá la imagen (ej: /productos/)"
+    )
+    abrir_en_nueva_pestana = models.BooleanField(
+        default=False, 
+        verbose_name="Abrir en nueva pestaña"
+    )
+    orden = models.PositiveIntegerField(
+        default=0, 
+        help_text="Define el orden de aparición (menor número primero)."
+    )
+    activo = models.BooleanField(
+        default=True, 
+        verbose_name="¿Mostrar esta imagen?",
+        help_text="Desmarca esta casilla para ocultar esta imagen del carrusel."
+    )
+
+    class Meta:
+        verbose_name = "Imagen de Carrusel"
+        verbose_name_plural = "Imágenes de Carrusel"
+        ordering = ['orden'] # Ordena las imágenes por el campo 'orden'
+
+    def __str__(self):
+        return self.titulo or f"Imagen de Carrusel {self.id}"
