@@ -1425,3 +1425,39 @@ text-decoration: underline;
     color: #333; 
     font-size: 1rem; 
 }
+
+/* Opciones de envío clickables */
+.shipping-option {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.shipping-option.seleccionado {
+    background-color: #d4edda; /* Un verde claro para la selección */
+    border-left: 3px solid #78857A;
+}
+
+/* Fila de envío en el mini-carrito */
+.cart-shipping {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+}
+
+/* Filas de costos en la página de checkout */
+.costos-detalle {
+    margin-top: -10px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+.costo-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #555;
+    margin-top: 8px;
+}

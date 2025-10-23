@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-<!-- Carga el SDK de Mercado Pago -->
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 
 <div class="checkout-wrapper">
@@ -18,10 +17,25 @@
                 </li>
             {% endfor %}
         </ul>
+        
+        <!-- === DETALLE DE COSTOS === -->
+        <div class="costos-detalle">
+            <div class="costo-fila">
+                <span>Subtotal:</span>
+                <!-- Asumimos que el envío está incluido en el total, lo restamos para mostrar el subtotal -->
+                <span>${{ pedido.get_subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="costo-fila">
+                <span>Envío ({{ pedido.metodo_envio_elegido }}):</span>
+                <span>${{ pedido.get_costo_envio|floatformat:2 }}</span>
+            </div>
+        </div>
         <div class="total-pedido">
             <strong>Total:</strong>
             <strong>${{ pedido.total|floatformat:2 }}</strong>
         </div>
+        <!-- === FIN DETALLE DE COSTOS === -->
+
     </div>
 
     <div class="datos-envio-resumen">
@@ -42,12 +56,11 @@
         </div>
         <div class="pago-opcion">
             <h4>2. Transferencia Bancaria</h4>
-            <p>Realiza la transferencia y envía el comprobante por WhatsApp. Tu pedido quedará pendiente hasta confirmar el pago.</p>
+            <p>Tu pedido quedará pendiente hasta confirmar el pago.</p>
             <div class="datos-transferencia">
                 <strong>Alias/CBU:</strong> {{ datos_pago.cbu_alias|default:"No configurado" }}
             </div>
-             
-             <!-- <a href="#" class="btn-principal" style="margin-top: 20px;">Confirmar Pago por Transferencia</a> -->
+             <a href="{% url 'confirmar_reserva' %}" class="btn-principal" style="margin-top: 20px;">Confirmar Pedido (Pagaré por Transferencia)</a>
         </div>
     </div>
 </div>

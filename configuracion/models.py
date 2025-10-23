@@ -13,3 +13,34 @@ class DatosPago(models.Model):
         class Meta:
             verbose_name = "Datos de Pago"
     
+    
+class HeroSectionConfig(models.Model):
+    # Campos para la imagen y el texto principal
+    imagen_fondo = models.ImageField(upload_to='hero_images/', verbose_name="Imagen de Fondo", help_text="Imagen principal de la sección (se recomienda tamaño grande).")
+    titulo_principal = models.CharField(max_length=200, verbose_name="Título Principal", help_text="Ej: Te ayudamos a lograr tus objetivos, sin perder el placer de comer.")
+    descripcion = models.TextField(verbose_name="Descripción", help_text="Texto descriptivo debajo del título.")
+
+    # Campos para el primer botón
+    texto_boton_1 = models.CharField(max_length=50, verbose_name="Texto Botón 1", default="Viandas")
+    url_boton_1 = models.URLField(max_length=200, verbose_name="URL Botón 1", default="/productos/")
+
+    # Campos para el segundo botón
+    texto_boton_2 = models.CharField(max_length=50, verbose_name="Texto Botón 2", default="Consultas")
+    url_boton_2 = models.URLField(max_length=200, verbose_name="URL Botón 2", default="/turnos/")
+
+    # Un campo para asegurarnos de que solo haya una configuración activa
+    activa = models.BooleanField(default=True, verbose_name="¿Activa?", help_text="Marca esta opción para que esta configuración sea la visible.")
+
+    class Meta:
+        verbose_name = "Configuración de Sección Principal"
+        verbose_name_plural = "Configuraciones de Sección Principal"
+
+    def __str__(self):
+        return f"Configuración Activa - {self.titulo_principal[:30]}..."
+
+    # Opcional: Para asegurar que solo haya una activa
+    def save(self, *args, **kwargs):
+        if self.activa:
+            # Desactiva cualquier otra configuración activa antes de guardar esta
+            HeroSectionConfig.objects.filter(activa=True).exclude(pk=self.pk).update(activa=False)
+        super().save(*args, **kwargs)

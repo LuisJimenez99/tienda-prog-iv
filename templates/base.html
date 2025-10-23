@@ -1,60 +1,54 @@
 {% load static %}
+
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Tienda de Viandas</title>
-    
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Tienda de Viandas</title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
-    <header>
-        
-        {% include 'header_content.html' %}
-    </header>
+<header>
+    {% include 'header_content.html' %}
+</header>
 
-    <main>
-        
-        {% block content %}
-        {% endblock %}
-    </main>
-    
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+<!-- === INICIO DEL MINI-CARRITO FLOTANTE === -->
+<!-- Esta es la estructura que debe estar oculta por el CSS -->
 <div id="mini-cart-overlay" class="mini-cart-overlay"></div>
-
-
 <div id="mini-cart" class="mini-cart">
-    
-    
     <div class="mini-cart-header">
         <h3>Mi Carrito</h3>
-        <button id="close-cart-btn" class="close-cart-btn">&times;</button>
+        <button id="close-cart-btn" class="close-cart-btn" type="button">&times;</button>
     </div>
-
-  
     <div id="mini-cart-items" class="mini-cart-items">
-    
         <p class="cart-empty-msg">Tu carrito está vacío.</p>
     </div>
-
-    
     <div class="mini-cart-footer">
+        <div class="cart-shipping" id="cart-shipping-cost" style="display: none;">
+            <span>Envío:</span>
+            <strong>$0.00</strong>
+        </div>
         <div class="cart-total">
             <strong>Total:</strong>
             <span id="cart-total-price">$0.00</span>
         </div>
-        
         <a href="#" class="btn-checkout">Finalizar Compra</a>
+    </div>
 </div>
+<!-- === FIN DEL MINI-CARRITO FLOTANTE === -->
 
-</div>
+{% include 'footer_content.html' %}
 
-    <footer>
-       
-        {% include 'footer_content.html' %}
-    </footer>
+<script src="{% static 'js/main.js' %}"></script>
 
-    
-     <script src="{% static 'js/main.js' %}"></script> 
+
+</body>
 </html>
