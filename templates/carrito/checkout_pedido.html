@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_pedido.css' %}">
+{% endblock %}
+
 {% block content %}
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 

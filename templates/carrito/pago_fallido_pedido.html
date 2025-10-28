@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_pedido.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="checkout-wrapper">
 <div class="confirmacion-box">
 <h2><i class="fas fa-times-circle"></i> Pago Rechazado</h2>

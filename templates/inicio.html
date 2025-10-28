@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/inicio.css' %}">
+{% endblock %}
+
 {% block content %}
 
     <!-- 1. Sección principal (AHORA ES DINÁMICA) -->

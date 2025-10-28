@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="checkout-wrapper">
     <div class="confirmacion-box">

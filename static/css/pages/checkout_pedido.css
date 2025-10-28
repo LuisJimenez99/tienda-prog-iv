@@ -1,0 +1,159 @@
+/* =================================
+   PÁGINA: CHECKOUT DE PEDIDO
+   ================================= */
+
+/* Contenedor principal */
+.checkout-wrapper {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+}
+
+.checkout-wrapper h2 {
+  font-family: "Lora", serif;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #333;
+}
+
+/* Resumen del Pedido */
+.resumen-pedido {
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+}
+.resumen-pedido h3 {
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+.lista-items-pedido {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 15px;
+}
+.lista-items-pedido li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+.lista-items-pedido li:last-child {
+  border-bottom: none;
+}
+
+/* Estilos para .costo-fila (heredan de .lista-items-pedido li) */
+.costo-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.total-pedido {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+/* Datos de Envío */
+.datos-envio-resumen {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+.datos-envio-resumen h3 {
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+.datos-envio-resumen p {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.link-editar-datos {
+  font-size: 0.9rem;
+  color: var(--color-btn-principal-fondo, #78857a);
+  text-decoration: none;
+  font-weight: 500;
+}
+.link-editar-datos:hover {
+  text-decoration: underline;
+}
+
+/* Métodos de Pago */
+.metodos-pago {
+  margin-bottom: 40px;
+}
+
+.metodos-pago h3 {
+  font-size: 1.4rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.pago-opcion {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.pago-opcion h4 {
+  margin-bottom: 10px;
+}
+
+.datos-transferencia {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+
+/* =================================
+   ESTILOS: PÁGINAS DE CONFIRMACIÓN
+   ================================= */
+.confirmacion-box {
+  text-align: center;
+}
+.confirmacion-box h2 {
+  /* Hacemos un poco de espacio para el ícono */
+  margin-bottom: 25px;
+}
+/* Ícono de Éxito (verde) */
+.confirmacion-box h2 .fa-check-circle {
+  color: #2ecc71;
+  margin-right: 10px;
+}
+/* Ícono de Pendiente (naranja) */
+.confirmacion-box h2 .fa-clock {
+  color: #f39c12;
+  margin-right: 10px;
+}
+.confirmacion-box p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+
+/* Ícono de Fallo (rojo) */
+.confirmacion-box h2 .fa-times-circle {
+  color: #e74c3c; /* Un color rojo para error */
+  margin-right: 10px;
+}

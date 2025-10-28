@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/calendario.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="opcion-calendario-wrapper">
     <div class="opcion-calendario">
@@ -50,38 +54,7 @@
     </div>
 </div>
 
-<style>
-    /* Estilos del Calendario */
-    .opcion-calendario-wrapper { background-color: #fff; padding: 60px 20px; }
-    .opcion-calendario { max-width: 900px; margin: 0 auto; }
-    .contenedor-turnos { display: flex; gap: 30px; }
-    .calendario-grid { flex: 1.5; }
-    .horarios-disponibles { flex: 1; }
-    .mes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .mes-header button { background: none; border: 1px solid #ccc; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
-    .mes-header button:disabled { cursor: not-allowed; opacity: 0.5; }
-    .dias-semana { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: #999; font-size: 0.8rem; margin-bottom: 10px;}
-    .dias-calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-    .dia { padding: 10px; border-radius: 8px; }
-    .dia.otro-mes { color: #ccc; }
-    .dia.disponible { cursor: pointer; font-weight: 600; }
-    .dia.disponible:hover { background-color: #f0f0f0; }
-    .dia.hoy { border: 2px solid #78857A; padding: 8px; }
-    .dia.seleccionado { background-color: #78857A; color: #fff; }
-    .horarios-lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;}
-    .horario-item { padding: 12px; border: 1px solid #ccc; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
-    .horario-item:hover { border-color: #78857A; }
-    .horario-item.seleccionado { background-color: #78857A; color: #fff; border-color: #78857A; }
-    .horarios-placeholder { color: #999; grid-column: 1 / -1; text-align: center; }
-    .titulo-seccion-turnos { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .boton-confirmar { display: block; width: 100%; padding: 15px; background-color: #78857A; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background-color 0.3s ease; }
-    .boton-confirmar:hover { background-color: #647066; }
-    .boton-confirmar:disabled { background-color: #ccc; cursor: not-allowed; }
 
-    @media (max-width: 768px) {
-        .contenedor-turnos { flex-direction: column; }
-    }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

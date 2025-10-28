@@ -1,4 +1,11 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/lista_productos.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="productos-page-wrapper">
   <h2 class="titulo-seccion">Nuestro Catálogo</h2>
 

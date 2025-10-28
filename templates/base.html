@@ -28,8 +28,11 @@
         --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
     }
 </style>
-    
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+<link rel="stylesheet" href="{% static 'css/base/global.css' %}">
+
+{% block extra_css %}{% endblock %}
+
 </head>
 <body>
 

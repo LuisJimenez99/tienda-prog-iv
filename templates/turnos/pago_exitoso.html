@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="checkout-wrapper">
     <div class="confirmacion-box">
@@ -23,27 +27,7 @@
     </div>
 </div>
 
-<!-- Añadimos un pequeño estilo extra para el recuadro del resumen -->
-<style>
-    .resumen-confirmado {
-        background-color: #f8f9fa;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 25px 0;
-    }
-    .resumen-confirmado p {
-        margin-bottom: 10px;
-        font-size: 1.1rem;
-        line-height: 1.6;
-    }
-    .resumen-confirmado p:last-child {
-        margin-bottom: 0;
-    }
-    .confirmacion-box h2 .fas { /* Para el ícono de check verde */
-        color: #2ecc71;
-        margin-right: 10px;
-    }
-</style>
+
+
 {% endblock %}
 

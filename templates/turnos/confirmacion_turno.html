@@ -1,6 +1,12 @@
-    {% extends 'base.html' %}
-    {% block content %}
-    <div class="checkout-wrapper">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-wrapper">
         <h2>¡Solicitud Recibida!</h2>
         <p>Hemos recibido tu solicitud de turno. En breve recibirás un email con todos los detalles.</p>
         <p>Una vez que confirmemos la recepción de tu pago, tu turno quedará agendado. ¡Muchas gracias!</p>

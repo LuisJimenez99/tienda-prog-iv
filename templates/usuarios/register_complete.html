@@ -1,6 +1,12 @@
-    {% extends 'base.html' %}
-    {% block content %}
-    <div class="auth-form-container">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-form-container">
         <h2>¡Cuenta Activada!</h2>
         <p>Tu cuenta ha sido activada exitosamente. Ahora tienes acceso a todas las funcionalidades del sitio.</p>
         <a href="{% url 'profile' %}" class="btn-principal" style="display: block; text-align: center; text-decoration: none;">Ir a Mi Cuenta</a>

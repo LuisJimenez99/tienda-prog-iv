@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
+{% endblock %}
+
 {% block content %}
-<!-- 1. Cargamos el script del SDK de Mercado Pago. Esencial para que todo funcione. -->
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 
 <div class="checkout-wrapper">

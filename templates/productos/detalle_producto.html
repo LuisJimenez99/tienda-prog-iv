@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/detalle_producto.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="producto-detalle-wrapper">
     <div class="producto-detalle-container">

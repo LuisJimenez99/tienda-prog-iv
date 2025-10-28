@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/sobre_mi.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="pagina-wrapper">
     <div class="pagina-container sobre-mi-layout">

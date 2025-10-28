@@ -1,0 +1,283 @@
+/* =================================
+   PÁGINA: INICIO (HOME)
+   ================================= */
+
+/* 3.1. Página Principal (Hero, Productos, Receta) */
+.seccion-principal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 60px 20px;
+}
+
+.componente-principal {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.contenedor-imagen,
+.contenedor-contenido {
+  flex: 1;
+}
+
+.imagen-principal {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+.contenedor-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.titulo {
+  font-family: "Lora", serif;
+  font-size: 2.8rem;
+  line-height: 1.2;
+}
+
+.descripcion {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 500px;
+}
+
+.seccion-productos {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.titulo-seccion {
+  font-family: "Lora", serif;
+  font-size: 2.5rem;
+  color: #4a4a4a;
+  margin-bottom: 40px;
+  font-weight: 500;
+}
+
+.contenedor-grid-productos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.seccion-receta {
+  background-color: var(--color-fondo-body, #ecf0e5);
+  padding: 80px 20px;
+}
+
+.receta-card {
+  display: flex;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.receta-imagen-contenedor {
+  flex: 0 0 45%;
+  min-height: 400px;
+}
+
+.receta-imagen-contenedor img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.receta-contenido {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.subtitulo-seccion {
+  color: var(--color-btn-principal-fondo, #78857a);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.titulo-receta {
+  font-family: "Lora", serif;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+/* Nota: Tu HTML usa 'receta-detalles', pero tu CSS original tenía 'descripcion-receta'. 
+   He usado 'descripcion-receta' para mantener el estilo. 
+   Si no funciona, renombra esta clase a '.receta-detalles' */
+.descripcion-receta {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 30px;
+}
+/* Si la clase de arriba no funciona, prueba con esta:
+.receta-detalles {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 30px;
+}
+.receta-detalles h4 {
+  font-family: "Lora", serif;
+  font-size: 1.1rem;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+*/
+
+
+.receta-botones {
+  display: flex;
+  gap: 15px;
+}
+
+/* 4.4. Carrusel de Imágenes */
+.carrusel-seccion {
+  padding: 0;
+  background-color: var(--color-fondo-body, #ecf0e5);
+}
+.carrusel-container {
+  max-width: 1400px;
+  margin: 40px auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.carrusel-inner {
+  display: flex;
+}
+.carrusel-item {
+  min-width: 100%;
+  position: relative;
+  display: none;
+  transition: opacity 0.5s ease;
+}
+.carrusel-item.active {
+  display: block;
+}
+.carrusel-item img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  display: block;
+}
+.carrusel-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.carrusel-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+.carrusel-control:hover {
+  background-color: #fff;
+}
+.carrusel-control.prev {
+  left: 15px;
+}
+.carrusel-control.next {
+  right: 15px;
+}
+.carrusel-indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.indicator-dot {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.indicator-dot.active {
+  background-color: #fff;
+}
+
+/* =================================
+   RESPONSIVE: INICIO
+   ================================= */
+@media (max-width: 992px) {
+  .componente-principal {
+    flex-direction: column;
+    text-align: center;
+  }
+  .titulo {
+    font-size: 2.2rem;
+  }
+  .descripcion {
+    max-width: 100%;
+  }
+  .contenedor-botones {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .receta-card {
+    flex-direction: column;
+  }
+  .receta-contenido {
+    padding: 30px;
+    text-align: center;
+  }
+  .receta-botones {
+    justify-content: center;
+  }
+  .carrusel-item img {
+    height: 300px;
+  }
+  .carrusel-caption {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+}

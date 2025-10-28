@@ -1,16 +1,23 @@
-{% extends 'base.html' %} {% load static %} {% load allauth i18n %} 
+{% extends 'base.html' %} 
+{% load static %} 
+{% load allauth i18n %} 
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="auth-form-container">
-  <h2>{% trans "Cerrar Sesion" %}</h2>
+  <h2>{% trans "Cerrar Sesión" %}</h2>
 
-  <p class="logout-confirmation-text">{% trans 'Confirma que quiere cerrar sesion?' %}</p>
+  <p class="logout-confirmation-text">{% trans '¿Confirma que quiere cerrar sesión?' %}</p>
 
   <form method="post" action="{% url 'account_logout' %}">
     {% csrf_token %}
     <div class="form-actions">
-    <button class="btn-principal" type="submit">{% trans 'Cerrar Sesion' %}</button>
-    <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn-secundario">Cancelar</a>
-</div>
+      <button class="btn-principal" type="submit">{% trans 'Cerrar Sesión' %}</button>
+      <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn-secundario">Cancelar</a>
+    </div>
   </form>
 </div>
 {% endblock %}
