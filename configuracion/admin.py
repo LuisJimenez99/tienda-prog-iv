@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DatosPago, HeroSectionConfig # Importamos AMBOS modelos
+from .models import DatosPago, HeroSectionConfig, AparienciaConfig  # Importamos AMBOS modelos
 from django.utils.html import format_html
 from .models import CarruselImagen # Asegúrate de importar el nuevo modelo
 from django.utils.html import format_html # Necesario para la previsualización
@@ -71,3 +71,44 @@ class CarruselImagenAdmin(admin.ModelAdmin):
             'fields': ('link_url', 'abrir_en_nueva_pestana')
         }),
     )    
+    
+from django.contrib import admin
+from .models import DatosPago, HeroSectionConfig, AparienciaConfig 
+from django.utils.html import format_html
+
+# ... (Tu 'DatosPagoAdmin' y 'HeroSectionConfigAdmin' se quedan igual) ...
+
+@admin.register(AparienciaConfig)
+class AparienciaConfigAdmin(admin.ModelAdmin):
+    
+    # --- ¡AQUÍ CREAMOS LA JERARQUÍA! ---
+    fieldsets = (
+        (None, {
+            'fields': ('color_fondo_body',)
+        }),
+        ('Página de Inicio: Barra de Navegación (Nav)', {
+            'classes': ('collapse',), # Esto lo hace colapsable
+            'fields': (
+                'navbar_color_fondo', 
+                'navbar_color_enlaces',
+            )
+        }),
+        ('Página de Inicio: Botones (Global)', {
+            'classes': ('collapse',),
+            'description': 'Define los colores para todos los botones del sitio (Nav, Tarjetas, etc.)',
+            'fields': (
+                'boton_color_principal_fondo',
+                'boton_color_principal_texto',
+                'boton_color_principal_hover',
+                'boton_color_secundario_borde',
+            )
+        }),
+    )
+
+    # ... (El resto de las funciones 'has_add_permission' y 'has_delete_permission' se quedan igual) ...
+    def has_add_permission(self, request):
+        if AparienciaConfig.objects.exists():
+            return False
+        return True
+    def has_delete_permission(self, request, obj=None):
+        return False

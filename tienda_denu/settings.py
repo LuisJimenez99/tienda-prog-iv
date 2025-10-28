@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'carrito',
     'envios',
+    'colorfield',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'configuracion.context_processors.apariencia_context',
             ],
         },
     },

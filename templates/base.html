@@ -4,9 +4,31 @@
 
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Tienda de Viandas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda de Viandas</title>
+    
+    <!-- === INICIO DEL BLOQUE DE ESTILOS DINÁMICOS === -->
+    <style>
+    :root {
+        /* Colores Base */
+        --color-fondo-body: {{ apariencia_config.color_fondo_body }};
+        
+        /* Colores de Navbar y Footer */
+        --color-navbar: {{ apariencia_config.navbar_color_fondo }};
+        --color-footer: {{ apariencia_config.navbar_color_fondo }};
+        --color-nav-link: {{ apariencia_config.navbar_color_enlaces }};
+
+        /* Colores de Botones Principales */
+        --color-btn-principal-fondo: {{ apariencia_config.boton_color_principal_fondo }};
+        --color-btn-principal-texto: {{ apariencia_config.boton_color_principal_texto }};
+        --color-btn-principal-hover: {{ apariencia_config.boton_color_principal_hover }};
+
+        /* Colores de Botones Secundarios */
+        --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
+    }
+</style>
+    
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>

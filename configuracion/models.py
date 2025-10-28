@@ -1,7 +1,5 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
+from colorfield.fields import ColorField
 
 class DatosPago(models.Model):
         cbu_alias = models.CharField(max_length=255, help_text="Tu CBU o Alias para transferencias.")
@@ -84,3 +82,56 @@ class CarruselImagen(models.Model):
 
     def __str__(self):
         return self.titulo or f"Imagen de Carrusel {self.id}"
+
+
+from django.db import models
+from colorfield.fields import ColorField # <-- 1. Importa el ColorField
+
+# ... (Aquí van tus otros modelos como HeroSectionConfig y DatosPago) ...
+
+# --- MODELO NUEVO PARA APARIENCIA ---
+class AparienciaConfig(models.Model):
+    # --- Colores Globales (que ya teníamos) ---
+    color_fondo_body = ColorField(
+        default='#ECF0E5', 
+        verbose_name="Color de Fondo Principal"
+    )
+    
+    # --- CAMPOS NUEVOS PARA EL NAVBAR ---
+    navbar_color_fondo = ColorField(
+        default='#FFFFFF',
+        verbose_name="Color de Fondo (Navbar y Footer)"
+    )
+    navbar_color_enlaces = ColorField(
+        default='#555555',
+        verbose_name="Color de Texto (Enlaces del Nav)"
+    )
+
+    # --- CAMPOS NUEVOS PARA BOTONES ---
+    # (Los usaremos para TODOS los botones, incluidos los del Nav y Tarjetas)
+    boton_color_principal_fondo = ColorField(
+        default='#78857A', 
+        verbose_name="Color Principal (Botones)"
+    )
+    boton_color_principal_texto = ColorField(
+        default='#FFFFFF', 
+        verbose_name="Color de Texto (Botones)"
+    )
+    boton_color_principal_hover = ColorField(
+        default='#647066', 
+        verbose_name="Color Hover (Botones)"
+    )
+    
+    boton_color_secundario_borde = ColorField(
+        default='#78857A',
+        verbose_name="Color Secundario (Borde y Texto)"
+    )
+    
+    # ... (podríamos añadir más, pero empecemos con estos) ...
+
+    class Meta:
+        verbose_name = "Configuración de Apariencia"
+        verbose_name_plural = "Configuración de Apariencia"
+
+    def __str__(self):
+        return "Configuración de Apariencia"
