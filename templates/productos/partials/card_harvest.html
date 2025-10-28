@@ -1,0 +1,40 @@
+{% load static %}
+<div class="card-harvest-wrapper">
+  
+  <div class="product-img">
+    <a href="{% url 'detalle_producto' producto.id %}">
+      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+    </a>
+  </div>
+
+  <div class="product-info">
+    <div class="product-text">
+      <h1>{{ producto.nombre }}</h1>
+      <h2>{{ producto.categoria.nombre|default:"Vianda" }}</h2>
+      <p>{{ producto.descripcion|truncatewords:20 }}</p>
+    </div>
+
+    <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+
+    <div class="tarjeta-botones">
+      {% if producto.stock > 0 %}
+      <a
+        href="{% url 'detalle_producto' producto.id %}"
+        class="btn-ver-producto"
+        >Ver Producto</a
+      >
+      <button
+        class="add-to-cart-btn"
+        data-id="{{ producto.id }}"
+        data-nombre="{{ producto.nombre }}"
+        data-precio="{{ producto.precio }}"
+        data-imagen="{{ producto.imagen.url }}"
+      >
+        Agregar
+      </button>
+      {% else %}
+      <span class="sin-stock-mensaje">Sin Stock</span>
+      {% endif %}
+    </div>
+    </div>
+</div>

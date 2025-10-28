@@ -7,12 +7,10 @@
 
 {% block content %}
 
-    <!-- 1. Sección principal (AHORA ES DINÁMICA) -->
     <div class="seccion-principal">
         <div class="componente-principal">
             
             <div class="contenedor-imagen">
-                <!-- Mostramos la imagen del admin, o una por defecto si no existe -->
                 <img class="imagen-principal" 
                      src="{% if hero_config.imagen_fondo %}{{ hero_config.imagen_fondo.url }}{% else %}{% static 'images/imagen1.jpg' %}{% endif %}" 
                      alt="Viandas saludables en una mesa">
@@ -20,15 +18,12 @@
 
             <div class="contenedor-contenido">
                 <p class="titulo">
-                    <!-- Mostramos el título del admin, con un texto por defecto si no existe -->
                     {{ hero_config.titulo_principal|default:"Te ayudamos a lograr tus objetivos, <br> sin perder el placer de comer."|safe }}
                 </p>
                 <p class="descripcion">
-                    <!-- Mostramos la descripción del admin -->
                     {{ hero_config.descripcion|default:"Te ofrecemos viandas nutritivas y asesoramiento profesional para que alimentarte bien sea simple, rico y sostenible en el tiempo."|linebreaksbr }}
                 </p>
                 <div class="contenedor-botones">
-                    <!-- Mostramos los botones del admin -->
                     <a href="{{ hero_config.url_boton_1|default:"#" }}" class="btn-elegante">{{ hero_config.texto_boton_1|default:"Viandas" }}</a>
                     <a href="{{ hero_config.url_boton_2|default:"#" }}" class="btn-elegante">{{ hero_config.texto_boton_2|default:"Consultas" }}</a>
                 </div>
@@ -64,39 +59,39 @@
         </div>
     </section>
     {% endif %}
-    <!-- 2. Sección de productos destacados (sin cambios) -->
     <section class="seccion-productos">
         <h2 class="titulo-seccion">Nuestras Viandas Destacadas</h2>
         <div class="contenedor-grid-productos">
             {% for producto in productos %}
-                <div class="tarjeta-producto">
-                    <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
-                        <div class="tarjeta-imagen-contenedor">
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen">
-                        </div>
-                    </a>
-                    <div class="tarjeta-contenido">
-                        <h3 class="tarjeta-titulo">
-                            <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
-                        </h3>
-                        <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
-                        <div class="tarjeta-botones">
-                            <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver Producto</a>
-                            <button class="add-to-cart-btn" 
-                                    data-id="{{ producto.id }}" 
-                                    data-nombre="{{ producto.nombre }}" 
-                                    data-precio="{{ producto.precio }}"
-                                    data-imagen="{{ producto.imagen.url }}">
-                                Agregar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+            
+                {% comment %} 
+                  Aquí comprobamos la variable que viene del admin.
+                {% endcomment %}
+                
+                {% if apariencia_config.estilo_tarjeta_producto == 'hot_sale' %}
+                    
+                    {% include 'productos/partials/card_hot_sale.html' %}
+                
+              {% elif apariencia_config.estilo_tarjeta_producto == 'harvest' %}
+
+    {% comment %} Carga la nueva tarjeta Harvest {% endcomment %}
+    {% include 'productos/partials/card_harvest.html' %}
+
+
+                    
+                    
+                
+                {% else %}
+                    
+                    {% comment %} Este es el 'simple' (default) {% endcomment %}
+                    {% include 'productos/partials/card_simple.html' %}
+                
+                {% endif %}
+                
+                {% endfor %}
         </div>
     </section>
 
-    <!-- Sección de Receta Aleatoria (sin cambios) -->
     {% if receta %}
     <section class="seccion-receta">
         <div id="receta-card" class="receta-card">
@@ -123,4 +118,3 @@
     {% endif %}
 
 {% endblock %}
-

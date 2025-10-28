@@ -279,29 +279,57 @@ body {
   color: var(--color-btn-principal-fondo, #78857a);
 }
 
-.tarjeta-botones .add-to-cart-btn,
+/* Esto es lo nuevo: */
+.tarjeta-botones .add-to-cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1; /* Para que ocupen el espacio equitativamente */
+  padding: 10px 5px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  /* Variables NUEVAS específicas de tarjeta */
+  background-color: var(--card-btn-principal-fondo);
+  color: var(--card-btn-principal-texto);
+  border: 1px solid var(--card-btn-principal-fondo);
+}
+/* Estilo del botón secundario ("Ver Producto") */
 .tarjeta-botones .btn-ver-producto {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  flex: 1; /* Para que ocupen el espacio equitativamente */
   padding: 10px 5px;
   font-size: 0.9rem;
   font-family: inherit;
-  background-color: var(--color-btn-principal-fondo, #78857a);
-  color: var(--color-btn-principal-texto, #ffffff);
-  border: 1px solid var(--color-btn-principal-fondo, #78857a);
-  border-radius: 8px;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
+  border-radius: 8px;
   transition: all 0.3s ease;
-  font-weight: 500;
+  
+  /* Variables NUEVAS específicas de tarjeta */
+  background-color: transparent;
+  color: var(--card-btn-secundario-borde);
+  border: 1px solid var(--card-btn-secundario-borde);
 }
 
-.tarjeta-botones .add-to-cart-btn:hover,
+/* Reemplaza con esto: */
+.tarjeta-botones .add-to-cart-btn:hover {
+  background-color: var(--card-btn-principal-hover);
+  border-color: var(--card-btn-principal-hover);
+  color: var(--card-btn-principal-texto); /* Se mantiene el color de texto */
+}
+
 .tarjeta-botones .btn-ver-producto:hover {
-  background-color: var(--color-btn-principal-hover, #647066);
-  border-color: var(--color-btn-principal-hover, #647066);
+  background-color: var(--card-btn-secundario-borde);
+  color: var(--card-btn-principal-texto); /* Usamos el color de texto del botón principal */
 }
 
 /* 2.4. Tarjetas */
@@ -341,10 +369,13 @@ body {
   flex-grow: 1;
 }
 
+/* Esto es lo nuevo: */
 .tarjeta-titulo {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 10px;
+  font-family: var(--fuente-tarjetas); /* ¡CONECTADO! */
+  color: var(--color-titulo-tarjeta); /* ¡CONECTADO! */
 }
 
 .tarjeta-precio {

@@ -26,53 +26,34 @@
       {% if productos %}
 
       <div class="contenedor-grid-productos">
+        
         {% for producto in productos %}
-        <div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %}">
-          <a
-            href="{% url 'detalle_producto' producto.id %}"
-            class="tarjeta-link"
-          >
-            <div class="tarjeta-imagen-contenedor">
-              <img
-                src="{{ producto.imagen.url }}"
-                alt="{{ producto.nombre }}"
-                class="tarjeta-imagen"
-              />
-            </div>
-          </a>
-          <div class="tarjeta-contenido">
-            <h3 class="tarjeta-titulo">
-              <a href="{% url 'detalle_producto' producto.id %}"
-                >{{ producto.nombre }}</a
-              >
-            </h3>
-            <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+        
+          {% comment %} 
+            Aquí comprobamos la variable que viene del admin.
+            Recuerda que 'apariencia_config' está disponible en TODOS 
+            los templates gracias a tu context_processor.
+          {% endcomment %}
+          
+          {% if apariencia_config.estilo_tarjeta_producto == 'hot_sale' %}
+              
+              {% include 'productos/partials/card_hot_sale.html' %}
+          
+          {% elif apariencia_config.estilo_tarjeta_producto == 'harvest' %}
 
-            <div class="tarjeta-botones">
-              {% if producto.stock > 0 %}
-              <!-- Si hay stock, mostramos los botones normales -->
-              <a
-                href="{% url 'detalle_producto' producto.id %}"
-                class="btn-ver-producto"
-                >Ver Producto</a
-              >
-              <button
-                class="add-to-cart-btn"
-                data-id="{{ producto.id }}"
-                data-nombre="{{ producto.nombre }}"
-                data-precio="{{ producto.precio }}"
-                data-imagen="{{ producto.imagen.url }}"
-              >
-                Agregar
-              </button>
-              {% else %}
-              <!-- Si no hay stock, mostramos un mensaje -->
-              <span class="sin-stock-mensaje">Sin Stock</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        {% endfor %}
+    {% comment %} Carga la nueva tarjeta Harvest {% endcomment %}
+    {% include 'productos/partials/card_harvest.html' %}
+
+
+              
+              
+              
+              {% comment %} Este es el 'simple' (default) {% endcomment %}
+              {% include 'productos/partials/card_simple.html' %}
+          
+          {% endif %}
+          
+          {% endfor %}
       </div>
       {% else %}
       <p class="no-results-msg">

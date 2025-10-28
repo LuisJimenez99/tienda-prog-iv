@@ -3,7 +3,9 @@ from .models import DatosPago, HeroSectionConfig, AparienciaConfig  # Importamos
 from django.utils.html import format_html
 from .models import CarruselImagen # Asegúrate de importar el nuevo modelo
 from django.utils.html import format_html # Necesario para la previsualización
-
+from django.contrib import admin
+from .models import DatosPago, HeroSectionConfig, AparienciaConfig 
+from django.utils.html import format_html
  
 # Admin para los Datos de Pago (que ya tenías)
 @admin.register(DatosPago)
@@ -72,30 +74,56 @@ class CarruselImagenAdmin(admin.ModelAdmin):
         }),
     )    
     
-from django.contrib import admin
-from .models import DatosPago, HeroSectionConfig, AparienciaConfig 
-from django.utils.html import format_html
+
 
 # ... (Tu 'DatosPagoAdmin' y 'HeroSectionConfigAdmin' se quedan igual) ...
 
 @admin.register(AparienciaConfig)
 class AparienciaConfigAdmin(admin.ModelAdmin):
     
-    # --- ¡AQUÍ CREAMOS LA JERARQUÍA! ---
+    admin.register(AparienciaConfig)
+class AparienciaConfigAdmin(admin.ModelAdmin):
+    
     fieldsets = (
-        (None, {
+        ('Diseño General', {
             'fields': ('color_fondo_body',)
         }),
-        ('Página de Inicio: Barra de Navegación (Nav)', {
-            'classes': ('collapse',), # Esto lo hace colapsable
+        ('Diseño de Tarjetas de Producto', {
+            'classes': ('collapse',), 
+            'description': 'Controla el estilo y los colores de texto de las tarjetas.',
+            'fields': (
+                'estilo_tarjeta_producto',
+                'fuente_tarjetas',
+                'color_titulo_tarjeta',
+                'color_desc_tarjeta',
+            )
+        }),
+        
+        # --- ¡NUEVO GRUPO! ---
+        ('Botones de Tarjetas de Producto', {
+            'classes': ('collapse',),
+            'description': 'Define los colores para los botones DENTRO de las tarjetas de producto.',
+            'fields': (
+                'card_btn_principal_fondo',
+                'card_btn_principal_texto',
+                'card_btn_principal_hover',
+                'card_btn_secundario_borde',
+            )
+        }),
+        # --- FIN NUEVO GRUPO ---
+
+        ('Barra de Navegación y Footer', {
+            'classes': ('collapse',),
             'fields': (
                 'navbar_color_fondo', 
                 'navbar_color_enlaces',
             )
         }),
-        ('Página de Inicio: Botones (Global)', {
+        
+        # --- GRUPO RENOMBRADO ---
+        ('Botones (Globales)', { 
             'classes': ('collapse',),
-            'description': 'Define los colores para todos los botones del sitio (Nav, Tarjetas, etc.)',
+            'description': 'Define los colores para botones globales (Navbar, Formularios, etc.)',
             'fields': (
                 'boton_color_principal_fondo',
                 'boton_color_principal_texto',
@@ -105,10 +133,13 @@ class AparienciaConfigAdmin(admin.ModelAdmin):
         }),
     )
 
-    # ... (El resto de las funciones 'has_add_permission' y 'has_delete_permission' se quedan igual) ...
+    # Funciones para evitar que se cree más de una configuración
     def has_add_permission(self, request):
         if AparienciaConfig.objects.exists():
             return False
         return True
+    
     def has_delete_permission(self, request, obj=None):
         return False
+
+    

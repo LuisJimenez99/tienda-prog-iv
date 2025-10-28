@@ -106,6 +106,40 @@ class AparienciaConfig(models.Model):
         default='#555555',
         verbose_name="Color de Texto (Enlaces del Nav)"
     )
+    class EstilosTarjeta(models.TextChoices):
+        SIMPLE = 'simple', 'Estilo Simple (Actual)'
+        HOT_SALE = 'hot_sale', 'Estilo "Hot Sale" (Con insignia)'
+        HARVEST = 'harvest', 'Estilo "Harvest" (Vase)'
+        
+    estilo_tarjeta_producto = models.CharField(
+        max_length=20,
+        choices=EstilosTarjeta.choices,
+        default=EstilosTarjeta.SIMPLE,
+        verbose_name="Estilo de Tarjetas de Producto",
+        help_text="Elige el diseño que se usará para mostrar los productos en el catálogo."
+    )
+    class FuentesTarjeta(models.TextChoices):
+        DEFAULT = '"Poppins", sans-serif', 'Fuente Principal (Poppins)'
+        SERIF = '"Lora", serif', 'Fuente Elegante (Lora)'
+        MODERNA = '"Segoe UI", sans-serif', 'Fuente Moderna (Segoe UI)'
+        
+    fuente_tarjetas = models.CharField(
+        max_length=50,
+        choices=FuentesTarjeta.choices,
+        default=FuentesTarjeta.DEFAULT,
+        verbose_name="Tipografía de Tarjetas"
+    )
+
+    # --- ¡NUEVO! Control de Color de Texto ---
+    color_titulo_tarjeta = ColorField(
+        default='#18181B', 
+        verbose_name="Color Título (Tarjetas)"
+    )
+    color_desc_tarjeta = ColorField(
+        default='#52525B', 
+        verbose_name="Color Descripción (Tarjetas)"
+    )
+    
 
     # --- CAMPOS NUEVOS PARA BOTONES ---
     # (Los usaremos para TODOS los botones, incluidos los del Nav y Tarjetas)
@@ -126,7 +160,22 @@ class AparienciaConfig(models.Model):
         default='#78857A',
         verbose_name="Color Secundario (Borde y Texto)"
     )
-    
+    card_btn_principal_fondo = ColorField(
+        default='#78857A', 
+        verbose_name="[Tarjeta] Color Principal (Fondo)"
+    )
+    card_btn_principal_texto = ColorField(
+        default='#FFFFFF', 
+        verbose_name="[Tarjeta] Color Principal (Texto)"
+    )
+    card_btn_principal_hover = ColorField(
+        default='#647066', 
+        verbose_name="[Tarjeta] Color Principal (Hover)"
+    )
+    card_btn_secundario_borde = ColorField(
+        default='#78857A',
+        verbose_name="[Tarjeta] Color Secundario (Borde)"
+    )
     # ... (podríamos añadir más, pero empecemos con estos) ...
 
     class Meta:

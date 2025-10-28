@@ -10,26 +10,39 @@
     
     <!-- === INICIO DEL BLOQUE DE ESTILOS DINÁMICOS === -->
     <style>
-    :root {
-        /* Colores Base */
-        --color-fondo-body: {{ apariencia_config.color_fondo_body }};
-        
-        /* Colores de Navbar y Footer */
-        --color-navbar: {{ apariencia_config.navbar_color_fondo }};
-        --color-footer: {{ apariencia_config.navbar_color_fondo }};
-        --color-nav-link: {{ apariencia_config.navbar_color_enlaces }};
+    
+:root {
+    /* Colores Base */
+    --color-fondo-body: {{ apariencia_config.color_fondo_body }};
+    
+    /* Colores de Navbar y Footer */
+    --color-navbar: {{ apariencia_config.navbar_color_fondo }};
+    --color-footer: {{ apariencia_config.navbar_color_fondo }};
+    --color-nav-link: {{ apariencia_config.navbar_color_enlaces }};
 
-        /* Colores de Botones Principales */
-        --color-btn-principal-fondo: {{ apariencia_config.boton_color_principal_fondo }};
-        --color-btn-principal-texto: {{ apariencia_config.boton_color_principal_texto }};
-        --color-btn-principal-hover: {{ apariencia_config.boton_color_principal_hover }};
+    /* Colores de Botones Principales */
+    --color-btn-principal-fondo: {{ apariencia_config.boton_color_principal_fondo }};
+    --color-btn-principal-texto: {{ apariencia_config.boton_color_principal_texto }};
+    --color-btn-principal-hover: {{ apariencia_config.boton_color_principal_hover }};
 
-        /* Colores de Botones Secundarios */
-        --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
-    }
+    /* Colores de Botones Secundarios */
+    --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
+
+    
+    --fuente-tarjetas: {{ apariencia_config.fuente_tarjetas|safe }};
+    --color-titulo-tarjeta: {{ apariencia_config.color_titulo_tarjeta }};
+    --color-desc-tarjeta: {{ apariencia_config.color_desc_tarjeta }};
+    --card-btn-principal-fondo: {{ apariencia_config.card_btn_principal_fondo }};
+    --card-btn-principal-texto: {{ apariencia_config.card_btn_principal_texto }};
+    --card-btn-principal-hover: {{ apariencia_config.card_btn_principal_hover }};
+    --card-btn-secundario-borde: {{ apariencia_config.card_btn_secundario_borde }};
+}
 </style>
     
 <link rel="stylesheet" href="{% static 'css/base/global.css' %}">
+
+<link rel="stylesheet" href="{% static 'css/components/card_hot_sale.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/card_harvest.css' %}">
 
 {% block extra_css %}{% endblock %}
 

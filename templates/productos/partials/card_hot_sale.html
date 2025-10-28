@@ -1,0 +1,40 @@
+{% load static %}
+<div class="card">
+    {% if producto.stock <= 0 %}
+        <div class="badge" style="background: #A1A1AA;">Agotado</div>
+    {% endif %}
+    <div class="img">
+        <a href="{% url 'detalle_producto' producto.id %}">
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+        </a>
+    </div>
+
+    <div class="info">
+        <div class="cat">{{ producto.categoria.nombre|default:"Vianda" }}</div>
+        <h2 class="title">{{ producto.nombre }}</h2>
+        <p class="desc">{{ producto.descripcion|truncatewords:15 }}</p>
+
+        <div class="bottom">
+            <div class="price">
+                <span class="new">${{ producto.precio|floatformat:2 }}</span>
+            </div>
+
+            {% if producto.stock > 0 %}
+            <button class="btn add-to-cart-btn"
+                data-id="{{ producto.id }}"
+                data-nombre="{{ producto.nombre }}"
+                data-precio="{{ producto.precio }}"
+                data-imagen="{{ producto.imagen.url }}">
+                <span>Agregar</span>
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+            </button>
+            {% else %}
+             <button class="btn" disabled style="background: #A1A1AA; cursor: not-allowed;">Agotado</button>
+            {% endif %}
+        </div>
+    </div>
+</div>

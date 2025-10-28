@@ -1,0 +1,44 @@
+{% load static %}
+<div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %}">
+  <a
+    href="{% url 'detalle_producto' producto.id %}"
+    class="tarjeta-link"
+  >
+    <div class="tarjeta-imagen-contenedor">
+      <img
+        src="{{ producto.imagen.url }}"
+        alt="{{ producto.nombre }}"
+        class="tarjeta-imagen"
+      />
+    </div>
+  </a>
+  <div class="tarjeta-contenido">
+    <h3 class="tarjeta-titulo">
+      <a href="{% url 'detalle_producto' producto.id %}"
+        >{{ producto.nombre }}</a
+      >
+    </h3>
+    <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+
+    <div class="tarjeta-botones">
+      {% if producto.stock > 0 %}
+      <a
+        href="{% url 'detalle_producto' producto.id %}"
+        class="btn-ver-producto"
+        >Ver Producto</a
+      >
+      <button
+        class="add-to-cart-btn"
+        data-id="{{ producto.id }}"
+        data-nombre="{{ producto.nombre }}"
+        data-precio="{{ producto.precio }}"
+        data-imagen="{{ producto.imagen.url }}"
+      >
+        Agregar
+      </button>
+      {% else %}
+      <span class="sin-stock-mensaje">Sin Stock</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
