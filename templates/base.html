@@ -36,6 +36,7 @@
     --card-btn-principal-texto: {{ apariencia_config.card_btn_principal_texto }};
     --card-btn-principal-hover: {{ apariencia_config.card_btn_principal_hover }};
     --card-btn-secundario-borde: {{ apariencia_config.card_btn_secundario_borde }};
+    --color-carrito-activo: {{ apariencia_config.color_carrito_activo }};
 }
 </style>
     
@@ -47,6 +48,9 @@
 {% block extra_css %}{% endblock %}
 
 </head>
+<div id="custom-alert" class="custom-alert">
+    <span id="custom-alert-message"></span>
+</div>
 <body>
 
 <header>

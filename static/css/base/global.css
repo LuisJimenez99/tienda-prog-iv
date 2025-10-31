@@ -38,11 +38,22 @@ body {
 }
 
 .nav-logo a {
-  font-family: "Lora", serif;
-  font-size: 1.8rem;
-  color: #333;
-  text-decoration: none;
-  font-weight: 500;
+    font-family: 'Lora', serif;
+    font-size: 1.8rem;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    /* Añadimos flex para centrar la imagen si es más pequeña que el texto */
+    display: flex;
+    align-items: center;
+    height: 50px; /* Altura de referencia para el logo */
+}
+/* --- ESTILO NUEVO PARA EL LOGO --- */
+/* Esta es la regla clave para controlar el tamaño */
+.site-logo {
+    max-height: 50px; /* Define la altura máxima del logo */
+    width: auto;      /* El ancho se ajustará automáticamente */
+    object-fit: contain;
 }
 
 .nav-links {
@@ -652,4 +663,79 @@ body {
   .footer-social {
     justify-content: center;
   }
+}
+
+/* Archivo: static/css/style.css */
+
+/* ... (tus estilos existentes) ... */
+
+/* Estilo base del contador (usa el color de botón principal) */
+.cart-counter {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background-color: var(--color-btn-principal-fondo, #78857A);
+    color: var(--color-btn-principal-texto, #fff);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    /* Añadimos una transición para el cambio de color */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* --- NUEVA REGLA --- */
+/* Estilo del contador CUANDO tiene items */
+.cart-counter.has-items {
+    background-color: var(--color-carrito-activo, #E74C3C);
+    /* Opcional: una pequeña animación para llamar la atención */
+    transform: scale(1.1);
+}
+
+
+/* =================================
+   COMPONENTE: Alerta Personalizada (Toast)
+   ================================= */
+
+.custom-alert {
+  position: fixed;
+  top: 100px; 
+  left: 50%;
+  transform: translate(-50%, -20px); 
+  
+  background-color: #e74c3c; /* Rojo (error) - Este es el default */
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1010; 
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Clase para éxito (Verde) */
+.custom-alert.success {
+  background-color: #2ecc71; /* Verde bonito */
+  color: white;
+}
+
+/* Clase para info (Color de tu marca) */
+.custom-alert.info {
+  background-color: var(--color-btn-principal-fondo, #78857a); 
+  color: var(--color-btn-principal-texto, #fff);
+}
+
+/* Clase que se añade con JS para mostrar la alerta */
+.custom-alert.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0); 
 }

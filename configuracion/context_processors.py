@@ -6,6 +6,7 @@ def apariencia_context(request):
     if not config:
         # Valores por defecto si aún no has guardado nada en el admin
         config_data = {
+            'logo_sitio': None,
             'color_fondo_body': '#ECF0E5',
             'navbar_color_fondo': '#FFFFFF',
             'navbar_color_enlaces': '#555555',
@@ -13,6 +14,7 @@ def apariencia_context(request):
             'boton_color_principal_texto': '#FFFFFF',
             'boton_color_principal_hover': '#647066',
             'boton_color_secundario_borde': '#78857A',
+             'color_carrito_activo': '#E74C3C',
         }
     else:
         config_data = config

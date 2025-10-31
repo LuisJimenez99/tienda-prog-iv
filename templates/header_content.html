@@ -3,7 +3,15 @@
 
    
     <div class="nav-logo">
-        <a href="{% url 'inicio' %}">Mi Tienda</a>
+        <a href="{% url 'inicio' %}">
+            {% if apariencia_config.logo_sitio %}
+                <!-- Si hay un logo subido en el admin, lo mostramos -->
+                <img src="{{ apariencia_config.logo_sitio.url }}" alt="Logo de Mi Tienda" class="site-logo">
+            {% else %}
+                <!-- Si no hay logo, mostramos el texto como antes -->
+                Mi Tienda
+            {% endif %}
+        </a>
     </div>
     <div class="nav-links">
         <a href="{% url 'inicio' %}" class="nav-link">Inicio</a>

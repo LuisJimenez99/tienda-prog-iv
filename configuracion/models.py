@@ -91,12 +91,23 @@ from colorfield.fields import ColorField # <-- 1. Importa el ColorField
 
 # --- MODELO NUEVO PARA APARIENCIA ---
 class AparienciaConfig(models.Model):
+    
+    logo_sitio = models.ImageField(
+        upload_to='logos/', 
+        blank=True, null=True, 
+        verbose_name="Logo del Sitio (Navbar)",
+        help_text="Sube el logo que aparecerá en el menú. Si no subes ninguno, se mostrará el texto 'Mi Tienda'. Se ajustará a 50px de alto."
+    )
     # --- Colores Globales (que ya teníamos) ---
     color_fondo_body = ColorField(
         default='#ECF0E5', 
         verbose_name="Color de Fondo Principal"
     )
-    
+    color_carrito_activo = ColorField(
+        default='#E74C3C', # Un color rojo llamativo por defecto
+        verbose_name="Color Contador Carrito (con items)",
+        help_text="Color del círculo numérico del carrito cuando tiene productos."
+    )
     # --- CAMPOS NUEVOS PARA EL NAVBAR ---
     navbar_color_fondo = ColorField(
         default='#FFFFFF',

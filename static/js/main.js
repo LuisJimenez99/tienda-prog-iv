@@ -1,8 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
     
+    /**
+     * =================================
+     * FUNCIÓN DE ALERTA PERSONALIZADA
+     * =================================
+     * Muestra una notificación "toast" personalizada en la pantalla.
+     * @param {string} message El mensaje que se mostrará.
+     * @param {number} duration Duración en milisegundos (default: 3000ms).
+     */
+/* REEMPLAZA CON ESTA VERSIÓN: */
+
+/**
+ * Muestra una notificación "toast" personalizada en la pantalla.
+ * @param {string} message El mensaje que se mostrará.
+ * @param {number} duration Duración en milisegundos (default: 3000ms).
+ * @param {string} type Tipo de alerta: 'error' (default), 'success', o 'info'.
+ */
+function showCustomAlert(message, duration = 3000, type = 'error') {
+  const alertBox = document.getElementById('custom-alert');
+  const alertMessage = document.getElementById('custom-alert-message');
+  
+  if (!alertBox || !alertMessage) {
+    console.error("No se encontró el HTML de la alerta personalizada.");
+    alert(message); // Fallback al alert viejo
+    return;
+  }
+
+  // 1. Limpiamos clases de color antiguas
+  alertBox.classList.remove('success', 'info', 'error'); 
+
+  // 2. Añadimos la clase de color correcta
+  if (type === 'success') {
+    alertBox.classList.add('success');
+  } else if (type === 'info') {
+    alertBox.classList.add('info');
+  } else {
+    // Si no es 'success' o 'info', será 'error' (el default)
+    // No hace falta añadir 'error' porque el CSS base ya es rojo
+  }
+
+  // 3. Pone el mensaje y la muestra
+  alertMessage.textContent = message;
+  alertBox.classList.add('visible');
+
+  // 4. Oculta la alerta después de la duración especificada
+  setTimeout(() => {
+    alertBox.classList.remove('visible');
+  }, duration);
+}
+
     /* =================================
-       1. LÓGICA DEL CARRITO DE COMPRAS
-       ================================= */
+        1. LÓGICA DEL CARRITO DE COMPRAS
+        ================================= */
     
     // --- Cargar Carrito y Envío desde localStorage ---
     let cart = JSON.parse(localStorage.getItem('miTiendaCarrito')) || [];
@@ -31,20 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toggleMiniCart = () => {
         if (miniCart && miniCartOverlay) {
-           miniCart.classList.toggle('visible');
-           miniCartOverlay.classList.toggle('visible');
+            miniCart.classList.toggle('visible');
+            miniCartOverlay.classList.toggle('visible');
         }
     };
 
-    const addToCart = (product) => {
-        const existingProduct = cart.find(item => item.id === product.id);
-        if (existingProduct) {
-            existingProduct.quantity++;
-        } else {
-            cart.push({ ...product, quantity: 1 });
-        }
-        updateCartDisplay();
-    };
+    /* REEMPLAZA CON ESTA VERSIÓN: */
+const addToCart = (product) => {
+    const existingProduct = cart.find(item => item.id === product.id);
+    if (existingProduct) {
+        existingProduct.quantity++;
+    } else {
+        cart.push({ ...product, quantity: 1 });
+    }
+    updateCartDisplay();
+    
+    // --- ¡LÍNEA AÑADIDA! ---
+    // (Usamos 2500ms y el tipo 'info' para que use el color de tu marca)
+    showCustomAlert(`${product.nombre} añadido al carrito`, 2500, 'info');
+};
     
     const updateQuantity = (productId, change) => {
         const product = cart.find(item => item.id === productId);
@@ -57,53 +111,60 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartDisplay();
     };
 
-    const updateCartDisplay = () => {
-        if (!miniCartItemsContainer || !cartCounter || !cartTotalPriceEl) return; 
+   const updateCartDisplay = () => {
+    if (!miniCartItemsContainer || !cartCounter || !cartTotalPriceEl) return; 
 
-        miniCartItemsContainer.innerHTML = '';
-        let totalItems = 0;
-        let subtotalPrice = 0;
+    miniCartItemsContainer.innerHTML = '';
+    let totalItems = 0;
+    let subtotalPrice = 0;
 
-        if (cart.length === 0) {
-            miniCartItemsContainer.innerHTML = '<p class="cart-empty-msg">Tu carrito está vacío.</p>';
-        } else {
-            cart.forEach(item => {
-                const itemHTML = `
-                    <div class="mini-cart-item">
-                        <img src="${item.imagen}" alt="${item.nombre}" class="cart-item-img">
-                        <div class="cart-item-details">
-                            <p class="cart-item-name">${item.nombre}</p>
-                            <p class="cart-item-price">$${parseFloat(item.precio).toFixed(2)}</p>
-                            <div class="cart-item-quantity">
-                                <button class="quantity-btn" data-id="${item.id}" data-change="-1">-</button>
-                                <span>${item.quantity}</span>
-                                <button class="quantity-btn" data-id="${item.id}" data-change="1">+</button>
-                            </div>
+    if (cart.length === 0) {
+        miniCartItemsContainer.innerHTML = '<p class="cart-empty-msg">Tu carrito está vacío.</p>';
+    } else {
+        cart.forEach(item => {
+            const itemHTML = `
+                <div class="mini-cart-item">
+                    <img src="${item.imagen}" alt="${item.nombre}" class="cart-item-img">
+                    <div class="cart-item-details">
+                        <p class="cart-item-name">${item.nombre}</p>
+                        <p class="cart-item-price">$${parseFloat(item.precio).toFixed(2)}</p>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn" data-id="${item.id}" data-change="-1">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn" data-id="${item.id}" data-change="1">+</button>
                         </div>
-                        <button class="remove-item-btn" data-id="${item.id}">&times;</button>
                     </div>
-                `;
-                miniCartItemsContainer.innerHTML += itemHTML;
-                totalItems += item.quantity;
-                subtotalPrice += item.quantity * parseFloat(item.precio);
-            });
-        }
-        
-        let shippingPrice = 0;
-        if (selectedShipping && cartShippingCostEl) {
-            shippingPrice = parseFloat(selectedShipping.precio);
-            cartShippingCostEl.innerHTML = `<span>Envío:</span> <strong>$${shippingPrice.toFixed(2)}</strong>`;
-            cartShippingCostEl.style.display = 'flex';
-        } else if (cartShippingCostEl) {
-            cartShippingCostEl.style.display = 'none';
-        }
+                    <button class="remove-item-btn" data-id="${item.id}">&times;</button>
+                </div>
+            `;
+            miniCartItemsContainer.innerHTML += itemHTML;
+            totalItems += item.quantity;
+            subtotalPrice += item.quantity * parseFloat(item.precio);
+        });
+    }
+    
+    let shippingPrice = 0;
+    if (selectedShipping && cartShippingCostEl) {
+        shippingPrice = parseFloat(selectedShipping.precio);
+        cartShippingCostEl.innerHTML = `<span>Envío:</span> <strong>$${shippingPrice.toFixed(2)}</strong>`;
+        cartShippingCostEl.style.display = 'flex';
+    } else if (cartShippingCostEl) {
+        cartShippingCostEl.style.display = 'none';
+    }
 
-        const totalPrice = subtotalPrice + shippingPrice;
-        
-        cartCounter.textContent = totalItems;
-        cartTotalPriceEl.textContent = `$${totalPrice.toFixed(2)}`;
-        saveCartToLocalStorage();
-    };
+    const totalPrice = subtotalPrice + shippingPrice;
+    
+    cartCounter.textContent = totalItems;
+    cartTotalPriceEl.textContent = `$${totalPrice.toFixed(2)}`;
+
+    if (totalItems > 0) {
+        cartCounter.classList.add('has-items');
+    } else {
+        cartCounter.classList.remove('has-items');
+    }
+    
+    saveCartToLocalStorage();
+};
 
     // --- Event Listeners del Carrito ---
     if (cartIcon) cartIcon.addEventListener('click', toggleMiniCart);
@@ -141,7 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCheckout.addEventListener('click', (e) => {
             e.preventDefault(); 
             if (cart.length === 0) {
-                alert('Tu carrito está vacío.');
+                // --- ¡CAMBIO AQUÍ! ---
+                showCustomAlert('Tu carrito está vacío.');
+                // --- FIN DEL CAMBIO ---
                 return;
             }
             btnCheckout.textContent = 'Procesando...';
@@ -164,7 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveShippingToLocalStorage();
                     window.location.href = data.redirect_url;
                 } else {
-                    alert(data.error || 'Hubo un error al crear el pedido.');
+                    // --- ¡CAMBIO AQUÍ! ---
+                    showCustomAlert(data.error || 'Hubo un error al crear el pedido.');
+                    // --- FIN DEL CAMBIO ---
                     if (data.redirect_url) { window.location.href = data.redirect_url; }
                     btnCheckout.textContent = 'Finalizar Compra';
                     btnCheckout.disabled = false;
@@ -172,7 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Error al finalizar compra:', error);
-                alert(`Error: ${error.message}`);
+                // --- ¡CAMBIO AQUÍ! ---
+                showCustomAlert(`Error: ${error.message || 'Error de conexión.'}`);
+                // --- FIN DEL CAMBIO ---
                 btnCheckout.textContent = 'Finalizar Compra';
                 btnCheckout.disabled = false;
             });
@@ -180,8 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =================================
-       2. LÓGICA DE BÚSQUEDA PREDICTIVA
-       ================================= */
+        2. LÓGICA DE BÚSQUEDA PREDICTIVA
+        ================================= */
     const searchInput = document.querySelector('.search-input');
     const searchResultsContainer = document.getElementById('live-search-results');
 
@@ -227,8 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =================================
-       3. LÓGICA DEL CALCULADOR DE ENVÍO
-       ================================= */
+        3. LÓGICA DEL CALCULADOR DE ENVÍO
+        ================================= */
     const btnCalcularEnvio = document.getElementById('cp-calcular-btn');
     const cpInput = document.getElementById('cp-input');
     const shippingResults = document.getElementById('shipping-results');
@@ -291,11 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /* =================================
-       4. LÓGICA DEL CARRUSEL (CORREGIDA)
-       ================================= */
+        4. LÓGICA DEL CARRUSEL (CORREGIDA)
+        ================================= */
     const carrusel = document.getElementById('mi-carrusel');
     
-    // Verificamos que el carrusel exista en esta página
     if (carrusel) {
         const items = carrusel.querySelectorAll('.carrusel-item');
         const dots = carrusel.querySelectorAll('.indicator-dot');
@@ -305,7 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let autoSlideInterval;
 
         function showSlide(index) {
-            // Validar que el índice esté en el rango
+            if (items.length === 0) return; // No hacer nada si no hay items
+            
             if (index >= items.length) {
                 currentIndex = 0;
             } else if (index < 0) {
@@ -314,11 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentIndex = index;
             }
 
-            // Ocultar todos los items y dots
             items.forEach(item => item.classList.remove('active'));
             dots.forEach(dot => dot.classList.remove('active'));
 
-            // Mostrar solo el item y dot actual
             if (items[currentIndex]) {
                 items[currentIndex].classList.add('active');
             }
@@ -336,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function startAutoSlide() {
-            stopAutoSlide(); // Prevenir múltiples intervalos
+            stopAutoSlide(); 
             if (items.length > 1) {
                 autoSlideInterval = setInterval(nextSlide, 5000); // Cambia cada 5 segundos
             }
@@ -346,36 +411,32 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(autoSlideInterval);
         }
 
-        // Asignar eventos a los botones
         if (prevBtn && nextBtn) {
             prevBtn.addEventListener('click', () => {
                 stopAutoSlide();
                 prevSlide();
-                startAutoSlide(); // Reinicia el temporizador
+                startAutoSlide(); 
             });
     
             nextBtn.addEventListener('click', () => {
                 stopAutoSlide();
                 nextSlide();
-                startAutoSlide(); // Reinicia el temporizador
+                startAutoSlide(); 
             });
         }
 
-        // Asignar eventos a los puntos indicadores
         dots.forEach(dot => {
             dot.addEventListener('click', (e) => {
                 stopAutoSlide();
                 const slideTo = parseInt(e.target.dataset.slideTo);
                 showSlide(slideTo);
-                startAutoSlide(); // Reinicia el temporizador
+                startAutoSlide(); 
             });
         });
 
-        // Iniciar al cargar la página
-        showSlide(currentIndex); // Muestra el primer slide
-        startAutoSlide(); // Inicia el auto-play
+        showSlide(currentIndex); 
+        startAutoSlide(); 
 
-        // Opcional: Pausar al pasar el mouse
         carrusel.addEventListener('mouseenter', stopAutoSlide);
         carrusel.addEventListener('mouseleave', startAutoSlide);
     }
@@ -384,4 +445,3 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartDisplay(); // Muestra el carrito al cargar la página
 
 }); // Fin del DOMContentLoaded
-
