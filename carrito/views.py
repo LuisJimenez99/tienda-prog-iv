@@ -2,15 +2,21 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from django.urls import reverse
+from django.db import transaction # ¡Importante para transacciones seguras!
 
 import json
 from decimal import Decimal
 import mercadopago
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from pynliner import Pynliner 
+from configuracion.models import DatosPago, AparienciaConfig
 
 from .models import Pedido, ItemPedido
 from productos.models import Producto
@@ -19,10 +25,55 @@ from turnos.models import TurnoReservado
 from configuracion.models import DatosPago
 
 
+# ===================================================
+# FUNCIONES AUXILIARES DE STOCK
+# ===================================================
+
+def descontar_stock(pedido):
+    """
+    Descuenta el stock de los productos de un pedido.
+    Usa 'transaction.atomic' para asegurar que si algo falla, no se descuente nada.
+    """
+    try:
+        with transaction.atomic():
+            # Iteramos sobre cada item del pedido
+            for item in pedido.items.all():
+                producto = item.producto
+                if producto.stock >= item.cantidad:
+                    producto.stock -= item.cantidad
+                    producto.save()
+                else:
+                    # Esto no debería pasar si lo validamos antes, pero es una doble seguridad
+                    raise Exception(f"Stock insuficiente para {producto.nombre} al descontar.")
+        return True, ""
+    except Exception as e:
+        print(f"Error grave al descontar stock para Pedido {pedido.id}: {e}")
+        return False, str(e)
+
+def reponer_stock(pedido):
+    """
+    Devuelve el stock de un pedido cancelado.
+    """
+    try:
+        with transaction.atomic():
+            for item in pedido.items.all():
+                producto = item.producto
+                producto.stock += item.cantidad
+                producto.save()
+        return True
+    except Exception as e:
+        print(f"Error grave al reponer stock para Pedido {pedido.id}: {e}")
+        return False
+
+
+# ===================================================
+# VISTAS DE PEDIDOS (API Y CHECKOUT)
+# ===================================================
+
 # ---------------------------------------------------
 # ✅ CREAR PEDIDO (API)
 # ---------------------------------------------------
-@csrf_exempt
+@csrf_protect # ¡CAMBIO DE SEGURIDAD! Usa @csrf_protect en lugar de @csrf_exempt
 @login_required
 def crear_pedido_api(request):
     if request.method == 'POST':
@@ -41,63 +92,78 @@ def crear_pedido_api(request):
                     'redirect_url': reverse('edit_profile')
                 }, status=400)
 
-            # --- Cálculo de montos ---
+            # --- Cálculo y VALIDACIÓN DE STOCK ---
             subtotal_pedido = Decimal('0.00')
             items_para_crear = []
 
-            for item_data in carrito_items:
-                producto = Producto.objects.get(id=item_data['id'])
+            # Usamos 'select_for_update' para bloquear los productos y evitar que
+            # dos personas compren el último item al mismo tiempo (race condition)
+            with transaction.atomic():
+                ids_productos = [item_data['id'] for item_data in carrito_items]
+                productos_en_db = Producto.objects.select_for_update().filter(id__in=ids_productos)
+                productos_map = {str(p.id): p for p in productos_en_db}
 
-                if producto.stock >= item_data['quantity']:
-                    costo_item = producto.precio * item_data['quantity']
-                    subtotal_pedido += costo_item
-                    items_para_crear.append({
-                        'producto': producto,
-                        'cantidad': item_data['quantity'],
-                        'precio_unitario': producto.precio
-                    })
-                else:
-                    return JsonResponse({
-                        'error': f'Lo sentimos, solo quedan {producto.stock} unidades de {producto.nombre}.'
-                    }, status=400)
+                for item_data in carrito_items:
+                    producto = productos_map.get(item_data['id'])
+                    
+                    if not producto:
+                        raise Producto.DoesNotExist(f"Producto ID {item_data['id']} no encontrado.")
 
-            # --- Costo de envío ---
-            costo_envio = Decimal('0.00')
-            metodo_envio_nombre = "Retiro"
+                    cantidad_pedida = item_data['quantity']
+                    
+                    if producto.stock >= cantidad_pedida:
+                        costo_item = producto.precio * cantidad_pedida
+                        subtotal_pedido += costo_item
+                        items_para_crear.append({
+                            'producto': producto,
+                            'cantidad': cantidad_pedida,
+                            'precio_unitario': producto.precio
+                        })
+                    else:
+                        # ¡Validación de stock!
+                        return JsonResponse({
+                            'error': f'Lo sentimos, solo quedan {producto.stock} unidades de {producto.nombre}.'
+                        }, status=400)
 
-            if shipping_data and shipping_data.get('precio'):
-                costo_envio = Decimal(str(shipping_data['precio']))
-                metodo_envio_nombre = shipping_data.get('nombre', 'Envío seleccionado')
+                # --- Costo de envío ---
+                costo_envio = Decimal('0.00')
+                metodo_envio_nombre = "Retiro"
 
-            total_pedido = subtotal_pedido + costo_envio
+                if shipping_data and shipping_data.get('precio'):
+                    costo_envio = Decimal(str(shipping_data['precio']))
+                    metodo_envio_nombre = shipping_data.get('nombre', 'Envío seleccionado')
 
-            # --- Crear el pedido ---
-            pedido = Pedido.objects.create(
-                cliente=request.user,
-                direccion_envio=perfil.direccion,
-                ciudad_envio=perfil.ciudad,
-                codigo_postal_envio=perfil.codigo_postal,
-                telefono_contacto=perfil.telefono,
-                total=total_pedido,
-                costo_envio=costo_envio,
-                metodo_envio_elegido=metodo_envio_nombre,
-                estado='pendiente'
-            )
+                total_pedido = subtotal_pedido + costo_envio
 
-            # --- Crear los items del pedido ---
-            for item in items_para_crear:
-                ItemPedido.objects.create(
-                    pedido=pedido,
-                    producto=item['producto'],
-                    cantidad=item['cantidad'],
-                    precio_unitario=item['precio_unitario']
+                # --- Crear el pedido ---
+                # ¡NO descontamos stock aquí! Solo lo validamos.
+                pedido = Pedido.objects.create(
+                    cliente=request.user,
+                    direccion_envio=perfil.direccion,
+                    ciudad_envio=perfil.ciudad,
+                    codigo_postal_envio=perfil.codigo_postal,
+                    telefono_contacto=perfil.telefono,
+                    total=total_pedido,
+                    costo_envio=costo_envio,
+                    metodo_envio_elegido=metodo_envio_nombre,
+                    estado='pendiente' # Estado inicial
                 )
 
+                # --- Crear los items del pedido ---
+                for item in items_para_crear:
+                    ItemPedido.objects.create(
+                        pedido=pedido,
+                        producto=item['producto'],
+                        cantidad=item['cantidad'],
+                        precio_unitario=item['precio_unitario']
+                    )
+
+            # Si todo salió bien, redirigimos al checkout
             checkout_url = reverse('checkout_pedido', args=[pedido.id])
             return JsonResponse({'success': True, 'redirect_url': checkout_url})
 
-        except Producto.DoesNotExist:
-            return JsonResponse({'error': 'Un producto en tu carrito ya no existe.'}, status=400)
+        except Producto.DoesNotExist as e:
+            return JsonResponse({'error': f'Un producto en tu carrito ya no existe. {e}'}, status=400)
         except Exception as e:
             print(f"Error inesperado creando pedido: {e}")
             return JsonResponse({'error': 'Ocurrió un error inesperado al procesar tu pedido.'}, status=500)
@@ -115,10 +181,14 @@ def checkout_pedido_view(request, pedido_id):
     if pedido.estado == 'pagado':
         messages.info(request, "Este pedido ya ha sido pagado.")
         return redirect('inicio')
+    
+    # Si el pedido fue por transferencia y quieren reintentar, reponemos stock
+    if pedido.estado == 'pendiente_transferencia':
+        reponer_stock(pedido)
+        pedido.estado = 'pendiente'
+        pedido.save()
 
     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
-
-    # --- Items de Mercado Pago ---
     items_mp = [
         {
             "title": item.producto.nombre,
@@ -137,7 +207,6 @@ def checkout_pedido_view(request, pedido_id):
             "currency_id": "ARS",
         })
 
-    # --- URLs de retorno ---
     back_urls = {
         "success": request.build_absolute_uri(reverse('pago_exitoso_pedido')),
         "failure": request.build_absolute_uri(reverse('pago_fallido_pedido')),
@@ -171,8 +240,69 @@ def checkout_pedido_view(request, pedido_id):
         'preference_id': preference_id,
         'datos_pago': DatosPago.objects.first(),
     }
-
     return render(request, 'carrito/checkout_pedido.html', contexto)
+
+
+# ---------------------------------------------------
+# ✅ CHECKOUT POR TRANSFERENCIA (¡NUEVA VISTA!)
+# ---------------------------------------------------
+@login_required
+@login_required
+def confirmar_transferencia_view(request, pedido_id):
+    pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user)
+
+    if pedido.estado == 'pendiente':
+        success, error_message = descontar_stock(pedido)
+        
+        if success:
+            pedido.estado = 'pendiente_transferencia'
+            pedido.save()
+            
+            # --- ¡NUEVA LÓGICA DE ENVÍO DE EMAIL! ---
+            try:
+                apariencia_config = AparienciaConfig.objects.first()
+                datos_pago = DatosPago.objects.first()
+                
+                subject = f"Instrucciones de pago para tu Pedido #{pedido.id}"
+                context = {
+                    'pedido': pedido, 
+                    'cliente': request.user,
+                    'datos_pago': datos_pago,
+                    'apariencia_config': apariencia_config
+                }
+
+                # Renderizar ambas versiones
+                message_txt = render_to_string('carrito/email/instrucciones_transferencia.txt', context)
+                message_html = render_to_string('carrito/email/instrucciones_transferencia.html', context)
+                
+                # Aplicar CSS en línea
+                p = Pynliner()
+                message_html_inlined = p.from_string(message_html).run()
+
+                send_mail(
+                    subject, 
+                    message_txt, # Fallback
+                    settings.DEFAULT_FROM_EMAIL, 
+                    [request.user.email],
+                    html_message=message_html_inlined # Email HTML
+                )
+            except Exception as e:
+                # Si el email falla, no rompemos la compra. Solo lo registramos.
+                print(f"Error al enviar email de transferencia para Pedido {pedido.id}: {e}")
+            # --- FIN DE LÓGICA DE EMAIL ---
+
+            messages.success(request, "Tu pedido fue reservado. Revisa tu email para las instrucciones de pago.")
+            return redirect('pago_pendiente_pedido')
+            
+        else:
+            messages.error(request, f"Error al reservar tu pedido: {error_message}")
+            return redirect('checkout_pedido', pedido_id=pedido.id)
+            
+    elif pedido.estado == 'pendiente_transferencia':
+        return redirect('pago_pendiente_pedido')
+    else:
+        messages.error(request, "Este pedido no se puede pagar por transferencia.")
+        return redirect('inicio')
 
 
 # ---------------------------------------------------
@@ -182,15 +312,40 @@ def pago_exitoso_pedido_view(request):
     pedido_id = request.GET.get('external_reference').split('-')[1]
     pedido = get_object_or_404(Pedido, id=pedido_id)
 
-    if request.GET.get('status') == 'approved':
-        pedido.estado = 'pagado'
-        pedido.save()
+    # ¡ESTO ES REDUNDANTE! El Webhook es más fiable.
+    # Esta vista solo debe MOSTRAR el éxito.
+    
+    # if request.GET.get('status') == 'approved':
+    #     if pedido.estado != 'pagado':
+    #         pedido.estado = 'pagado'
+    #         pedido.save()
+    #         descontar_stock(pedido) # <-- NO HACERLO AQUÍ, HACERLO EN EL WEBHOOK
 
     return render(request, 'carrito/pago_exitoso_pedido.html', {'pedido': pedido})
 
 
 def pago_pendiente_pedido_view(request):
-    pedido_id = request.GET.get('external_reference').split('-')[1]
+    # Esta vista ahora puede recibir pedidos de MP o de Transferencia
+    pedido_id = None
+    external_ref = request.GET.get('external_reference')
+    
+    if external_ref:
+        # Viene de Mercado Pago
+        pedido_id = external_ref.split('-')[1]
+    else:
+        # Si no hay external_ref, buscamos el último pedido pendiente del usuario
+        # (Esto es para el flujo de transferencia)
+        pedido = Pedido.objects.filter(
+            cliente=request.user, 
+            estado='pendiente_transferencia'
+        ).last()
+        if pedido:
+            pedido_id = pedido.id
+
+    if not pedido_id:
+        messages.error(request, "No se encontró un pedido pendiente.")
+        return redirect('inicio')
+
     pedido = get_object_or_404(Pedido, id=pedido_id)
     return render(request, 'carrito/pago_pendiente_pedido.html', {'pedido': pedido})
 
@@ -198,8 +353,12 @@ def pago_pendiente_pedido_view(request):
 def pago_fallido_pedido_view(request):
     pedido_id = request.GET.get('external_reference').split('-')[1]
     pedido = get_object_or_404(Pedido, id=pedido_id)
-    pedido.estado = 'cancelado'
-    pedido.save()
+    
+    # No cancelamos el pedido, solo le avisamos que falló.
+    # El pedido sigue 'pendiente' para que pueda reintentar.
+    # pedido.estado = 'cancelado' <-- NO HACER
+    # pedido.save()
+    
     return render(request, 'carrito/pago_fallido_pedido.html', {'pedido': pedido})
 
 
@@ -227,21 +386,61 @@ def mercadopago_webhook_view(request):
                     payment_status = payment.get("status")
 
                     if not external_ref:
-                        return HttpResponse(status=200)
+                        return HttpResponse(status=200) # Es un pago sin referencia, lo ignoramos
 
-                    if payment_status == "approved":
-                        if external_ref.startswith("pedido-"):
-                            pedido_id = external_ref.split('-')[1]
-                            pedido = Pedido.objects.get(id=pedido_id)
+                    # --- LÓGICA DE PEDIDOS DE PRODUCTOS ---
+                    if external_ref.startswith("pedido-"):
+                        pedido_id = external_ref.split('-')[1]
+                        pedido = Pedido.objects.get(id=pedido_id)
+
+                        if payment_status == "approved" and pedido.estado != 'pagado':
+                            # ¡PAGO APROBADO!
                             pedido.estado = 'pagado'
                             pedido.save()
+                            # ¡AQUÍ DESCONTAMOS STOCK!
+                            success, error_msg = descontar_stock(pedido)
+                            if not success:
+                                # ¡ERROR CRÍTICO! El pago entró pero no se pudo descontar stock.
+                                # Enviar email al admin para que lo revise manualmente.
+                                print(f"¡ALERTA! Pedido {pedido.id} PAGADO pero NO SE DESCONTÓ STOCK. Error: {error_msg}")
 
-                        elif external_ref.startswith("turno-"):
-                            turno_id = external_ref.split('-')[1]
-                            turno = TurnoReservado.objects.get(id=turno_id)
+                        elif payment_status == "rejected" or payment_status == "cancelled":
+                            # El pago falló o se canceló
+                            if pedido.estado == 'pendiente_transferencia':
+                                # Si era una transferencia que intentaron pagar por MP y falló,
+                                # reponemos el stock que habíamos reservado.
+                                reponer_stock(pedido)
+                            pedido.estado = 'cancelado' # O 'pendiente' si quieres que reintente
+                            pedido.save()
+
+                    # --- LÓGICA DE TURNOS ---
+                    elif external_ref.startswith("turno-"):
+                        turno_id = external_ref.split('-')[1]
+                        turno = TurnoReservado.objects.get(id=turno_id)
+                        if payment_status == "approved" and turno.estado != 'confirmado':
                             turno.estado = 'confirmado'
                             turno.save()
+                        elif payment_status == "rejected" or payment_status == "cancelled":
+                            turno.estado = 'cancelado'
+                            turno.save()
 
+                    
+                    elif external_ref.startswith("recetario-"):
+                            # --- Lógica de Acceso al Recetario ---
+                            user_id = external_ref.split('-')[1]
+                            try:
+                                # Buscamos al usuario que pagó
+                                user = User.objects.get(id=user_id)
+                                # Le damos el permiso
+                                user.perfil.es_cliente_activo = True
+                                user.perfil.save()
+                                print(f"Acceso al recetario CONCEDIDO al usuario {user.username}")
+                                # (Opcional: enviar un email de bienvenida al recetario)
+                            except User.DoesNotExist:
+                                print(f"¡ALERTA! Se pagó por el recetario (user_id: {user_id}) pero el usuario no existe.")
+                        # --- FIN DEL BLOQUE NUEVO ---
+                        
+                        
             except Exception as e:
                 print(f"Error procesando webhook: {e}")
                 return HttpResponse(status=500)

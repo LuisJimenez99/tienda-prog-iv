@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/servicios.css' %}">
+{% endblock %}
+
+{% block content %}
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+
+<div class="servicios-wrapper">
+    <div class="servicios-header">
+        <h1 class="servicios-titulo">Finalizar Compra</h1>
+        <p class="servicios-subtitulo">Estás a un paso de obtener tu acceso.</p>
+    </div>
+
+    <div class="plan-grid">
+        <div class="plan-card" style="width: 400px; max-width: 90%;">
+            
+            <div class="plan-icon">
+                <i class="{{ servicio.icono|default:'fas fa-book-open' }}"></i>
+            </div>
+            
+            <h3 class="plan-nombre">{{ servicio.nombre }}</h3>
+            
+            <div class="plan-precio" style="margin-bottom: 30px;">
+                ${{ servicio.precio|floatformat:0 }}
+            </div>
+            
+            <div id="wallet_container"></div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Inicializa Mercado Pago con tu Llave Pública
+    const mp = new MercadoPago('{{ public_key }}', {
+        locale: 'es-AR'
+    });
+
+    // 2. Crea el botón de pago
+    mp.bricks().create("wallet", "wallet_container", {
+        initialization: {
+            preferenceId: "{{ preference_id }}", // El ID que pasamos desde la vista
+        },
+        customization: {
+            texts: {
+                valueProp: 'smart_option',
+            },
+        }
+    });
+</script>
+{% endblock %}

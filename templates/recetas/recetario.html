@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <style>
+    .recetario-wrapper {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    .recetario-titulo {
+        font-family: 'Lora', serif;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+    .receta-item {
+        display: flex;
+        gap: 25px;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #eee;
+    }
+    .receta-item:last-child {
+        border-bottom: none;
+    }
+    .receta-item-img {
+        width: 250px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+    .receta-item-contenido h3 {
+        font-family: 'Lora', serif;
+        font-size: 1.8rem;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    .receta-item-contenido h4 {
+        font-size: 1.1rem;
+        color: var(--color-btn-principal-fondo, #78857a);
+        margin-bottom: 10px;
+        border-top: 1px solid #f0f0f0;
+        padding-top: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="recetario-wrapper">
+    <h1 class="recetario-titulo">Mi Recetario Privado</h1>
+    
+    {% for receta in recetas %}
+        <div class="receta-item">
+            <img src="{{ receta.imagen.url }}" alt="{{ receta.nombre }}" class="receta-item-img">
+            <div class="receta-item-contenido">
+                <h3>{{ receta.nombre }}</h3>
+                
+                <h4>Ingredientes:</h4>
+                <p>{{ receta.ingredientes|linebreaksbr }}</p>
+                
+                <h4>Instrucciones:</h4>
+                <p>{{ receta.instrucciones|linebreaksbr }}</p>
+                
+                {% if receta.tiempo_preparacion %}
+                    <p><strong>Tiempo:</strong> {{ receta.tiempo_preparacion }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

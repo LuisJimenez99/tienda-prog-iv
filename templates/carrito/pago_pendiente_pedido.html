@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_pedido.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="confirmacion-box">
+        
+        <h2><i class="fas fa-clock"></i> Pago Pendiente</h2>
+        
+        {% if pedido.estado == 'pendiente_transferencia' %}
+            <p>Tu pedido ha sido reservado. Queda pendiente de pago.</p>
+            <p class="resumen-confirmado" style="text-align: left; padding: 20px; line-height: 1.7;">
+                Por favor, realiza la transferencia a los datos provistos en la pantalla anterior y envía el comprobante para confirmar.
+            </p>
+        {% else %}
+            <p>Tu pago para el pedido #{{ pedido.id }} está siendo procesado.</p>
+            <p>Tu pedido quedará confirmado una vez que se acredite el pago.</p>
+        {% endif %}
+        
+        <a href="{% url 'inicio' %}" class="btn-principal" style="margin-top: 30px; display: inline-block;">Volver al Inicio</a>
+    </div>
+</div>
+{% endblock %}

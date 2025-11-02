@@ -1,0 +1,25 @@
+{% extends 'email/email_base.html' %}
+
+{% block title %}Instrucciones para tu Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+    <h1>Tu pedido está casi listo</h1>
+    
+    <p>Hola {{ cliente.first_name }},</p>
+    
+    <p>Hemos reservado exitosamente los productos de tu pedido <strong>#{{ pedido.id }}</strong>. Para confirmar la compra, solo falta que realices la transferencia bancaria.</p>
+
+    <p>Monto a transferir: <strong>${{ pedido.total|floatformat:2 }}</strong></p>
+
+    <p>Por favor, transfiere el monto exacto a la siguiente cuenta:</p>
+    
+    <div style="background-color: #f4f4f4; border-radius: 8px; padding: 15px 20px; text-align: center; margin-bottom: 25px;">
+        <strong style="font-size: 20px; color: #333; letter-spacing: 1px;">
+            {{ datos_pago.cbu_alias|default:"CBU/ALIAS NO CONFIGURADO" }}
+        </strong>
+    </div>
+
+    <p><strong>Importante:</strong> Una vez realizada la transferencia, por favor envía el comprobante respondiendo a este email o por WhatsApp para que podamos procesar tu pedido.</p>
+
+    <p style="margin-top: 30px;">¡Muchas gracias!<br>El equipo de NutriTienda.</p>
+{% endblock %}

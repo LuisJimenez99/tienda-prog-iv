@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NutriTienda{% endblock %}</title>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Un fondo gris suave */
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px; /* Ancho estándar para emails */
+            margin: 20px auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .header {
+            padding: 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            max-height: 50px; /* Controla el tamaño de tu logo */
+            width: auto;
+        }
+        .content {
+            padding: 30px;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .content h1 {
+            color: #333;
+            font-family: 'Lora', serif;
+            font-size: 24px;
+        }
+        .content p {
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            /* Usamos las variables del admin (si se pasan en el contexto) */
+            background-color: {{ apariencia_config.boton_color_principal_fondo|default:'#78857A' }};
+            color: {{ apariencia_config.boton_color_principal_texto|default:'#FFFFFF' }};
+        }
+        .footer {
+            padding: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                
+                <table class="container" role="presentation" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="header">
+                            {% if apariencia_config.logo_sitio %}
+                                <img src="{{ apariencia_config.logo_sitio.url }}" alt="NutriTienda" class="logo">
+                            {% else %}
+                                <h1 style="margin: 0;">NutriTienda</h1>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="content">
+                            {% block content %}
+                                {% endblock %}
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="footer">
+                            <p>&copy; {% now "Y" %} NutriTienda. Todos los derechos reservados.</p>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,11 @@
+Hola {{ cliente.first_name }},
+
+Hemos reservado tu pedido #{{ pedido.id }}. Para confirmar la compra, realiza la transferencia:
+
+Monto: ${{ pedido.total|floatformat:2 }}
+Datos: {{ datos_pago.cbu_alias }}
+
+Importante: Envía el comprobante respondiendo a este email o por WhatsApp.
+
+Gracias,
+El equipo de NutriTienda.

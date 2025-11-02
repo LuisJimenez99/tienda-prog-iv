@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'carrito',
     'envios',
     'colorfield',
+    
 ]
 
 MIDDLEWARE = [

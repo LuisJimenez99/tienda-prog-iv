@@ -3,6 +3,6 @@ from . import views
 
 urlpatterns = [
     
-    path('api/random/', views.random_receta_api, name='random_receta_api'),
+    path('recetario/', views.vista_recetario, name='recetario'),
 ]
 

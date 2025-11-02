@@ -1,0 +1,29 @@
+{% extends 'email/email_base.html' %}
+
+{% block title %}¡Tu pedido ha sido despachado!{% endblock %}
+
+{% block content %}
+    <h1>¡Tu pedido ha sido despachado!</h1>
+    
+    <p>Hola {{ cliente.first_name }},</p>
+    
+    <p>¡Buenas noticias! Tu pedido <strong>#{{ pedido.id }}</strong> ya está en camino.</p>
+
+    <p>
+        Has elegido el método: <strong>{{ pedido.metodo_envio_elegido|default:"Envío Estándar" }}</strong>
+    </p>
+
+    <p>Tu código de seguimiento es:</p>
+    
+    <div style="background-color: #f4f4f4; border-radius: 8px; padding: 15px 20px; text-align: center; margin-bottom: 25px;">
+        <strong style="font-size: 20px; color: #333; letter-spacing: 1px;">{{ pedido.codigo_seguimiento }}</strong>
+    </div>
+
+    <p style="text-align: center;">
+        <a href="httpsSARASA" class="button">
+            Seguir mi paquete
+        </a>
+    </p>
+
+    <p style="margin-top: 30px;">Gracias por tu compra,<br>El equipo de NutriTienda.</p>
+{% endblock %}

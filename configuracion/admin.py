@@ -1,6 +1,6 @@
 from django.contrib import admin
 # Importamos todos los modelos de una vez
-from .models import DatosPago, HeroSectionConfig, AparienciaConfig, CarruselImagen
+from .models import DatosPago, HeroSectionConfig, AparienciaConfig, CarruselImagen, Servicio
 from django.utils.html import format_html
 
 # Admin para los Datos de Pago
@@ -61,15 +61,12 @@ class CarruselImagenAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('link_url', 'abrir_en_nueva_pestana')
         }),
-    )    
+    )
     
-# (Recuerda tener 'from django.contrib import admin' al inicio de tu archivo)
-# (También asegúrate de importar el modelo: 'from .models import AparienciaConfig')
-
+# Admin para la Configuración de Apariencia
 @admin.register(AparienciaConfig)
 class AparienciaConfigAdmin(admin.ModelAdmin):
     
-    # --- Los 'fieldsets' que definimos ---
     fieldsets = (
         ('Diseño General', {
             'fields': (
@@ -118,16 +115,42 @@ class AparienciaConfigAdmin(admin.ModelAdmin):
                 'boton_color_secundario_borde',
             )
         }),
+        
+        ('Configuración del Footer', {
+            'classes': ('collapse',),
+            'fields': (
+                'footer_col_contacto_titulo',
+                'footer_col_contacto_texto',
+                'footer_link_instagram',
+                'footer_link_whatsapp',
+                'footer_texto_creditos',
+            )
+        }),
     )
 
-    # --- Funciones para que sea un "Singleton" (solo 1 objeto) ---
-
     def has_add_permission(self, request):
-        # Evita que se pueda crear una "segunda" configuración si ya existe una
         if AparienciaConfig.objects.exists():
             return False
         return True
     
     def has_delete_permission(self, request, obj=None):
-        # Evita que se pueda borrar la configuración (solo editar)
         return False
+
+
+
+@admin.register(Servicio)
+class ServicioAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'precio', 'tipo_servicio', 'orden', 'activo')
+    list_editable = ('precio', 'orden', 'activo')
+    search_fields = ('nombre',)
+    list_filter = ('tipo_servicio', 'activo')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('activo', 'orden', 'nombre', 'descripcion', 'precio')
+        }),
+        ('Configuración del Botón', {
+            'description': "Elige qué hará el botón 'Contratar' de este servicio.",
+            'fields': ('tipo_servicio', 'icono')
+        }),
+    )

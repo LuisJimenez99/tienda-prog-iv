@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/servicios.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="servicios-wrapper">
+    
+    <div class="servicios-header">
+        <h1 class="servicios-titulo">Planes y Servicios</h1>
+        <p class="servicios-subtitulo">Elige el plan que mejor se adapta a tus objetivos.</p>
+    </div>
+
+    <div class="plan-grid">
+        
+        {% for servicio in servicios %}
+        <div class="plan-card">
+            
+            {% if servicio.icono %}
+            <div class="plan-icon">
+                <i class="{{ servicio.icono }}"></i>
+            </div>
+            {% endif %}
+            
+            <h3 class="plan-nombre">{{ servicio.nombre }}</h3>
+            <p class="plan-descripcion">{{ servicio.descripcion }}</p>
+            
+            <div class="plan-precio">
+                ${{ servicio.precio|floatformat:0 }}
+            </div>
+            
+            {% if servicio.tipo_servicio == 'TURNO' %}
+                <a href="{% url 'calendario' %}" class="btn-principal">
+                    Reservar Turno
+                </a>
+            {% elif servicio.tipo_servicio == 'RECETARIO' %}
+                <a href="{% url 'checkout_recetario' %}" class="btn-principal">
+                    Comprar Acceso
+                </a>
+            {% endif %}
+            
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

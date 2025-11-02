@@ -64,7 +64,7 @@
             <div class="datos-transferencia">
                 <strong>Alias/CBU:</strong> {{ datos_pago.cbu_alias|default:"No configurado" }}
             </div>
-             <a href="{% url 'confirmar_reserva' %}" class="btn-principal" style="margin-top: 20px;">Confirmar Pedido (Pagaré por Transferencia)</a>
+             <a href="{% url 'confirmar_transferencia' pedido.id %}" class="btn-principal" style="margin-top: 20px;">Confirmar Pedido (Pagaré por Transferencia)</a>
         </div>
     </div>
 </div>
