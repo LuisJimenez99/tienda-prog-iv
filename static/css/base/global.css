@@ -311,11 +311,12 @@ body {
   border: 1px solid var(--card-btn-principal-fondo);
 }
 /* Estilo del botón secundario ("Ver Producto") */
+/* REEMPLAZA CON ESTO: */
 .tarjeta-botones .btn-ver-producto {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1; /* Para que ocupen el espacio equitativamente */
+  flex: 1;
   padding: 10px 5px;
   font-size: 0.9rem;
   font-family: inherit;
@@ -324,23 +325,20 @@ body {
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.3s ease;
-  
-  /* Variables NUEVAS específicas de tarjeta */
-  background-color: transparent;
-  color: var(--card-btn-secundario-borde);
-  border: 1px solid var(--card-btn-secundario-borde);
+
+  /* Variables de botón PRINCIPAL (igual que 'Agregar') */
+  background-color: var(--card-btn-principal-fondo);
+  color: var(--card-btn-principal-texto);
+  border: 1px solid var(--card-btn-principal-fondo);
 }
 
-/* Reemplaza con esto: */
-.tarjeta-botones .add-to-cart-btn:hover {
+/* REEMPLAZA LOS DOS :hover SEPARADOS CON ESTE: */
+
+.tarjeta-botones .add-to-cart-btn:hover,
+.tarjeta-botones .btn-ver-producto:hover {
   background-color: var(--card-btn-principal-hover);
   border-color: var(--card-btn-principal-hover);
-  color: var(--card-btn-principal-texto); /* Se mantiene el color de texto */
-}
-
-.tarjeta-botones .btn-ver-producto:hover {
-  background-color: var(--card-btn-secundario-borde);
-  color: var(--card-btn-principal-texto); /* Usamos el color de texto del botón principal */
+  color: var(--card-btn-principal-texto);
 }
 
 /* 2.4. Tarjetas */

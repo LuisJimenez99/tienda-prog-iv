@@ -63,17 +63,43 @@ class CarruselImagenAdmin(admin.ModelAdmin):
         }),
     )    
     
-# Admin para la Configuración de Apariencia
+# (Recuerda tener 'from django.contrib import admin' al inicio de tu archivo)
+# (También asegúrate de importar el modelo: 'from .models import AparienciaConfig')
+
 @admin.register(AparienciaConfig)
 class AparienciaConfigAdmin(admin.ModelAdmin):
     
+    # --- Los 'fieldsets' que definimos ---
     fieldsets = (
         ('Diseño General', {
-            'fields': ('color_fondo_body',)
+            'fields': (
+                'color_fondo_body',
+            )
         }),
-        ('Página de Inicio: Barra de Navegación (Nav)', {
+        ('Diseño de Tarjetas de Producto', {
+            'classes': ('collapse',), 
+            'description': 'Controla el estilo y los colores de texto de las tarjetas.',
+            'fields': (
+                'estilo_tarjeta_producto',
+                'fuente_tarjetas',
+                'color_titulo_tarjeta',
+                'color_desc_tarjeta',
+            )
+        }),
+        
+        ('Botones de Tarjetas de Producto', {
             'classes': ('collapse',),
-            'description': 'Personaliza el logo y los colores del menú de navegación.',
+            'description': 'Define los colores para los botones DENTRO de las tarjetas de producto.',
+            'fields': (
+                'card_btn_principal_fondo',
+                'card_btn_principal_texto',
+                'card_btn_principal_hover',
+                'card_btn_secundario_borde',
+            )
+        }),
+
+        ('Barra de Navegación y Footer', {
+            'classes': ('collapse',),
             'fields': (
                 'logo_sitio',
                 'navbar_color_fondo', 
@@ -81,7 +107,8 @@ class AparienciaConfigAdmin(admin.ModelAdmin):
                 'color_carrito_activo',
             )
         }),
-        ('Página de Inicio: Botones (Globales)', { 
+        
+        ('Botones (Globales)', { 
             'classes': ('collapse',),
             'description': 'Define los colores para botones globales (Navbar, Formularios, etc.)',
             'fields': (
@@ -91,21 +118,16 @@ class AparienciaConfigAdmin(admin.ModelAdmin):
                 'boton_color_secundario_borde',
             )
         }),
-        ('Página de Inicio: Tarjetas de Productos', {
-            'classes': ('collapse',),
-            'description': 'Personaliza los colores de las tarjetas de productos.',
-            'fields': (
-                'tarjeta_color_fondo',
-                'tarjeta_color_titulo',
-                'tarjeta_color_precio',
-            )
-        }),
     )
 
+    # --- Funciones para que sea un "Singleton" (solo 1 objeto) ---
+
     def has_add_permission(self, request):
+        # Evita que se pueda crear una "segunda" configuración si ya existe una
         if AparienciaConfig.objects.exists():
             return False
         return True
     
     def has_delete_permission(self, request, obj=None):
+        # Evita que se pueda borrar la configuración (solo editar)
         return False

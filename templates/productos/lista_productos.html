@@ -41,19 +41,13 @@
           
           {% elif apariencia_config.estilo_tarjeta_producto == 'harvest' %}
 
-    {% comment %} Carga la nueva tarjeta Harvest {% endcomment %}
-    {% include 'productos/partials/card_harvest.html' %}
-
-
-              
-              
-              
-              {% comment %} Este es el 'simple' (default) {% endcomment %}
+              {% comment %} Carga la nueva tarjeta Harvest {% endcomment %}
+              {% include 'productos/partials/card_harvest.html' %}
+          
+          {% else %}  {% comment %} Este es el 'simple' (default) {% endcomment %}
               {% include 'productos/partials/card_simple.html' %}
           
-          {% endif %}
-          
-          {% endfor %}
+          {% endif %} {% endfor %}
       </div>
       {% else %}
       <p class="no-results-msg">

@@ -65,8 +65,10 @@
 }
 
 /* Contenedor de la grilla de productos */
+/* REEMPLAZA CON ESTO: */
 .productos-grid-container {
   flex: 1; /* Ocupa el resto del espacio */
+  width: 100%; /* ¡SOLUCIÓN! Evita que el 'flex: 1' colapse a 0px */
 }
 
 /* Grilla (reutilizada de 'inicio') */
