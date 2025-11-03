@@ -1,22 +1,33 @@
 from pathlib import Path
 import os
+import dj_database_url # <-- Añadido
 from dotenv import load_dotenv
+from decimal import Decimal
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- CONFIGURACIÓN DE PRODUCCIÓN ---
+# 1. SECRET_KEY
+# Lee la SECRET_KEY desde las variables de entorno de Render.
+# Debes añadir tu clave al .env para que funcione localmente.
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-+isv)*q2+5^l_(c&qmkhc-#k9gy3sy3$*zwyv%0leamtwe&rp7') # El default es solo para que no falle
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# 2. DEBUG
+# Render pondrá esto en 'False' automáticamente.
+# 'False' es más seguro.
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+isv)*q2+5^l_(c&qmkhc-#k9gy3sy3$*zwyv%0leamtwe&rp7'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+# 3. ALLOWED_HOSTS
+# Render necesita que su dominio esté aquí.
 ALLOWED_HOSTS = []
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+else:
+    # Para desarrollo, permitimos localhost
+    ALLOWED_HOSTS.append('127.0.0.1')
 
 
 # Application definition
@@ -28,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', # <-- Añadido (para estáticos)
     'django.contrib.staticfiles',
     # Mis Apps
     'core',
@@ -45,11 +57,11 @@ INSTALLED_APPS = [
     'carrito',
     'envios',
     'colorfield',
-    
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <-- Añadido (para estáticos)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,7 +76,7 @@ ROOT_URLCONF = 'tienda_denu.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # Correcto
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,14 +93,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tienda_denu.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# --- Base de Datos (¡MODIFICADO!) ---
+# Render nos da una URL de PostgreSQL. dj-database-url la lee.
+# Ya no usaremos db.sqlite3 en producción.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Fallback a tu sqlite3 si DATABASE_URL no está definida (para desarrollo)
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600 # Mantiene las conexiones activas
+    )
 }
 
 
@@ -109,15 +122,21 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- Static files (CSS, JavaScript) (¡MODIFICADO!) ---
 STATIC_URL = 'static/'
-# --- CAMBIO AQUÍ: Usamos pathlib también para los archivos estáticos ---
 STATICFILES_DIRS = [BASE_DIR / "static"]
+# 1. Dónde 'collectstatic' pondrá todos los archivos
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# 2. El motor de almacenamiento de WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+# --- Media files (Fotos de productos) (¡MODIFICADO!) ---
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Render usará un "Disco Persistente" en esta ruta.
+# Para desarrollo, usará tu carpeta 'media' local.
+MEDIA_ROOT = os.getenv('RENDER_DISK_MOUNT_PATH', BASE_DIR / 'media')
+
 
 # Default primary key field type
 # ... (sin cambios)
@@ -147,34 +166,59 @@ JAZZMIN_SETTINGS = {
     "hide_models": ["auth.group"],
 }
 
-# Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# --- Email Settings (¡MODIFICADO!) ---
+# Usamos el backend de Consola si DEBUG es True
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # EN PRODUCCIÓN (Render): Debes configurar esto
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST') # ej: 'smtp.sendgrid.net'
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER') # ej: 'apikey'
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # La clave de tu proveedor
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@mitienda.com')
 
+# --- Claves de APIs (Leídas desde variables de entorno) ---
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-PRECIO_CONSULTA = 1500.00
+PRECIO_CONSULTA = Decimal(os.getenv('PRECIO_CONSULTA', '1500.00'))
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_SECRET_KEY = os.getenv('GOOGLE_SECRET_KEY')
 
 
+# --- Configuración de AllAuth ---
 LOGIN_URL = 'account_login'
 SITE_ID = 1
 
 LOGIN_REDIRECT_URL = '/'  
 LOGOUT_REDIRECT_URL = '/' 
 AUTHENTICATION_BACKENDS = [
-   
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
-ACCOUNT_LOGIN_METHODS = {"username", "email"}  # permite login con usuario o email
-ACCOUNT_SIGNUP_FIELDS = [
-    "username*",   # el * indica que es obligatorio
-    "email*", 
-    "password1*", 
-    "password2*",
-]
-
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # o 'mandatory' si querés verificar
+# Configuración específica de Google
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_SECRET_KEY,
+            'key': ''
+        }
+    }
+}
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 ACCOUNT_PASSWORD_MIN_LENGTH = 6
