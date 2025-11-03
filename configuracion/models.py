@@ -1,5 +1,7 @@
 from django.db import models
 from colorfield.fields import ColorField
+from cloudinary.models import CloudinaryField
+
 
 class DatosPago(models.Model):
     cbu_alias = models.CharField(max_length=255, help_text="Tu CBU o Alias para transferencias.")
@@ -12,7 +14,7 @@ class DatosPago(models.Model):
         verbose_name = "Datos de Pago"
 
 class HeroSectionConfig(models.Model):
-    imagen_fondo = models.ImageField(upload_to='hero_images/', verbose_name="Imagen de Fondo", help_text="Imagen principal de la sección (se recomienda tamaño grande).")
+    imagen_fondo = CloudinaryField('hero_imagen', blank=True, null=True)
     titulo_principal = models.CharField(max_length=200, verbose_name="Título Principal", help_text="Ej: Te ayudamos a lograr tus objetivos, sin perder el placer de comer.")
     descripcion = models.TextField(verbose_name="Descripción", help_text="Texto descriptivo debajo del título.")
     texto_boton_1 = models.CharField(max_length=50, verbose_name="Texto Botón 1", default="Viandas")
@@ -35,7 +37,7 @@ class HeroSectionConfig(models.Model):
 
 class CarruselImagen(models.Model):
     titulo = models.CharField(max_length=200, blank=True, null=True, verbose_name="Título (Opcional)", help_text="Este texto aparecerá sobre la imagen.")
-    imagen = models.ImageField(upload_to='carrusel/', verbose_name="Imagen del carrusel", help_text="Sube la imagen para este slide.")
+    imagen = CloudinaryField('carrusel_imagen', blank=True, null=True)
     link_url = models.URLField(max_length=300, blank=True, null=True, verbose_name="Enlace (Opcional)", help_text="URL a la que dirigirá la imagen (ej: /productos/)")
     abrir_en_nueva_pestana = models.BooleanField(default=False, verbose_name="Abrir en nueva pestaña")
     orden = models.PositiveIntegerField(default=0, help_text="Define el orden de aparición (menor número primero).")
@@ -51,7 +53,7 @@ class CarruselImagen(models.Model):
 
 class AparienciaConfig(models.Model):
     
-    logo_sitio = models.ImageField(upload_to='logos/', blank=True, null=True, verbose_name="Logo del Sitio (Navbar)", help_text="Sube el logo que aparecerá en el menú. Si no subes ninguno, se mostrará el texto 'Mi Tienda'. Se ajustará a 50px de alto.")
+    logo_sitio = CloudinaryField('logo_sitio', blank=True, null=True)
     color_fondo_body = ColorField(default='#ECF0E5', verbose_name="Color de Fondo Principal")
     color_carrito_activo = ColorField(default='#E74C3C', verbose_name="Color Contador Carrito (con items)", help_text="Color del círculo numérico del carrito cuando tiene productos.")
     navbar_color_fondo = ColorField(default='#FFFFFF', verbose_name="Color de Fondo (Navbar y Footer)")

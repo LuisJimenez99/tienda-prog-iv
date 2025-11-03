@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Lee la SECRET_KEY desde las variables de entorno de Render.
 # Debes añadir tu clave al .env para que funcione localmente.
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-+isv)*q2+5^l_(c&qmkhc-#k9gy3sy3$*zwyv%0leamtwe&rp7') # El default es solo para que no falle
-
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 # 2. DEBUG
 # Render pondrá esto en 'False' automáticamente.
 # 'False' es más seguro.
@@ -33,6 +33,8 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage', 
+    'cloudinary',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -135,9 +137,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 # Render usará un "Disco Persistente" en esta ruta.
 # Para desarrollo, usará tu carpeta 'media' local.
-MEDIA_ROOT = os.getenv('RENDER_DISK_MOUNT_PATH', BASE_DIR / 'media')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-
+CLOUDINARY_STORAGE = {
+    'CLOUDINARY_URL': CLOUDINARY_URL
+}
 # Default primary key field type
 # ... (sin cambios)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
