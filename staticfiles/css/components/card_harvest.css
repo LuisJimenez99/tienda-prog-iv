@@ -1,0 +1,102 @@
+/* =================================
+   COMPONENTE: Card Harvest (CSS DESDE CERO)
+   ================================= */
+
+.card-harvest-wrapper {
+  /* --- Estructura y Caja --- */
+  height: 414px;
+  width: 320px; /* Ancho similar a la tarjeta simple */
+  margin: 20px;
+  background-color: #ffffff;
+  border-radius: 12px; /* Mismo borde que la simple */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra similar */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Efecto hover */
+}
+
+.card-harvest-wrapper:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-harvest-wrapper .product-img {
+  width: 100%;
+  height: 250px; /* Altura de imagen IGUAL a la tarjeta simple */
+  overflow: hidden;
+}
+
+.card-harvest-wrapper .product-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra bien */
+}
+
+/* --- Contenido de Información --- */
+.card-harvest-wrapper .product-info {
+  padding: 20px; /* Padding igual a la tarjeta simple */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Permite que esta sección ocupe espacio si es necesario */
+  /* NO FIJAMOS ALTURA AQUÍ */
+}
+
+.card-harvest-wrapper .product-text {
+  /* Este contenedor solo agrupa texto, no necesita estilos especiales ahora */
+  margin-bottom: 15px; /* Espacio antes del precio */
+}
+
+.card-harvest-wrapper .product-text h1 {
+  /* Título Principal */
+  margin: 0 0 5px 0;
+  font-size: 1.25rem; /* Tamaño IGUAL a la tarjeta simple */
+  font-weight: 600;
+  line-height: 1.3;
+  /* CONECTADO AL ADMIN */
+  font-family: var(--fuente-tarjetas);
+  color: var(--color-titulo-tarjeta);
+}
+
+.card-harvest-wrapper .product-text h2 {
+  /* Subtítulo (Categoría) */
+  margin: 0 0 10px 0;
+  font-size: 11px; /* Más pequeño, como en el diseño Harvest */
+  font-family: 'Raleway', sans-serif; /* Fuente específica del diseño Harvest */
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #b0b0b0; /* Un gris más suave */
+  letter-spacing: 0.1em;
+}
+
+.card-harvest-wrapper .product-text p {
+  /* ... (margin, font-family, etc.) ... */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  line-clamp: 2; /* <-- ¡AÑADE ESTA LÍNEA! */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: calc(1.5em * 2); 
+}
+
+/* --- Precio y Botones --- */
+.card-harvest-wrapper .tarjeta-precio {
+  font-family: 'Trocchi', serif; /* Fuente específica del diseño Harvest */
+  margin-top: auto; /* Empuja precio y botones abajo */
+  margin-bottom: 15px;
+  font-size: 1.5rem; /* Un poco más pequeño que en Harvest original */
+  font-weight: 500; /* Ligeramente más grueso */
+  color: #333; /* Color de texto estándar */
+}
+
+/* Los botones usan los estilos de .tarjeta-botones de global.css */
+.card-harvest-wrapper .tarjeta-botones {
+  margin-top: 0;
+}
+
+/* --- Estado Agotado (Opcional, igual que la simple) --- */
+.card-harvest-wrapper.agotado {
+  opacity: 0.7;
+}

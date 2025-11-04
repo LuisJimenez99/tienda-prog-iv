@@ -1,0 +1,195 @@
+/* =================================
+   PÁGINAS: AUTH Y PERFIL
+   (Login, Signup, Profile, etc.)
+   ================================= */
+
+/* Contenedor principal para forms de auth y perfil */
+.auth-form-container,
+.profile-container {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+}
+
+/* Títulos */
+.auth-form-container h2,
+.profile-container h2 {
+  font-family: "Lora", serif;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #333;
+}
+
+/* Estilos de Formulario (generados por {{ form.as_p }}) */
+.auth-form-container form p {
+  margin-bottom: 20px;
+}
+
+.auth-form-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.auth-form-container input[type="text"],
+.auth-form-container input[type="email"],
+.auth-form-container input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.auth-form-container input:focus {
+  outline: none;
+  border-color: var(--color-btn-principal-fondo, #78857a);
+}
+
+/* Botón principal (full-width en forms) */
+.auth-form-container .btn-principal {
+  width: 100%;
+  padding: 15px;
+}
+
+/* Link para cambiar (ej: Login -> Signup) */
+.auth-switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.auth-switch a {
+  color: var(--color-btn-principal-fondo, #78857a);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* Login Social (Google, etc.) */
+.social-login {
+  text-align: center;
+  margin: 25px 0;
+  border-top: 1px solid #eee;
+  padding-top: 25px;
+}
+.social-login p {
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #888;
+}
+.btn-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.btn-social.google {
+  background-color: #fff;
+  color: #444;
+  border: 1px solid #ccc;
+}
+.btn-social.google:hover {
+  background-color: #f8f8f8;
+}
+
+/* Específico de Logout */
+.logout-confirmation-text {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* Específicos de Perfil */
+.profile-info p,
+.profile-details p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.profile-container hr {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 30px 0;
+}
+
+.profile-details h3 {
+  font-family: "Lora", serif;
+  margin-bottom: 20px;
+}
+
+/* Contenedor de botones en Profile Edit */
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-actions .btn-principal,
+.form-actions .btn-secundario,
+.form-actions a.btn-principal,
+.form-actions a.btn-secundario {
+  width: auto;
+  padding-left: 25px;
+  padding-right: 25px;
+  text-align: center;
+}
+
+
+/* =================================
+   ESTILOS: EDICIÓN DE PERFIL (Fieldset)
+   ================================= */
+
+.form-section {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.form-section .section-title {
+  font-family: "Lora", serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  padding: 0 10px; /* Evita que el texto toque los bordes del fieldset */
+  margin-left: -10px; /* Alinea el título */
+}
+
+/* Ajustes para los <p> generados por .as_p dentro del fieldset */
+.form-section p {
+  margin-bottom: 20px;
+}
+.form-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.form-section input[type="text"],
+.form-section input[type="email"],
+.form-section input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.form-section input:focus {
+  outline: none;
+  border-color: var(--color-btn-principal-fondo, #78857a);
+}

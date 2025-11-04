@@ -1,0 +1,166 @@
+/* =================================
+   PÁGINA: DETALLE DE PRODUCTO
+   ================================= */
+
+/* Contenedor principal */
+.producto-detalle-wrapper {
+  background-color: #fff;
+  padding: 60px 20px;
+}
+.producto-detalle-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 50px;
+  text-align: left;
+}
+
+/* Columna de Imagen */
+.producto-imagen-galeria {
+  flex: 1;
+}
+.producto-imagen-galeria img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+/* Columna de Info */
+.producto-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.producto-nombre {
+  font-family: "Lora", serif;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+.producto-precio {
+  font-size: 1.8rem;
+  color: var(--color-btn-principal-fondo, #78857a);
+  font-weight: 500;
+  margin-bottom: 25px;
+}
+.producto-descripcion {
+  line-height: 1.7;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* Bloque de Acciones (Cantidad, Envío, Botón) */
+.producto-acciones {
+  display: flex;
+  flex-direction: column; /* Apilados verticalmente */
+  gap: 20px;
+  align-items: stretch; /* Se estiran al 100% */
+  margin-bottom: 30px;
+}
+
+.cantidad-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cantidad-selector input {
+  width: 60px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Override del botón en esta página */
+.producto-info .add-to-cart-btn {
+  padding: 15px 30px;
+}
+
+.info-adicional {
+  font-size: 0.9rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+  margin-top: auto; /* Empuja esto al fondo de la card */
+}
+
+/* Calculador de Envío (Integrado) */
+.shipping-calculator {
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+.shipping-calculator label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  font-size: 1.1rem;
+}
+.cp-form {
+  display: flex;
+  gap: 10px;
+}
+#cp-input {
+  flex-grow: 1;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: "Poppins", sans-serif;
+}
+#cp-calcular-btn {
+  padding: 12px 20px;
+  white-space: nowrap;
+}
+.shipping-results-container {
+  margin-top: 20px;
+}
+.shipping-results-container .shipping-error {
+  color: #c0392b;
+}
+.shipping-results-container .shipping-loading {
+  color: #888;
+}
+.shipping-results-container ul {
+  list-style: none;
+  padding: 0;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.shipping-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.shipping-option.seleccionado {
+  background-color: #d4edda;
+  border-left: 3px solid var(--color-btn-principal-fondo, #78857a);
+}
+.shipping-option:last-child {
+  border-bottom: none;
+}
+.shipping-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.shipping-price {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* =================================
+   RESPONSIVE: DETALLE DE PRODUCTO
+   ================================= */
+@media (max-width: 768px) {
+  .producto-detalle-container {
+    flex-direction: column;
+  }
+  .producto-nombre {
+    font-size: 2rem;
+  }
+}

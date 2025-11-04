@@ -1,0 +1,146 @@
+/* =================================
+   PÁGINA: CHECKOUT DE TURNO
+   ================================= */
+
+/* Contenedor principal (Compartido) */
+.checkout-wrapper {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+}
+.checkout-wrapper h2 {
+  font-family: "Lora", serif;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #333;
+}
+
+/* Resumen del Turno (Específico) */
+.resumen-turno {
+  margin-bottom: 40px;
+}
+.resumen-turno h3 {
+  font-size: 1.4rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+.resumen-turno p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Métodos de Pago (Compartido) */
+.metodos-pago {
+  margin-bottom: 40px;
+}
+.metodos-pago h3 {
+  font-size: 1.4rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+.pago-opcion {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.pago-opcion h4 {
+  margin-bottom: 10px;
+}
+.pago-opcion p {
+    line-height: 1.6;
+    color: #555;
+}
+.datos-transferencia {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+
+/* =================================
+   ESTILOS: PÁGINAS DE CONFIRMACIÓN (TURNOS)
+   ================================= */
+.confirmacion-box {
+  text-align: center;
+}
+.confirmacion-box h2 {
+  margin-bottom: 25px;
+}
+.confirmacion-box p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* Ícono de Éxito (verde) */
+.confirmacion-box h2 .fas.fa-check-circle {
+  color: #2ecc71;
+  margin-right: 10px;
+}
+/* Ícono de Fallo (rojo) */
+.confirmacion-box h2 .fas.fa-times-circle {
+  color: #e74c3c;
+  margin-right: 10px;
+}
+/* Ícono de Pendiente (naranja) */
+.confirmacion-box h2 .fas.fa-clock {
+  color: #f39c12;
+  margin-right: 10px;
+}
+
+/* Recuadro de resumen (usado en 'exitoso' y 'pendiente') */
+.resumen-confirmado {
+  background-color: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 25px 0;
+  line-height: 1.6; /* Para que el texto se vea bien */
+}
+.resumen-confirmado p {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+.resumen-confirmado p:last-child {
+  margin-bottom: 0;
+}
+
+/* =================================
+   ESTILOS: CONFIRMACIÓN (TRANSFERENCIA)
+   ================================= */
+.contacto-final {
+  margin-top: 30px;
+  margin-bottom: 40px; /* Asegura espacio al final */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  text-align: center; /* Asegura que el texto esté centrado */
+}
+
+.contacto-final h4 {
+  font-size: 1.4rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px; /* Reducido de 20px para mejor ajuste */
+  width: 100%; /* Asegura que la línea de borde ocupe todo */
+}
+
+.contacto-final p {
+    font-size: 1.1rem;
+    color: #555;
+}
