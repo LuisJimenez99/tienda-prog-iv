@@ -1,5 +1,7 @@
 from django.db import models
 from colorfield.fields import ColorField
+from imagekit.models import ProcessedImageField # <-- 1. Importar
+from imagekit.processors import ResizeToFit, Transpose
 
 class DatosPago(models.Model):
     cbu_alias = models.CharField(max_length=255, help_text="Tu CBU o Alias para transferencias.")
@@ -11,8 +13,13 @@ class DatosPago(models.Model):
 
 class HeroSectionConfig(models.Model):
     # Campo de imagen corregido:
-    imagen_fondo = models.ImageField(upload_to='hero_images/', blank=True, null=True, verbose_name="Imagen de Fondo")
-    
+    imagen_fondo = ProcessedImageField(
+        upload_to='hero_images/',
+        processors=[Transpose(), ResizeToFit(width=1920)], # Hero más grande (máx 1920px)
+        format='WEBP',
+        options={'quality': 80}, # Puede ser más agresivo
+        blank=True, null=True, verbose_name="Imagen de Fondo"
+    )
     titulo_principal = models.CharField(max_length=200, verbose_name="Título Principal", help_text="Ej: Te ayudamos a lograr tus objetivos, sin perder el placer de comer.")
     descripcion = models.TextField(verbose_name="Descripción", help_text="Texto descriptivo debajo del título.")
     texto_boton_1 = models.CharField(max_length=50, verbose_name="Texto Botón 1", default="Viandas")
@@ -34,7 +41,13 @@ class CarruselImagen(models.Model):
     titulo = models.CharField(max_length=200, blank=True, null=True, verbose_name="Título (Opcional)", help_text="Este texto aparecerá sobre la imagen.")
     
     # Campo de imagen corregido:
-    imagen = models.ImageField(upload_to='carrusel/', blank=True, null=True, verbose_name="Imagen del carrusel")
+    imagen = ProcessedImageField(
+        upload_to='carrusel/',
+        processors=[Transpose(), ResizeToFit(width=1200)], # Carrusel (máx 1200px)
+        format='WEBP',
+        options={'quality': 85},
+        blank=True, null=True, verbose_name="Imagen del carrusel"
+    )
     
     link_url = models.URLField(max_length=300, blank=True, null=True, verbose_name="Enlace (Opcional)", help_text="URL a la que dirigirá la imagen (ej: /productos/)")
     abrir_en_nueva_pestana = models.BooleanField(default=False, verbose_name="Abrir en nueva pestaña")
@@ -50,7 +63,13 @@ class CarruselImagen(models.Model):
 class AparienciaConfig(models.Model):
     
     # Campo de imagen corregido:
-    logo_sitio = models.ImageField(upload_to='logos/', blank=True, null=True, verbose_name="Logo del Sitio (Navbar)")
+    logo_sitio = ProcessedImageField(
+        upload_to='logos/',
+        processors=[Transpose(), ResizeToFit(height=80)], # Redimensionar por altura (máx 80px de alto)
+        format='PNG', # Conservar PNG para logos transparentes
+        options={'quality': 90},
+        blank=True, null=True, verbose_name="Logo del Sitio (Navbar)"
+    )
    
     color_fondo_body = ColorField(default='#ECF0E5', verbose_name="Color de Fondo Principal")
     color_carrito_activo = ColorField(default='#E74C3C', verbose_name="Color Contador Carrito (con items)", help_text="Color del círculo numérico del carrito cuando tiene productos.")

@@ -6,10 +6,9 @@
  */
 function initCart() {
     
-    // --- Cargar Carrito y Envío desde localStorage ---
+    // --- Cargar Carrito desde localStorage ---
     let cart = JSON.parse(localStorage.getItem('miTiendaCarrito')) || [];
-    let selectedShipping = JSON.parse(localStorage.getItem('miTiendaEnvio')) || null;
-
+    
     // --- Elementos del DOM (Carrito) ---
     const cartIcon = document.querySelector('.nav-carrito');
     const cartCounter = document.querySelector('.cart-counter');
@@ -27,43 +26,13 @@ function initCart() {
         localStorage.setItem('miTiendaCarrito', JSON.stringify(cart));
     };
     
-    const saveShippingToLocalStorage = () => {
-        localStorage.setItem('miTiendaEnvio', JSON.stringify(selectedShipping));
-    };
-
-    const toggleMiniCart = () => {
-        if (miniCart && miniCartOverlay) {
-            miniCart.classList.toggle('visible');
-            miniCartOverlay.classList.toggle('visible');
-        }
-    };
-
-    const addToCart = (product) => {
-        const existingProduct = cart.find(item => item.id === product.id);
-        if (existingProduct) {
-            existingProduct.quantity++;
-        } else {
-            cart.push({ ...product, quantity: 1 });
-        }
-        updateCartDisplay();
-        
-        // Llamada a la notificación global
-        showCustomAlert(`${product.nombre} añadido al carrito`, 2500, 'info');
-    };
-    
-    const updateQuantity = (productId, change) => {
-        const product = cart.find(item => item.id === productId);
-        if (product) {
-            product.quantity += change;
-            if (product.quantity <= 0) {
-                cart = cart.filter(item => item.id !== productId);
-            }
-        }
-        updateCartDisplay();
-    };
-
+    // --- FUNCIÓN CLAVE: ACTUALIZAR VISUALIZACIÓN ---
     const updateCartDisplay = () => {
         if (!miniCartItemsContainer || !cartCounter || !cartTotalPriceEl) return; 
+
+        // 1. LEER ENVÍO FRESCO DESDE MEMORIA
+        // Esto asegura que si cambiaste el envío en otra parte, el carrito se entere.
+        const shippingData = JSON.parse(localStorage.getItem('miTiendaEnvio')) || null;
 
         miniCartItemsContainer.innerHTML = '';
         let totalItems = 0;
@@ -94,12 +63,22 @@ function initCart() {
             });
         }
         
+        // 2. CALCULAR TOTAL CON ENVÍO
         let shippingPrice = 0;
-        if (selectedShipping && cartShippingCostEl) {
-            shippingPrice = parseFloat(selectedShipping.precio);
-            cartShippingCostEl.innerHTML = `<span>Envío:</span> <strong>$${shippingPrice.toFixed(2)}</strong>`;
+        
+        // Solo mostramos envío si hay items en el carrito Y hay un envío seleccionado
+        if (cart.length > 0 && shippingData && cartShippingCostEl) {
+            // Limpieza del precio (por si viene como string "$ 5.000,00")
+            let precioLimpio = shippingData.precio;
+            if (typeof precioLimpio === 'string') {
+                 precioLimpio = precioLimpio.replace('$', '').replace(/\./g, '').replace(',', '.').trim();
+            }
+            shippingPrice = parseFloat(precioLimpio) || 0;
+
+            cartShippingCostEl.innerHTML = `<span>Envío (${shippingData.nombre}):</span> <strong>$${shippingPrice.toFixed(2)}</strong>`;
             cartShippingCostEl.style.display = 'flex';
         } else if (cartShippingCostEl) {
+            // Si no hay envío seleccionado, ocultamos esa línea
             cartShippingCostEl.style.display = 'none';
         }
 
@@ -117,6 +96,56 @@ function initCart() {
         saveCartToLocalStorage();
     };
 
+    // --- NUEVA FUNCIÓN: BORRAR ENVÍO ---
+    // Esta función permite quitar el envío seleccionado de la memoria y actualizar el total
+    // Úsala en shipping_calculator.js cuando el usuario presione "Calcular" de nuevo.
+    const resetCartShipping = () => {
+        localStorage.removeItem('miTiendaEnvio'); // Borra la memoria
+        updateCartDisplay(); // Refresca el carrito visualmente (quita el costo de envío)
+    };
+
+    // --- EXPORTAR FUNCIONES GLOBALES ---
+    // Hacemos que estas funciones sean visibles para otros scripts
+    window.updateCartDisplay = updateCartDisplay;
+    window.resetCartShipping = resetCartShipping;
+
+    const toggleMiniCart = () => {
+        if (miniCart && miniCartOverlay) {
+            miniCart.classList.toggle('visible');
+            miniCartOverlay.classList.toggle('visible');
+        }
+    };
+
+    const addToCart = (product, quantity) => {
+        // Aseguramos que la cantidad sea al menos 1
+        const quantityToAdd = parseInt(quantity, 10) || 1; 
+        const existingProduct = cart.find(item => item.id === product.id);
+        
+        if (existingProduct) {
+            existingProduct.quantity += quantityToAdd;
+        } else {
+            cart.push({ ...product, quantity: quantityToAdd });
+        }
+        updateCartDisplay();
+        showCustomAlert(`${product.nombre} (x${quantityToAdd}) añadido al carrito`, 2500, 'info');
+        
+        // Abrir el carrito automáticamente al agregar (Mejora de UX)
+        if (miniCart && !miniCart.classList.contains('visible')) {
+            toggleMiniCart();
+        }
+    };
+    
+    const updateQuantity = (productId, change) => {
+        const product = cart.find(item => item.id === productId);
+        if (product) {
+            product.quantity += change;
+            if (product.quantity <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+            }
+        }
+        updateCartDisplay();
+    };
+
     // --- Event Listeners del Carrito ---
     if (cartIcon) cartIcon.addEventListener('click', toggleMiniCart);
     if (closeCartBtn) closeCartBtn.addEventListener('click', toggleMiniCart);
@@ -124,12 +153,27 @@ function initCart() {
 
     addToCartButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            const productData = e.target.closest('.add-to-cart-btn').dataset;
+            const btn = e.target.closest('.add-to-cart-btn');
+            const productData = btn.dataset;
+
+            // Buscar input de cantidad (Soporte para Detalle y Lista)
+            const container = btn.closest('.producto-detalle-container, .tarjeta-producto');
+            let quantity = 1;
+
+            if (container) {
+                const quantityInput = container.querySelector('.quantity-input');
+                if (quantityInput) {
+                    quantity = parseInt(quantityInput.value, 10);
+                    // Validación extra: si no es número o es menor a 1, usar 1
+                    if (isNaN(quantity) || quantity < 1) quantity = 1;
+                }
+            }
+
             const product = {
                 id: productData.id, nombre: productData.nombre, 
                 precio: productData.precio, imagen: productData.imagen,
             };
-            addToCart(product);
+            addToCart(product, quantity);
         });
     });
     
@@ -159,31 +203,34 @@ function initCart() {
             btnCheckout.textContent = 'Procesando...';
             btnCheckout.disabled = true;
 
-            // ¡IMPORTANTE! Aquí llamamos a la función global para el token CSRF
             const csrftoken = getCsrfToken(); 
+            // IMPORTANTE: Leemos el envío justo antes de enviarlo al backend
+            const finalShipping = JSON.parse(localStorage.getItem('miTiendaEnvio')) || null;
 
             fetch('/carrito/api/crear-pedido/', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken // Token CSRF añadido
+                    'X-CSRFToken': csrftoken
                 },
                 body: JSON.stringify({ 
                     cart: cart,
-                    shipping: selectedShipping
+                    shipping: finalShipping 
                 })
             })
             .then(response => response.json().then(data => ({ok: response.ok, data})))
             .then(({ok, data}) => {
                 if (ok) {
+                    // Limpieza tras compra exitosa
                     cart = [];
-                    selectedShipping = null;
-                    saveCartToLocalStorage(); 
-                    saveShippingToLocalStorage();
+                    localStorage.removeItem('miTiendaCarrito');
+                    localStorage.removeItem('miTiendaEnvio');
                     window.location.href = data.redirect_url;
                 } else {
                     showCustomAlert(data.error || 'Hubo un error al crear el pedido.');
-                    if (data.redirect_url) { window.location.href = data.redirect_url; }
+                    // Si el backend nos redirige (ej: perfil incompleto), vamos ahí
+                    if (data.redirect_url) window.location.href = data.redirect_url;
+                    
                     btnCheckout.textContent = 'Finalizar Compra';
                     btnCheckout.disabled = false;
                 }
@@ -198,5 +245,5 @@ function initCart() {
     }
 
     // --- INICIALIZACIÓN FINAL ---
-    updateCartDisplay(); // Muestra el carrito al cargar la página
+    updateCartDisplay(); 
 }

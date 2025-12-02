@@ -2,10 +2,14 @@
 <div class="card-harvest-wrapper">
   
   <div class="product-img">
-    <a href="{% url 'detalle_producto' producto.id %}">
-      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-    </a>
-  </div>
+  <a href="{% url 'detalle_producto' producto.id %}">
+    {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+    {% else %}
+        <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}">
+    {% endif %}
+  </a>
+</div>
 
   <div class="product-info">
     <div class="product-text">

@@ -5,12 +5,20 @@
     class="tarjeta-link"
   >
     <div class="tarjeta-imagen-contenedor">
-      <img
-        src="{{ producto.imagen.url }}"
-        alt="{{ producto.nombre }}"
-        class="tarjeta-imagen"
-      />
-    </div>
+    {% if producto.imagen %}
+        <img
+          src="{{ producto.imagen.url }}"
+          alt="{{ producto.nombre }}"
+          class="tarjeta-imagen"
+        />
+    {% else %}
+        <img
+          src="{% static 'images/placeholder_vianda.png' %}"
+          alt="{{ producto.nombre }}"
+          class="tarjeta-imagen"
+        />
+    {% endif %}
+</div>
   </a>
   <div class="tarjeta-contenido">
     <h3 class="tarjeta-titulo">

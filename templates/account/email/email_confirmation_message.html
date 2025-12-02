@@ -1,0 +1,26 @@
+{% extends 'email/email_base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirmar Email" %}{% endblock %}
+
+{% block content %}
+
+<h1 style='color: #333; font-family: "Lora", serif; font-size: 24px'>¡Bienvenido/a a NutriTienda!</h1>
+<p style="margin-bottom: 20px;">{% blocktrans with user_display asactivate_url %}Hola {{ user_display }},
+
+
+
+
+
+
+Gracias por registrarte. Por favor, haz clic en el botón de abajo para activar tu cuenta:{% endblocktrans %}</p>
+
+<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 25px 0;">
+<tr>
+<td align="center">
+<a href="{{ activate_url }}" class="button" style="display: inline-block; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; background-color: {{ apariencia_config.boton_color_principal_fondo|default:'#78857A' }}; color: {{ apariencia_config.boton_color_principal_texto|default:'#FFFFFF' }};">
+Activar mi cuenta
+</a>
+</td>
+</tr>
+</table>

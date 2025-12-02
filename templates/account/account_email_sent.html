@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-form-container">
+<h2>{% trans "Verifica tu Email" %}</h2>
+
+<p class="auth-text">
+    {% blocktrans %}Hemos enviado un email de confirmación a {{ email }}. Por favor, haz clic en el enlace dentro del email para activar tu cuenta.{% endblocktrans %}
+</p>
+
+<p class="auth-text">
+    {% blocktrans %}Si no has recibido el email en unos minutos, por favor revisa tu carpeta de spam.{% endblocktrans %}
+</p>
+
+
+</div>
+{% endblock %}

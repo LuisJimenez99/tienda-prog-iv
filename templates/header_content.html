@@ -3,14 +3,14 @@
 
     
     <div class="nav-logo">
-        <a href="{% url 'inicio' %}">
-            {% if apariencia_config.logo_sitio %}
-                <img src="{{ apariencia_config.logo_sitio.url }}" alt="Logo de Mi Tienda" class="site-logo">
-            {% else %}
-                Mi Tienda
-            {% endif %}
-        </a>
-    </div>
+    <a href="{% url 'inicio' %}">
+        {% if apariencia_config.logo_sitio %}
+            <img src="{{ apariencia_config.logo_sitio.url }}" ...>
+        {% else %}
+            Mi Tienda
+        {% endif %}
+    </a>
+</div>
     <div class="nav-links">
         <a href="{% url 'inicio' %}" class="nav-link">Inicio</a>
         <a href="{% url 'lista_productos' %}" class="nav-link">Productos</a>

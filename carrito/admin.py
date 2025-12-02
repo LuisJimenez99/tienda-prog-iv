@@ -1,10 +1,15 @@
+# carrito/admin.py
+
 from django.contrib import admin, messages
 from .models import Pedido, ItemPedido
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import format_html
-from .views import reponer_stock
+
+# ¡Importamos la función clave desde las vistas!
+from .views import descontar_stock 
+
 from pynliner import Pynliner
 from configuracion.models import AparienciaConfig
 
@@ -35,10 +40,7 @@ class PedidoAdmin(admin.ModelAdmin):
     list_display = ('id', 'cliente', 'fecha_creacion', 'total', 'estado', 'codigo_seguimiento')
     list_filter = ('estado', 'fecha_creacion')
     search_fields = ('cliente__username', 'id')
-    
-    # --- LÍNEA CLAVE AÑADIDA AQUÍ ---
-    list_editable = ['estado'] # <-- Hacemos el estado editable desde la lista
-    
+    list_editable = ['estado']
     readonly_fields = ('id', 'cliente', 'fecha_creacion', 'total', 'direccion_envio', 'ciudad_envio', 'codigo_postal_envio', 'telefono_contacto')
     
     fieldsets = (
@@ -55,27 +57,56 @@ class PedidoAdmin(admin.ModelAdmin):
     
     inlines = [ItemPedidoInline]
     
-    actions = ['marcar_cancelado_y_reponer_stock']
+    actions = ['marcar_pagado_y_descontar_stock', 'cancelar_pedidos_pendientes']
 
-    @admin.action(description='Cancelar pedidos y reponer stock (para transferencias fallidas)')
-    def marcar_cancelado_y_reponer_stock(self, request, queryset):
-        pedidos_actualizados = 0
-        for pedido in queryset.filter(estado='pendiente_transferencia'):
-            if reponer_stock(pedido):
-                pedido.estado = 'cancelado'
+    # 1. ACCIÓN NUEVA: Para confirmar el pago y descontar stock
+    @admin.action(description='Marcar Pagado y Descontar Stock (Transferencias)')
+    def marcar_pagado_y_descontar_stock(self, request, queryset):
+        pedidos_confirmados = 0
+        errores = []
+
+        # Filtramos solo los que están esperando transferencia
+        pedidos_a_procesar = queryset.filter(estado='pendiente_transferencia')
+        
+        for pedido in pedidos_a_procesar:
+            success, error_msg = descontar_stock(pedido) 
+            
+            if success:
+                pedido.estado = 'pagado'
                 pedido.save()
-                pedidos_actualizados += 1
+                pedidos_confirmados += 1
+            else:
+                errores.append(f"Pedido #{pedido.id}: {error_msg}")
+
+        if pedidos_confirmados > 0:
+            self.message_user(request, 
+                              f'{pedidos_confirmados} pedidos han sido confirmados y el stock ha sido descontado.', 
+                              messages.SUCCESS)
+        if errores:
+            self.message_user(request, 
+                              f'Errores al descontar stock: {". ".join(errores)}', 
+                              messages.ERROR)
+
+    # 2. ACCIÓN MODIFICADA: Para cancelar (ya no repone stock)
+    @admin.action(description='Cancelar pedidos pendientes de transferencia')
+    def cancelar_pedidos_pendientes(self, request, queryset):
+        pedidos_actualizados = queryset.filter(
+            estado='pendiente_transferencia'
+        ).update(estado='cancelado')
         
         if pedidos_actualizados > 0:
             self.message_user(request, 
-                f'{pedidos_actualizados} pedidos han sido cancelados y el stock ha sido repuesto.', 
-                messages.SUCCESS)
+                              f'{pedidos_actualizados} pedidos han sido cancelados.', 
+                              messages.SUCCESS)
         else:
             self.message_user(request, 
-                'No se pudo reponer stock. Solo aplica a pedidos "pendiente_transferencia".', 
-                messages.WARNING)
-    
+                              'Esta acción solo aplica a pedidos en estado "pendiente_transferencia".', 
+                              messages.WARNING)
+
+    # --- FIN DE CAMBIOS EN ACCIONES ---
+
     def save_model(self, request, obj, form, change):
+        # Lógica para enviar email cuando se añade código de seguimiento
         old_codigo_seguimiento = ""
         if change:
             try:
@@ -87,36 +118,27 @@ class PedidoAdmin(admin.ModelAdmin):
         
         new_codigo_seguimiento = obj.codigo_seguimiento or ""
 
-        # Lógica para enviar email cuando se añade código de seguimiento
         if new_codigo_seguimiento != old_codigo_seguimiento and new_codigo_seguimiento != "":
             try:
-                # 1. Obtenemos la configuración de apariencia (para el logo y colores)
                 apariencia_config = AparienciaConfig.objects.first()
-
                 subject = f"¡Tu pedido #{obj.id} ha sido despachado!"
                 context = {
                     'pedido': obj, 
                     'cliente': obj.cliente,
-                    'apariencia_config': apariencia_config # <-- La pasamos a la plantilla
+                    'apariencia_config': apariencia_config
                 }
-
-                # 2. Renderizamos la plantilla .txt (como fallback)
                 message_txt = render_to_string('carrito/email/envio_despachado.txt', context)
-                
-                # 3. Renderizamos la plantilla .html
                 message_html = render_to_string('carrito/email/envio_despachado.html', context)
                 
-                # 4. Usamos el "inliner" para aplicar el CSS
                 p = Pynliner()
                 message_html_inlined = p.from_string(message_html).run()
 
-                # 5. Enviamos el email
                 send_mail(
                     subject, 
-                    message_txt, # Fallback de texto plano
+                    message_txt,
                     settings.DEFAULT_FROM_EMAIL, 
                     [obj.cliente.email],
-                    html_message=message_html_inlined # <-- ¡El HTML va aquí!
+                    html_message=message_html_inlined
                 )
                 
                 if obj.estado != 'despachado':

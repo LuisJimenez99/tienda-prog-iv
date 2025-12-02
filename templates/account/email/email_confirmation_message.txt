@@ -1,0 +1,14 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans with site_name as site_domain %}
+Hola {{ user_display }},
+
+Gracias por registrarte en {{ site_name }}.
+
+Para activar tu cuenta, por favor ve al siguiente enlace:
+{{ activate_url }}
+
+Gracias,
+El equipo de {{ site_name }}
+{% endblocktrans %}
+{% endautoescape %}

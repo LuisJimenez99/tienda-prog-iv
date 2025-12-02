@@ -16,15 +16,23 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # ===========================
 # 🌍 ALLOWED HOSTS
 # ===========================
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = []
 
+# Leemos el dominio de producción de PythonAnywhere (desde el .env)
+PA_DOMAIN = os.getenv("PYTHONANYWHERE_DOMAIN")
+if PA_DOMAIN:
+    ALLOWED_HOSTS.append(PA_DOMAIN)
+
+# Leemos el dominio de Render (si lo volvemos a usar)
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-PA_DOMAIN = os.getenv("PYTHONANYWHERE_DOMAIN")
-if PA_DOMAIN:
-    ALLOWED_HOSTS.append(PA_DOMAIN)
+# ¡LÍNEA CLAVE! Si estamos en modo DEBUG (local),
+# añadimos los hosts de desarrollo automáticamente.
+if DEBUG:
+    ALLOWED_HOSTS.append('127.0.0.1')
+    ALLOWED_HOSTS.append('localhost')
 
 # ===========================
 # 📦 INSTALLED APPS (¡ORDEN CORREGIDO!)
@@ -48,8 +56,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    # 'cloudinary_storage', # Desactivado para PA
-    # 'cloudinary',         # Desactivado para PA
+    'imagekit',
 
     # 3. Apps de Django
     'django.contrib.admin',
@@ -59,8 +66,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-
-    # 'whitenoise.runserver_nostatic', # Desactivado para PA
 ]
 
 # ===========================
@@ -68,9 +73,8 @@ INSTALLED_APPS = [
 # ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    #'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    'allauth.account.middleware.AccountMiddleware', # <-- Mover aquí
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -101,12 +105,11 @@ WSGI_APPLICATION = 'tienda_denu.wsgi.application'
 
 # ===========================
 # 🗄️ DATABASE CONFIG
-# Compatible: PythonAnywhere + Render + Local
 # ===========================
 DATABASE_URL = os.getenv("DATABASE_URL")
+DB_HOST = os.getenv("DB_HOST") 
 
 if DATABASE_URL:
-    # Producción externa tipo Render / Neon
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,
@@ -114,19 +117,25 @@ if DATABASE_URL:
             ssl_require=True
         )
     }
-else:
-    # PythonAnywhere MySQL / Local
+elif DB_HOST:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': os.getenv("DB_NAME"),
             'USER': os.getenv("DB_USER"),
             'PASSWORD': os.getenv("DB_PASSWORD"),
-            'HOST': os.getenv("DB_HOST"),
+            'HOST': DB_HOST,
             'PORT': os.getenv("DB_PORT", '3306'),
             'OPTIONS': {
                 'charset': 'utf8mb4'
             }
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
@@ -149,17 +158,18 @@ USE_I18N = True
 USE_TZ = True
 
 # ===========================
-# 📁 STATIC & MEDIA (WhiteNoise + Cloudinary)
+# 📁 STATIC & MEDIA
 # ===========================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/luchy/tienda-prog-iv/media'
-
-
+# Ruta de media actualizada para desarrollo local
+if DEBUG:
+    MEDIA_ROOT = BASE_DIR / 'media'
+else:
+    MEDIA_ROOT = '/home/luchy/tienda-prog-iv/media'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -204,7 +214,7 @@ GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_SECRET_KEY = os.getenv('GOOGLE_SECRET_KEY')
 
 # ===========================
-# 👤 ALLAUTH
+# 👤 ALLAUTH (BLOQUE ACTUALIZADO Y CORREGIDO)
 # ===========================
 SITE_ID = 1
 LOGIN_URL = 'account_login'
@@ -221,14 +231,40 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
         'OAUTH_PKCE_ENABLED': True,
-
     }
 }
 
+# --- CONFIGURACIÓN MODERNA DE ALLAUTH ---
+
+# 1. El email es el método de login
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+
+# 2. El email es obligatorio y debe ser único
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+
+# 3. Verificación de Email
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
-ACCOUNT_USERNAME_MIN_LENGTH = 4
+
+# 4. Confía en Google (no pide verificar email si vienes de Google)
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none" 
+SOCIALACCOUNT_AUTO_SIGNUP = True 
+
+# 5. Campos de Registro (solo pide email y passwords)
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+# 6. Adaptador para copiar email a username
+ACCOUNT_ADAPTER = 'usuarios.adapter.MyAccountAdapter'
+
+# 7. Opcional: seguridad
 ACCOUNT_PASSWORD_MIN_LENGTH = 6
 ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
 
+# 8. Forzar el uso de nuestras plantillas de email personalizadas
+ACCOUNT_EMAIL_TEMPLATES = {
+    'email_confirmation': 'account/email/email_confirmation_message',
+    'password_reset': 'account/email/password_reset_message',
+}

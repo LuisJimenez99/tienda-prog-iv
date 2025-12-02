@@ -4,10 +4,14 @@
         <div class="badge" style="background: #A1A1AA;">Agotado</div>
     {% endif %}
     <div class="img">
-        <a href="{% url 'detalle_producto' producto.id %}">
+    <a href="{% url 'detalle_producto' producto.id %}">
+        {% if producto.imagen %}
             <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-        </a>
-    </div>
+        {% else %}
+            <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}">
+        {% endif %}
+    </a>
+</div>
 
     <div class="info">
         <div class="cat">{{ producto.categoria.nombre|default:"Vianda" }}</div>

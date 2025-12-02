@@ -12,8 +12,8 @@
             
             <div class="contenedor-imagen">
                 <img class="imagen-principal" 
-                     src="{% if hero_config.imagen_fondo %}{{ hero_config.imagen_fondo.url }}{% else %}{% static 'images/imagen1.jpg' %}{% endif %}" 
-                     alt="Viandas saludables en una mesa">
+     src="{% if hero_config.imagen_fondo %}{{ hero_config.imagen_fondo.url }}{% else %}{% static 'images/imagen1.jpg' %}{% endif %}" 
+     alt="...">
             </div>
 
             <div class="contenedor-contenido">
@@ -36,19 +36,21 @@
         <div class="carrusel-container" id="mi-carrusel">
             <div class="carrusel-inner">
                 {% for item in imagenes_carrusel %}
-                <div class="carrusel-item {% if forloop.first %}active{% endif %}">
-                    {% if item.link_url %}
-                        <a href="{{ item.link_url }}" {% if item.abrir_en_nueva_pestana %}target="_blank"{% endif %}>
-                            <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
-                        </a>
-                    {% else %}
-                        <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
-                    {% endif %}
-                    {% if item.titulo %}
-                        <div class="carrusel-caption">{{ item.titulo }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
+<div class="carrusel-item {% if forloop.first %}active{% endif %}">
+    {% if item.link_url %}
+        <a href="{{ item.link_url }}" {% if item.abrir_en_nueva_pestana %}target="_blank"{% endif %}>
+            {% if item.imagen %}
+                <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
+            {% endif %}
+        </a>
+    {% else %}
+        {% if item.imagen %}
+            <img src="{{ item.imagen.url }}" alt="{{ item.titulo|default:'Slide' }}">
+        {% endif %}
+    {% endif %}
+    
+</div>
+{% endfor %}
             </div>
             <button class="carrusel-control prev" data-slide="prev">&#10094;</button>
             <button class="carrusel-control next" data-slide="next">&#10095;</button>
