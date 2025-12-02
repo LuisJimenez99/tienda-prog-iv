@@ -2,32 +2,86 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
-    <h2>Mi Cuenta</h2>
     
-    <div class="profile-info">
-        <p><strong>Nombre de Usuario:</strong> {{ user.username }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Nombre Completo:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-    </div>
-    
-    <hr>
-    
-    <div class="profile-details">
-        <h3>Mis Datos de Envío</h3>
-        <p><strong>Teléfono:</strong> {{ user.perfil.telefono|default:"No especificado" }}</p>
-        <p><strong>Dirección:</strong> {{ user.perfil.direccion|default:"No especificada" }}</p>
-        <p><strong>Ciudad:</strong> {{ user.perfil.ciudad|default:"No especificada" }}</p>
-        <p><strong>Código Postal:</strong> {{ user.perfil.codigo_postal|default:"No especificado" }}</p>
+    <!-- TARJETA DE USUARIO -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar-circle">
+                {{ user.username|make_list|first|upper }}
+            </div>
+            <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+            <p class="email">{{ user.email }}</p>
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-row">
+                <span class="label">Teléfono:</span>
+                <span class="value">{{ user.perfil.telefono|default:"-" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Dirección:</span>
+                <span class="value">{{ user.perfil.direccion|default:"-" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Ciudad:</span>
+                <span class="value">{{ user.perfil.ciudad|default:"-" }} (CP: {{ user.perfil.codigo_postal|default:"-" }})</span>
+            </div>
+        </div>
+
+        <a href="{% url 'edit_profile' %}" class="btn-editar">Editar mis datos</a>
+        <br>
+        <a href="{% url 'account_logout' %}" class="btn-logout">Cerrar Sesión</a>
     </div>
 
-    <!-- === CAMBIO CLAVE AQUÍ === -->
-    <!-- Reemplazamos el href="#" por la URL dinámica de Django -->
-    <a href="{% url 'edit_profile' %}" class="btn-principal" style="margin-top: 20px; display: inline-block;">Editar Mis Datos</a>
+    <!-- HISTORIAL DE PEDIDOS -->
+    <div class="orders-section">
+        <h3>Mis Pedidos</h3>
+        
+        {% if pedidos %}
+            <div class="orders-list">
+                {% for pedido in pedidos %}
+                <div class="order-card">
+                    <div class="order-header">
+                        <span class="order-id">Pedido #{{ pedido.id }}</span>
+                        <span class="order-date">{{ pedido.fecha_creacion|date:"d M Y" }}</span>
+                        <span class="order-status status-{{ pedido.estado }}">
+                            {{ pedido.get_estado_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="order-body">
+                        <div class="order-items">
+                            {% for item in pedido.items.all %}
+                                <p>{{ item.cantidad }}x {{ item.producto.nombre }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="order-total">
+                            Total: ${{ pedido.total|floatformat:2 }}
+                        </div>
+                    </div>
+                    
+                    {% if pedido.codigo_seguimiento %}
+                    <div class="order-footer">
+                        <p class="tracking">
+                            📦 Seguimiento: <strong>{{ pedido.codigo_seguimiento }}</strong>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Aún no has realizado pedidos.</p>
+                <a href="{% url 'lista_productos' %}" class="btn-principal">Ir a la Tienda</a>
+            </div>
+        {% endif %}
+    </div>
+
 </div>
 {% endblock %}
-

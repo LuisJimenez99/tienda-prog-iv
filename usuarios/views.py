@@ -2,33 +2,34 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserUpdateForm, PerfilUpdateForm
+from carrito.models import Pedido # <-- Importamos el modelo Pedido
 
 # --- Vista para mostrar la página de perfil del usuario ---
 @login_required
 def profile_view(request):
-    # Simplemente renderiza la plantilla del perfil.
-    # El decorador @login_required se asegura de que solo los usuarios
-    # que han iniciado sesión puedan ver esta página.
-    return render(request, 'usuarios/profile.html')
+    # 1. Buscamos los pedidos de este cliente
+    # Los ordenamos por fecha de creación descendente (el más nuevo primero)
+    pedidos = Pedido.objects.filter(cliente=request.user).order_by('-fecha_creacion')
+
+    contexto = {
+        'pedidos': pedidos
+    }
+    return render(request, 'usuarios/profile.html', contexto)
 
 # --- Vista para editar el perfil del usuario ---
 @login_required
 def edit_profile_view(request):
-    # request.method == 'POST' se cumple cuando el usuario hace clic en "Guardar Cambios"
+    # ... (Esta función queda IGUAL que antes) ...
     if request.method == 'POST':
-        # Cargamos los datos enviados en los formularios, vinculándolos al usuario actual
         user_form = UserUpdateForm(request.POST, instance=request.user)
         perfil_form = PerfilUpdateForm(request.POST, instance=request.user.perfil)
         
-        # Verificamos si ambos formularios son válidos
         if user_form.is_valid() and perfil_form.is_valid():
-            user_form.save() # Guardamos los cambios en el modelo User
-            perfil_form.save() # Guardamos los cambios en el modelo Perfil
+            user_form.save()
+            perfil_form.save()
             messages.success(request, '¡Tu perfil ha sido actualizado exitosamente!')
-            return redirect('profile') # Redirigimos de vuelta a la página de perfil
+            return redirect('profile')
     else:
-        # Si la página se carga por primera vez (método GET),
-        # mostramos los formularios con la información actual del usuario.
         user_form = UserUpdateForm(instance=request.user)
         perfil_form = PerfilUpdateForm(instance=request.user.perfil)
 
@@ -38,4 +39,3 @@ def edit_profile_view(request):
     }
 
     return render(request, 'usuarios/edit_profile.html', contexto)
-

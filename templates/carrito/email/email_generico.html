@@ -1,0 +1,6 @@
+{% extends 'email/email_base.html' %}
+
+{% block content %}
+    <!-- Aquí se inyecta lo que escribiste en el Admin -->
+    {{ contenido_dinamico|safe }}
+{% endblock %}

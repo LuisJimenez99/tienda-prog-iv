@@ -2,6 +2,7 @@ from django.db import models
 from colorfield.fields import ColorField
 from imagekit.models import ProcessedImageField # <-- 1. Importar
 from imagekit.processors import ResizeToFit, Transpose
+from django.core.exceptions import ValidationError
 
 class DatosPago(models.Model):
     cbu_alias = models.CharField(max_length=255, help_text="Tu CBU o Alias para transferencias.")
@@ -130,3 +131,36 @@ class Servicio(models.Model):
         ordering = ['orden']
     def __str__(self):
         return self.nombre
+
+
+class EmailConfig(models.Model):
+    TIPOS_EMAIL = (
+        ('TRANSFERENCIA', 'Instrucciones de Transferencia'),
+        ('DESPACHADO', 'Pedido Despachado (Envío)'),
+        ('PAGO_CONFIRMADO', 'Pago Confirmado (Recibo)'),
+    )
+
+    tipo = models.CharField(max_length=50, choices=TIPOS_EMAIL, unique=True, verbose_name="Tipo de Email")
+    asunto = models.CharField(max_length=200, help_text="Puedes usar variables como {{ pedido.id }}")
+    
+    contenido = models.TextField(
+        verbose_name="Cuerpo del Email (HTML)", 
+        help_text="""
+        Escribe aquí el contenido. Puedes usar HTML simple (<b>negrita</b>, <br> saltos).
+        <br><strong>Variables Disponibles:</strong>
+        <ul>
+            <li>{{ pedido.id }} - ID del pedido</li>
+            <li>{{ pedido.total }} - Total a pagar</li>
+            <li>{{ cliente.first_name }} - Nombre del cliente</li>
+            <li>{{ datos_pago.cbu_alias }} - Alias/CBU</li>
+            <li>{{ codigo_seguimiento }} - (Solo para envíos)</li>
+        </ul>
+        """
+    )
+
+    class Meta:
+        verbose_name = "Configuración de Email"
+        verbose_name_plural = "Configuraciones de Email"
+
+    def __str__(self):
+        return self.get_tipo_display()

@@ -1,7 +1,8 @@
 from django.contrib import admin
 # Importamos todos los modelos de una vez
-from .models import DatosPago, HeroSectionConfig, AparienciaConfig, CarruselImagen, Servicio
+from .models import DatosPago, HeroSectionConfig, AparienciaConfig, CarruselImagen, Servicio, EmailConfig
 from django.utils.html import format_html
+
 
 # Admin para los Datos de Pago
 @admin.register(DatosPago)
@@ -152,5 +153,18 @@ class ServicioAdmin(admin.ModelAdmin):
         ('Configuración del Botón', {
             'description': "Elige qué hará el botón 'Contratar' de este servicio.",
             'fields': ('tipo_servicio', 'icono')
+        }),
+    )
+    
+
+@admin.register(EmailConfig)
+class EmailConfigAdmin(admin.ModelAdmin):
+    list_display = ('tipo', 'asunto')
+    # No permitimos agregar tipos nuevos que el sistema no conozca, 
+    # ni borrar los esenciales, pero por ahora lo dejamos abierto para facilitar la creación inicial.
+    
+    fieldsets = (
+        (None, {
+            'fields': ('tipo', 'asunto', 'contenido')
         }),
     )

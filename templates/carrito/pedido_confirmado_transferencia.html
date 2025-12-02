@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<!-- Reutilizamos estilos de auth y checkout para mantener la coherencia -->
+<link rel="stylesheet" href="{% static 'css/pages/checkout_pedido.css' %}">
+<style>
+    .confirmacion-wrapper {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+
+    .icono-exito {
+        width: 80px;
+        height: 80px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+    }
+
+    .datos-banco {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+        text-align: left;
+        border-left: 4px solid var(--color-btn-principal-fondo);
+    }
+
+    .datos-banco h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+    }
+
+    .dato-row {
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .monto-total {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmacion-wrapper">
+    <div class="icono-exito">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </div>
+
+    <h1 style="font-family: var(--fuente-tarjetas);">¡Pedido Reservado!</h1>
+    <p>Tu pedido <strong>#{{ pedido.id }}</strong> ha sido registrado correctamente.</p>
+
+    <p>Para finalizar la compra y que comencemos a prepararla, por favor realiza la transferencia del total:</p>
+
+    <div class="monto-total">
+        ${{ pedido.total|floatformat:2 }}
+    </div>
+
+    <div class="datos-banco">
+        <h3>Datos para la transferencia:</h3>
+        <div class="dato-row"><strong>Alias/CBU:</strong> {{ datos_pago.cbu_alias }}</div>
+        <div class="dato-row"><strong>Titular:</strong> NutriTienda</div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+        <small>Hemos enviado estos datos también a tu email: <strong>{{ user.email }}</strong></small>
+    </div>
+
+    <p style="margin-bottom: 2rem;">
+        Una vez realizada la transferencia, avísanos por WhatsApp o responde al email para confirmar el pago.
+    </p>
+
+    <a href="{% url 'inicio' %}" class="btn-principal">Volver al Inicio</a>
+    <br><br>
+    <a href="{% url 'profile' %}" style="color: #666; text-decoration: underline; font-size: 0.9rem;">Ver mis
+        pedidos</a>
+</div>
+{% endblock %}

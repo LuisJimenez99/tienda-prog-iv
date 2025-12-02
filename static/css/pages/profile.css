@@ -1,0 +1,138 @@
+.profile-container {
+    max-width: 1100px;
+    margin: 3rem auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Columna izq fija, derecha flexible */
+    gap: 2rem;
+    align-items: start;
+}
+
+/* --- TARJETA DE PERFIL (IZQUIERDA) --- */
+.profile-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
+    position: sticky;
+    top: 100px; /* Se queda fija al hacer scroll */
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    background-color: var(--color-btn-principal-fondo);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.profile-header h2 { margin: 0.5rem 0 0.2rem; font-size: 1.2rem; }
+.profile-header .email { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+.profile-details { text-align: left; margin-bottom: 2rem; }
+.detail-row {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row .label { font-weight: bold; display: block; color: #555; }
+.detail-row .value { color: #333; }
+
+.btn-editar {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--color-btn-principal-fondo);
+    color: var(--color-btn-principal-fondo);
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.btn-editar:hover { background: var(--color-btn-principal-fondo); color: white; }
+
+.btn-logout {
+    display: inline-block;
+    margin-top: 10px;
+    color: #e74c3c;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+/* --- SECCIÓN DE PEDIDOS (DERECHA) --- */
+.orders-section h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.order-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+.order-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+
+.order-header {
+    background: #f9f9f9;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.order-id { font-weight: bold; }
+.order-date { color: #777; }
+
+/* Etiquetas de estado */
+.order-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.status-pendiente { background: #fff3cd; color: #856404; }
+.status-pendiente_transferencia { background: #e2e3e5; color: #383d41; }
+.status-pagado { background: #d1e7dd; color: #0f5132; }
+.status-en_preparacion { background: #cfe2ff; color: #084298; }
+.status-despachado { background: #d1e7dd; color: #198754; }
+.status-cancelado { background: #f8d7da; color: #842029; }
+
+.order-body { padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+.order-items p { margin: 0.2rem 0; color: #555; font-size: 0.95rem; }
+.order-total { font-weight: bold; font-size: 1.1rem; color: var(--color-titulo-tarjeta); }
+
+.order-footer {
+    padding: 0.8rem 1rem;
+    background: #f1f8ff;
+    border-top: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #0056b3;
+}
+
+.empty-state { text-align: center; padding: 3rem; background: white; border-radius: 8px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr; /* Una sola columna en móvil */
+    }
+    .profile-card { position: static; /* Ya no es sticky en móvil */ }
+}
