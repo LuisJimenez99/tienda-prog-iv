@@ -2,90 +2,91 @@
 
 <!-- LÓGICA DE DETECCIÓN DE DIETA -->
 {% with conflicto_dieta=False motivo_conflicto="" %}
+    
+    {% if user.is_authenticated %}
+        {% if user.perfil.es_vegetariano and not producto.es_vegetariano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene carne"></div>
+        {% elif user.perfil.es_vegano and not producto.es_vegano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene derivados animales"></div>
+        {% elif user.perfil.es_celiaco and not producto.es_sin_tacc %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene Gluten (TACC)"></div>
+        {% endif %}
+    {% endif %}
 
-<!-- 1. Detectar conflictos -->
-{% if user.is_authenticated %}
-{% if user.perfil.es_vegetariano and not producto.es_vegetariano %}
-<!-- Es un truco para cambiar variables dentro del template -->
-<div style="display:none;" data-set-conflicto="true" data-motivo="Contiene carne"></div>
-{% elif user.perfil.es_vegano and not producto.es_vegano %}
-<div style="display:none;" data-set-conflicto="true" data-motivo="Contiene derivados animales"></div>
-{% elif user.perfil.es_celiaco and not producto.es_sin_tacc %}
-<div style="display:none;" data-set-conflicto="true" data-motivo="Contiene Gluten (TACC)"></div>
-{% endif %}
-{% endif %}
+    <div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %} producto-card-js" 
+         data-id="{{ producto.id }}">
+         
+        <!-- Advertencia Visual de Dieta -->
+        <div class="diet-warning-overlay">
+            <span>🚫 No apto para tu dieta</span>
+        </div>
 
-<!-- 2. Tarjeta con clases condicionales -->
-<!-- Si hay conflicto, añadimos la clase 'producto-incompatible' -->
-<div class="tarjeta-producto {% if producto.stock <= 0 %}agotado{% endif %} producto-card-js"
-  data-id="{{ producto.id }}">
+        <!-- Botón de Favorito (Corazón) -->
+        {% if user.is_authenticated %}
+        <button class="btn-favorito {% if user in producto.favoritos.all %}activo{% endif %}" 
+                data-id="{{ producto.id }}"
+                onclick="toggleFavorito(this)" 
+                aria-label="Añadir a favoritos">
+            <i class="fas fa-heart"></i>
+        </button>
+        {% endif %}
 
-  <!-- Advertencia Visual de Dieta -->
-  <div class="diet-warning-overlay">
-    <span>🚫 No apto para tu dieta</span>
-  </div>
+        <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
+            <div class="tarjeta-imagen-contenedor">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen" loading="lazy"/>
+                {% else %}
+                    <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}" class="tarjeta-imagen" loading="lazy"/>
+                {% endif %}
+            </div>
+        </a>
 
-  <!-- Botón de Favorito (Corazón) -->
-  {% if user.is_authenticated %}
-<button class="btn-favorito {% if user in producto.favoritos.all %}activo{% endif %}" 
-        data-id="{{ producto.id }}"
-        onclick="toggleFavorito(this)" 
-        aria-label="Añadir a favoritos">
-    <i class="fas fa-heart"></i>
-</button>
-{% endif %}
+        <div class="tarjeta-contenido">
+            <!-- Etiquetas (Badges) -->
+            <div class="producto-badges">
+                {% if producto.es_sin_tacc %}<span class="badge badge-tacc">Sin TACC</span>{% endif %}
+                {% if producto.es_vegano %}<span class="badge badge-vegano">Vegano</span>{% endif %}
+            </div>
 
-  <a href="{% url 'detalle_producto' producto.id %}" class="tarjeta-link">
-    <div class="tarjeta-imagen-contenedor">
-      {% if producto.imagen %}
-      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="tarjeta-imagen" loading="lazy" />
-      {% else %}
-      <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}" class="tarjeta-imagen"
-        loading="lazy" />
-      {% endif %}
+            <h3 class="tarjeta-titulo">
+                <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
+            </h3>
+            <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+
+            <!-- BOTONES DE ACCIÓN (AQUÍ ESTÁ LO QUE FALTABA) -->
+            <div class="tarjeta-botones">
+                {% if producto.stock > 0 %}
+                    <!-- Botón 1: Ver Detalle -->
+                    <a href="{% url 'detalle_producto' producto.id %}" class="btn-ver-producto">Ver</a>
+                    
+                    <!-- Botón 2: Agregar al Carrito -->
+                    <button class="add-to-cart-btn" 
+                        data-id="{{ producto.id }}" 
+                        data-nombre="{{ producto.nombre }}" 
+                        data-precio="{{ producto.precio }}" 
+                        data-imagen="{{ producto.imagen.url }}">
+                        Agregar
+                    </button>
+                {% else %}
+                    <span class="sin-stock-mensaje">Sin Stock</span>
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </a>
-
-  <div class="tarjeta-contenido">
-    <!-- Etiquetas (Badges) -->
-    <div class="producto-badges">
-      {% if producto.es_sin_tacc %}<span class="badge badge-tacc">Sin TACC</span>{% endif %}
-      {% if producto.es_vegano %}<span class="badge badge-vegano">Vegano</span>{% endif %}
-    </div>
-
-    <h3 class="tarjeta-titulo">
-      <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
-    </h3>
-    <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
-
-    <div class="tarjeta-botones">
-      {% if producto.stock > 0 %}
-      <button class="add-to-cart-btn" data-id="{{ producto.id }}" data-nombre="{{ producto.nombre }}"
-        data-precio="{{ producto.precio }}" data-imagen="{{ producto.imagen.url }}">
-        Agregar
-      </button>
-      {% else %}
-      <span class="sin-stock-mensaje">Sin Stock</span>
-      {% endif %}
-    </div>
-  </div>
-</div>
 {% endwith %}
 
-<!-- Script pequeño para procesar la lógica visual del conflicto que el HTML puro no puede manejar bien -->
+<!-- Script para la lógica visual de dieta -->
 <script>
-  (function () {
-    // Buscamos el div oculto anterior a este script
-    const scripts = document.getElementsByTagName('script');
-    const currentScript = scripts[scripts.length - 1];
-    const card = currentScript.previousElementSibling; // El div tarjeta
-    const conflictMarker = card.previousElementSibling; // El div oculto
-
-    // Si encontramos el marcador de conflicto, activamos la clase CSS
-    if (conflictMarker && conflictMarker.getAttribute('data-set-conflicto') === 'true') {
-      card.classList.add('producto-incompatible');
-      const warningText = card.querySelector('.diet-warning-overlay span');
-      if (warningText) warningText.innerText = "⚠️ " + conflictMarker.getAttribute('data-motivo');
-    }
-  })();
+    (function() {
+        const scripts = document.getElementsByTagName('script');
+        const currentScript = scripts[scripts.length - 1];
+        const card = currentScript.previousElementSibling;
+        const conflictMarker = card ? card.previousElementSibling : null;
+        
+        if (conflictMarker && conflictMarker.getAttribute('data-set-conflicto') === 'true') {
+            card.classList.add('producto-incompatible');
+            const warningText = card.querySelector('.diet-warning-overlay span');
+            if(warningText) warningText.innerText = "⚠️ " + conflictMarker.getAttribute('data-motivo');
+        }
+    })();
 </script>

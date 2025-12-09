@@ -1,58 +1,221 @@
-/* --- ESTILOS DE FAVORITOS --- */
+/* =========================================
+   TARJETA SIMPLE DE PRODUCTO
+   ========================================= */
+
+/* --- CONTENEDOR PRINCIPAL --- */
 .tarjeta-producto {
-    position: relative; /* Necesario para posicionar el corazón */
+    position: relative; /* CLAVE: Define el marco para posicionar elementos absolutos (corazón, badges) */
+    background: white;
+    border-radius: 16px; /* Bordes redondeados modernos */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Sombra suave */
+    overflow: hidden; /* Asegura que la imagen no se salga de los bordes redondeados */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid rgba(0,0,0,0.02);
 }
 
+.tarjeta-producto:hover {
+    transform: translateY(-5px); /* Efecto de levitación */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- IMAGEN --- */
+.tarjeta-imagen-contenedor {
+    position: relative;
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+    background-color: #f3f4f6; /* Fondo gris pálido mientras carga */
+}
+
+.tarjeta-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Recorta la imagen para llenar el espacio sin deformarse */
+    transition: transform 0.5s ease;
+}
+
+.tarjeta-producto:hover .tarjeta-imagen {
+    transform: scale(1.05); /* Zoom suave al pasar el mouse */
+}
+
+/* --- CONTENIDO (TEXTO) --- */
+.tarjeta-contenido {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Ocupa el espacio restante para alinear botones al fondo */
+}
+
+.tarjeta-titulo {
+    font-size: 1.1rem;
+    margin: 8px 0;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.tarjeta-titulo a {
+    text-decoration: none;
+    color: #1f2937; /* Gris muy oscuro */
+    transition: color 0.2s;
+}
+
+.tarjeta-titulo a:hover {
+    color: var(--color-btn-principal-fondo, #4A6C48);
+}
+
+.tarjeta-precio {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-btn-principal-fondo, #4A6C48);
+    margin-bottom: 16px;
+}
+
+/* --- BOTONES DE ACCIÓN (PIE DE TARJETA) --- */
+.tarjeta-botones {
+    margin-top: auto; /* Empuja este bloque al final de la tarjeta */
+    display: flex;
+    gap: 10px;
+}
+
+.btn-ver-producto {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.btn-ver-producto:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.add-to-cart-btn {
+    flex: 2; /* El botón de comprar es más grande */
+    padding: 10px;
+    background-color: var(--color-btn-principal-fondo, #4A6C48);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.add-to-cart-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.sin-stock-mensaje {
+    width: 100%;
+    text-align: center;
+    color: #ef4444; /* Rojo */
+    font-weight: bold;
+    padding: 8px;
+    background: #fee2e2;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   ELEMENTOS FLOTANTES (Badge, Corazón)
+   ========================================= */
+
+/* --- BOTÓN FAVORITO (CORAZÓN) --- */
 .btn-favorito {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    border: none;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    width: 35px;
-    height: 35px;
+    background-color: rgba(255, 255, 255, 0.95); /* Blanco casi sólido */
+    border: 1px solid rgba(0,0,0,0.05);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
-    transition: all 0.2s;
-    color: #ccc; /* Gris cuando no es favorito */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 20; /* Asegura estar encima de la imagen */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    color: #cbd5e1; /* Gris claro (desactivado) */
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
 }
 
 .btn-favorito:hover {
     transform: scale(1.1);
-    background: white;
+    color: #ef4444; /* Rojo al pasar el mouse */
+    background-color: white;
 }
 
 .btn-favorito.activo {
-    color: #e74c3c; /* Rojo cuando es favorito */
+    color: #ef4444; /* Rojo permanente */
+    background-color: #fef2f2; /* Fondo rojizo muy suave */
+    border-color: #fecaca;
 }
 
+/* Animación de latido al dar like */
 .btn-favorito.activo i {
-    animation: latido 0.3s;
+    animation: heartbeat 0.4s ease-in-out;
 }
 
-@keyframes latido {
+@keyframes heartbeat {
     0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.3); }
     100% { transform: scale(1); }
 }
 
-/* --- ESTILOS DE INCOMPATIBILIDAD DIETARIA --- */
+/* --- BADGES (ETIQUETAS NUTRICIONALES) --- */
+.producto-badges {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column; /* Apilados verticalmente para no tapar mucho */
+    gap: 6px;
+    z-index: 15;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.badge-tacc { background-color: #f59e0b; }   /* Naranja/Amarillo */
+.badge-vegano { background-color: #10b981; } /* Verde esmeralda */
+
+/* --- ESTADOS DE INCOMPATIBILIDAD (Dieta) --- */
 .producto-incompatible {
+    filter: grayscale(1);
     opacity: 0.7;
-    filter: grayscale(0.8); /* Lo pone en blanco y negro */
-    pointer-events: none; /* Evita clics (opcional) */
 }
 
 .producto-incompatible:hover {
-    /* Si el usuario insiste, le dejamos ver */
-    filter: grayscale(0);
+    filter: grayscale(0.5); /* Recupera un poco de color al hover */
     opacity: 1;
-    pointer-events: auto;
 }
 
 .diet-warning-overlay {
@@ -61,35 +224,18 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     color: white;
-    padding: 8px 12px;
+    padding: 8px 16px;
     border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    z-index: 20;
-    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 25;
     width: 80%;
+    text-align: center;
+    backdrop-filter: blur(2px);
 }
 
 .producto-incompatible .diet-warning-overlay {
     display: block;
 }
-
-/* --- BADGES --- */
-.producto-badges {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    gap: 5px;
-}
-.badge {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: white;
-    font-weight: 600;
-}
-.badge-tacc { background-color: #f39c12; }
-.badge-vegano { background-color: #27ae60; }
