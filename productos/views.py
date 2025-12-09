@@ -1,11 +1,11 @@
-# productos/views.py
-
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Producto, Categoria
 from django.urls import reverse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger # <-- 1. IMPORTAR PAGINATOR
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 def lista_productos(request):
     # Obtenemos todos los productos (query base)
@@ -61,3 +61,39 @@ def live_search_api(request):
                 'imagen_url': producto.imagen.url if producto.imagen else ''
             })
     return JsonResponse({'productos': productos_sugeridos})
+
+@login_required
+@require_POST
+def toggle_favorito(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id)
+    
+    if producto.favoritos.filter(id=request.user.id).exists():
+        producto.favoritos.remove(request.user)
+        es_favorito = False
+        mensaje = "Eliminado de favoritos"
+    else:
+        producto.favoritos.add(request.user)
+        es_favorito = True
+        mensaje = "Añadido a favoritos"
+    
+    # NUEVO: Contamos cuántos favoritos tiene EL USUARIO en total
+    total_user_favorites = request.user.productos_favoritos.count()
+        
+    return JsonResponse({
+        'es_favorito': es_favorito, 
+        'mensaje': mensaje,
+        'total_user_favorites': total_user_favorites # <-- Enviamos este dato al JS
+    })
+
+@login_required
+def lista_favoritos(request):
+    """
+    Muestra la página con los productos que el usuario marcó como favoritos.
+    """
+    # Gracias al related_name en el modelo, podemos acceder así de fácil:
+    favoritos = request.user.productos_favoritos.all()
+    
+    contexto = {
+        'productos': favoritos,
+    }
+    return render(request, 'productos/favoritos.html', contexto)

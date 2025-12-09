@@ -7,6 +7,7 @@ from decimal import Decimal
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 # ===========================
 # 🔑 SECRET KEY & DEBUG
 # ===========================
@@ -16,29 +17,14 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # ===========================
 # 🌍 ALLOWED HOSTS
 # ===========================
-ALLOWED_HOSTS = []
-
-# Leemos el dominio de producción de PythonAnywhere (desde el .env)
-PA_DOMAIN = os.getenv("PYTHONANYWHERE_DOMAIN")
-if PA_DOMAIN:
-    ALLOWED_HOSTS.append(PA_DOMAIN)
-
-# Leemos el dominio de Render (si lo volvemos a usar)
-RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# ¡LÍNEA CLAVE! Si estamos en modo DEBUG (local),
-# añadimos los hosts de desarrollo automáticamente.
-if DEBUG:
-    ALLOWED_HOSTS.append('127.0.0.1')
-    ALLOWED_HOSTS.append('localhost')
+# Definimos explícitamente los dominios permitidos para evitar errores 400 en prod
+ALLOWED_HOSTS = ['luchy.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 # ===========================
-# 📦 INSTALLED APPS (¡ORDEN CORREGIDO!)
+# 📦 INSTALLED APPS
 # ===========================
 INSTALLED_APPS = [
-    # 1. TUS APPS (Tienen que cargarse primero)
+    # 1. TUS APPS
     'core',
     'productos',
     'recetas',
@@ -48,6 +34,7 @@ INSTALLED_APPS = [
     'usuarios',
     'carrito',
     'envios',
+    
 
     # 2. Paquetes de Terceros
     'jazzmin',
@@ -66,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.sitemaps',
 ]
 
 # ===========================
@@ -74,7 +62,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware', # <-- Mover aquí
+    # AllAuth middleware debe ir aquí, después de session
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -95,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Nuestro motor de temas personalizado
                 'configuracion.context_processors.apariencia_context',
             ],
         },
@@ -152,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # ===========================
 # 🌐 LANGUAGE / TIME
 # ===========================
-LANGUAGE_CODE = 'en-ar'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -165,17 +155,15 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
-# Ruta de media actualizada para desarrollo local
 if DEBUG:
     MEDIA_ROOT = BASE_DIR / 'media'
 else:
     MEDIA_ROOT = '/home/luchy/tienda-prog-iv/media'
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ===========================
-# 🎨 Jazzmin
+# 🎨 Jazzmin (PANEL ADMIN)
 # ===========================
 JAZZMIN_SETTINGS = {
     "site_title": "NutriTienda Admin",
@@ -188,6 +176,24 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
     ],
     "hide_models": ["auth.group"],
+    
+    # --- MENÚ PERSONALIZADO (AQUÍ ESTÁ EL DASHBOARD) ---
+    "custom_links": {
+        "carrito": [{
+            # Nombre que verás en el menú
+            "name": "Tablero de Ventas", 
+            
+            # El nombre de la URL definida en carrito/urls.py
+            "url": "admin_dashboard", 
+            
+            # Icono visual
+            "icon": "fas fa-chart-line",
+            
+            # Permisos (opcional)
+            "permissions": ["carrito.view_pedido"]
+        }]
+    },
+    # ---------------------------------------------------
 }
 
 # ===========================
@@ -214,7 +220,7 @@ GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_SECRET_KEY = os.getenv('GOOGLE_SECRET_KEY')
 
 # ===========================
-# 👤 ALLAUTH (BLOQUE ACTUALIZADO Y CORREGIDO)
+# 👤 ALLAUTH (CONFIGURACIÓN MODERNA)
 # ===========================
 SITE_ID = 1
 LOGIN_URL = 'account_login'
@@ -234,36 +240,22 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# --- CONFIGURACIÓN MODERNA DE ALLAUTH ---
-
-# 1. El email es el método de login
+# Configuración limpia y sin warnings
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
-
-# 2. El email es obligatorio y debe ser único
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
-
-# 3. Verificación de Email
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
-
-# 4. Confía en Google (no pide verificar email si vienes de Google)
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none" 
 SOCIALACCOUNT_AUTO_SIGNUP = True 
-
-# 5. Campos de Registro (solo pide email y passwords)
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-
-# 6. Adaptador para copiar email a username
 ACCOUNT_ADAPTER = 'usuarios.adapter.MyAccountAdapter'
-
-# 7. Opcional: seguridad
 ACCOUNT_PASSWORD_MIN_LENGTH = 6
 ACCOUNT_SESSION_REMEMBER = True
 
-# 8. Forzar el uso de nuestras plantillas de email personalizadas
+# Plantillas de email personalizadas
 ACCOUNT_EMAIL_TEMPLATES = {
     'email_confirmation': 'account/email/email_confirmation_message',
     'password_reset': 'account/email/password_reset_message',

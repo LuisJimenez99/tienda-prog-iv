@@ -6,16 +6,19 @@ from django.dispatch import receiver
 class Perfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
-    
     telefono = models.CharField(max_length=20, null=True, blank=True)
     direccion = models.CharField(max_length=255, null=True, blank=True)
     ciudad = models.CharField(max_length=100, null=True, blank=True)
     codigo_postal = models.CharField(max_length=10, null=True, blank=True)
     es_cliente_activo = models.BooleanField(default=False)
 
+    # --- NUEVAS PREFERENCIAS DIETARIAS ---
+    es_vegetariano = models.BooleanField(default=False, verbose_name="Soy Vegetariano")
+    es_vegano = models.BooleanField(default=False, verbose_name="Soy Vegano")
+    es_celiaco = models.BooleanField(default=False, verbose_name="Soy Celíaco (Sin TACC)")
+
     def __str__(self):
         return self.user.username
-
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

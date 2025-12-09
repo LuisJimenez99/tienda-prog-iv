@@ -1,0 +1,562 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* =========================================
+           1. RESET Y VARIABLES (ORGANIZACIÓN)
+           ========================================= */
+        :root {
+            --color-bg: #f3f4f6;          /* Gris muy suave de fondo */
+            --color-card: #ffffff;        /* Blanco puro para tarjetas */
+            --color-text-main: #1f2937;   /* Gris oscuro casi negro */
+            --color-text-muted: #6b7280;  /* Gris medio para etiquetas */
+            --color-primary: #417690;     /* Azul Django (Admin) */
+            --color-success: #10b981;     /* Verde éxito */
+            --color-danger: #ef4444;      /* Rojo alerta */
+            --color-warning: #f59e0b;     /* Naranja advertencia */
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius-lg: 16px;            /* Bordes más redondeados */
+        }
+
+        /* Forzamos al admin de Django a usar todo el ancho */
+        #content-main { width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        .main-content { width: 100% !important; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--color-bg);
+            margin: 0;
+            overflow-x: hidden; /* Evita scroll lateral accidental */
+        }
+
+        .dashboard-container {
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 1600px; /* Un límite sano para pantallas ultra-wide */
+            margin: 0 auto;
+        }
+
+        /* =========================================
+           2. HEADER Y FILTROS
+           ========================================= */
+        .dashboard-header {
+            background: var(--color-card);
+            padding: 20px 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .dashboard-title {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--color-text-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filters-wrapper {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .quick-filters {
+            display: flex;
+            background: #f9fafb;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-quick {
+            background: transparent;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-quick:hover { background: #e5e7eb; color: var(--color-text-main); }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--color-text-main);
+            outline: none;
+        }
+        .date-input:focus { border-color: var(--color-primary); }
+
+        .btn-filter {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-filter:hover { opacity: 0.9; }
+
+        /* =========================================
+           3. GRID SYSTEM (LA MAGIA DEL LAYOUT)
+           ========================================= */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr); /* 12 columnas invisibles */
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Tarjetas (Cards) Genéricas */
+        .card-box {
+            background: var(--color-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+        }
+        
+        .card-box:hover { transform: translateY(-2px); }
+
+        /* Títulos de Tarjetas */
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i { color: var(--color-primary); opacity: 0.8; }
+
+        /* =========================================
+           4. CONFIGURACIÓN DE TAMAÑOS (SPANS)
+           ========================================= */
+        
+        /* Fila 1: KPIs (3 tarjetas, 4 columnas cada una) */
+        .col-kpi { grid-column: span 4; }
+
+        /* Fila 2: Gráfico Diario (Ancho total) */
+        .col-full { grid-column: span 12; }
+
+        /* Fila 3: Gráficos Medios (Mitad y Mitad) */
+        .col-half { grid-column: span 6; }
+
+        /* Fila 4: Tercios (Para productos, estados, etc.) */
+        .col-third { grid-column: span 4; }
+
+        /* Fila 5: Tablas anchas */
+        .col-wide-table { grid-column: span 8; }
+        .col-small-table { grid-column: span 4; }
+
+        /* Responsividad: En tablet/móvil todo se apila */
+        @media (max-width: 1024px) {
+            .col-kpi { grid-column: span 6; }
+            .col-half { grid-column: span 12; }
+            .col-third { grid-column: span 6; }
+            .col-wide-table, .col-small-table { grid-column: span 12; }
+        }
+        @media (max-width: 768px) {
+            .col-kpi { grid-column: span 12; }
+            .col-third { grid-column: span 12; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; }
+            .filters-wrapper { width: 100%; flex-direction: column; align-items: flex-start; }
+        }
+
+        /* =========================================
+           5. ESTILOS DE KPIs
+           ========================================= */
+        .kpi-content { position: relative; }
+        .kpi-label { font-size: 0.875rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 2.5rem; font-weight: 800; color: var(--color-text-main); margin: 8px 0; letter-spacing: -1px; }
+        .kpi-icon-bg { position: absolute; right: 0; top: 0; font-size: 3.5rem; opacity: 0.05; color: var(--color-text-main); }
+        
+        .trend-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .trend-up { background-color: #dcfce7; color: #166534; }
+        .trend-down { background-color: #fee2e2; color: #991b1b; }
+        .trend-neutral { background-color: #f3f4f6; color: #4b5563; }
+
+        /* =========================================
+           6. TABLAS
+           ========================================= */
+        .table-responsive { overflow-x: auto; }
+        .styled-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .styled-table th { text-align: left; padding: 12px; color: var(--color-text-muted); font-weight: 600; border-bottom: 2px solid #f3f4f6; }
+        .styled-table td { padding: 12px; border-bottom: 1px solid #f9fafb; color: var(--color-text-main); vertical-align: middle; }
+        .styled-table tr:last-child td { border-bottom: none; }
+        
+        .stock-tag { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+        .btn-action { text-decoration: none; color: var(--color-primary); font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(65, 118, 144, 0.2); padding: 4px 8px; border-radius: 4px; transition: all 0.2s;}
+        .btn-action:hover { background: var(--color-primary); color: white; }
+
+        .chart-wrapper { position: relative; height: 300px; width: 100%; }
+        .chart-wrapper-sm { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- HEADER -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-rocket" style="color: var(--color-primary);"></i> 
+            Dashboard Ejecutivo
+        </h1>
+        
+        <div class="filters-wrapper">
+            <div class="quick-filters">
+                <button type="button" class="btn-quick" onclick="setDateRange(0)">Hoy</button>
+                <button type="button" class="btn-quick" onclick="setDateRange(7)">7 Días</button>
+                <button type="button" class="btn-quick" onclick="setDateRange(30)">Mes</button>
+            </div>
+            <form method="get" class="date-filter-form" id="filterForm" style="display:flex; gap:10px; align-items:center;">
+                <input type="date" name="fecha_inicio" id="startDate" value="{{ fecha_inicio }}" class="date-input">
+                <span style="color:#9ca3af;">—</span>
+                <input type="date" name="fecha_fin" id="endDate" value="{{ fecha_fin }}" class="date-input">
+                <button type="submit" class="btn-filter"><i class="fas fa-filter"></i> Filtrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FILA 1: KPIs -->
+    <div class="dashboard-grid">
+        <!-- Ingresos -->
+        <div class="card-box col-kpi">
+            <div class="kpi-content">
+                <div class="kpi-label">Ingresos Totales</div>
+                <div class="kpi-value">${{ ingresos_actual|floatformat:0 }}</div>
+                <i class="fas fa-wallet kpi-icon-bg"></i>
+                {% if crecimiento_ingresos >= 0 %}
+                    <span class="trend-badge trend-up"><i class="fas fa-arrow-up"></i> {{ crecimiento_ingresos|floatformat:1 }}% vs anterior</span>
+                {% else %}
+                    <span class="trend-badge trend-down"><i class="fas fa-arrow-down"></i> {{ crecimiento_ingresos|floatformat:1 }}% vs anterior</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ventas -->
+        <div class="card-box col-kpi">
+            <div class="kpi-content">
+                <div class="kpi-label">Pedidos Concretados</div>
+                <div class="kpi-value">{{ ventas_actual }}</div>
+                <i class="fas fa-shopping-bag kpi-icon-bg"></i>
+                {% if crecimiento_ventas >= 0 %}
+                    <span class="trend-badge trend-up"><i class="fas fa-arrow-up"></i> {{ crecimiento_ventas|floatformat:1 }}%</span>
+                {% else %}
+                    <span class="trend-badge trend-down"><i class="fas fa-arrow-down"></i> {{ crecimiento_ventas|floatformat:1 }}%</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ticket -->
+        <div class="card-box col-kpi">
+            <div class="kpi-content">
+                <div class="kpi-label">Ticket Promedio</div>
+                <div class="kpi-value">${{ ticket_actual|floatformat:0 }}</div>
+                <i class="fas fa-receipt kpi-icon-bg"></i>
+                <span class="trend-badge trend-neutral">Promedio por compra</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 2: GRÁFICO PRINCIPAL -->
+    <div class="dashboard-grid">
+        <div class="card-box col-full">
+            <div class="card-title">
+                <span><i class="fas fa-chart-area"></i> Tendencia de Ingresos</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 3: ANÁLISIS ESTRATÉGICO -->
+    <div class="dashboard-grid">
+        <!-- Ventas por Categoría -->
+        <div class="card-box col-half">
+            <div class="card-title"><span><i class="fas fa-chart-pie"></i> Ventas por Categoría ($)</span></div>
+            <div class="chart-wrapper">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Productos -->
+        <div class="card-box col-half">
+            <div class="card-title"><span><i class="fas fa-trophy"></i> Top 5 Productos (Unidades)</span></div>
+            <div class="chart-wrapper">
+                <canvas id="productsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 4: PATRONES DE TIEMPO -->
+    <div class="dashboard-grid">
+        <div class="card-box col-half">
+            <div class="card-title"><span><i class="far fa-calendar-alt"></i> Días de la Semana</span></div>
+            <div class="chart-wrapper">
+                <canvas id="weekChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card-box col-half">
+            <div class="card-title"><span><i class="far fa-clock"></i> Horarios Pico</span></div>
+            <div class="chart-wrapper">
+                <canvas id="hoursChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 5: ESTADO Y STOCK -->
+    <div class="dashboard-grid">
+        <div class="card-box col-third">
+            <div class="card-title"><span><i class="fas fa-tasks"></i> Estado Operativo</span></div>
+            <div class="chart-wrapper-sm">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card-box col-wide-table">
+            <div class="card-title" style="color: var(--color-danger);">
+                <span><i class="fas fa-exclamation-triangle"></i> Alerta: Stock Bajo</span>
+            </div>
+            <div class="table-responsive">
+                <table class="styled-table">
+                    <thead><tr><th>Producto</th><th>Stock</th><th>Acción</th></tr></thead>
+                    <tbody>
+                        {% for prod in stock_critico %}
+                        <tr>
+                            <td>{{ prod.nombre }}</td>
+                            <td><span class="stock-tag">{{ prod.stock }} u.</span></td>
+                            <td><a href="/admin/productos/producto/{{ prod.id }}/change/" target="_blank" class="btn-action">Reponer <i class="fas fa-external-link-alt"></i></a></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" style="text-align:center; padding: 20px; color: #10b981;">¡Inventario Saludable! ✅</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 6: CLIENTES -->
+    <div class="dashboard-grid">
+        <div class="card-box col-full">
+            <div class="card-title"><span><i class="fas fa-users"></i> Clientes VIP (Periodo)</span></div>
+            <div class="table-responsive">
+                <table class="styled-table">
+                    <thead><tr><th>Cliente</th><th>Email</th><th>Compras</th><th>Total Gastado</th></tr></thead>
+                    <tbody>
+                        {% for cliente in top_clientes %}
+                        <tr>
+                            <td><strong>{{ cliente.cliente__username }}</strong></td>
+                            <td style="color:#6b7280;">{{ cliente.cliente__email }}</td>
+                            <td style="text-align:center;">{{ cliente.compras }}</td>
+                            <td style="color: var(--color-success); font-weight: bold;">${{ cliente.total_gastado|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="text-align:center; padding: 20px;">Sin datos en este periodo.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- DATA TRANSFER -->
+{{ labels_dias|json_script:"labels-dias" }}
+{{ data_ingresos_dia|json_script:"data-ingresos" }}
+{{ labels_cat|json_script:"labels-cat" }}
+{{ data_cat|json_script:"data-cat" }}
+{{ labels_semana|json_script:"labels-semana" }}
+{{ data_semana|json_script:"data-semana" }}
+{{ labels_horas|json_script:"labels-horas" }}
+{{ data_horas|json_script:"data-horas" }}
+{{ labels_prod|json_script:"labels-prod" }}
+{{ data_prod|json_script:"data-prod" }}
+{{ labels_est|json_script:"labels-est" }}
+{{ data_est|json_script:"data-est" }}
+{{ colores_est|json_script:"colores-est" }}
+
+<script>
+    function setDateRange(days) {
+        const end = new Date();
+        const start = new Date();
+        if (days > 0) { start.setDate(end.getDate() - days); } else { start.setHours(0,0,0,0); }
+        document.getElementById('endDate').valueAsDate = end;
+        document.getElementById('startDate').valueAsDate = start;
+        document.getElementById('filterForm').submit();
+    }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración Base de Estilo para todos los gráficos
+    Chart.defaults.font.family = "'Segoe UI', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.color = '#6b7280';
+    
+    const commonOptions = { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { usePointStyle: true, boxWidth: 6 } }
+        }
+    };
+
+    // 1. Gráfico Diario (Línea Suave)
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'line',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-dias').textContent),
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: JSON.parse(document.getElementById('data-ingresos').textContent),
+                borderColor: '#417690',
+                backgroundColor: 'rgba(65, 118, 144, 0.05)',
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#417690',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { 
+            ...commonOptions, 
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { borderDash: [2, 4], color: '#f3f4f6' },
+                    ticks: { callback: v => '$' + v } 
+                },
+                x: { grid: { display: false } }
+            } 
+        }
+    });
+
+    // 2. Categoría (Pie)
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-cat').textContent),
+            datasets: [{
+                data: JSON.parse(document.getElementById('data-cat').textContent),
+                backgroundColor: ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
+                borderWidth: 0
+            }]
+        },
+        options: { ...commonOptions, plugins: { legend: { position: 'right' } } }
+    });
+
+    // 3. Top Productos (Horizontal)
+    new Chart(document.getElementById('productsChart'), {
+        type: 'bar',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-prod').textContent),
+            datasets: [{
+                label: 'Unidades',
+                data: JSON.parse(document.getElementById('data-prod').textContent),
+                backgroundColor: '#3b82f6',
+                borderRadius: 4,
+                barThickness: 20
+            }]
+        },
+        options: { 
+            ...commonOptions, 
+            indexAxis: 'y', 
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
+        }
+    });
+
+    // 4. Semanal (Barra Vertical)
+    new Chart(document.getElementById('weekChart'), {
+        type: 'bar',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-semana').textContent),
+            datasets: [{
+                label: 'Pedidos',
+                data: JSON.parse(document.getElementById('data-semana').textContent),
+                backgroundColor: '#f97316',
+                borderRadius: 4
+            }]
+        },
+        options: { 
+            ...commonOptions, 
+            plugins: { legend: { display: false } },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 5. Horas Pico (Barra Vertical)
+    new Chart(document.getElementById('hoursChart'), {
+        type: 'bar',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-horas').textContent),
+            datasets: [{
+                label: 'Pedidos',
+                data: JSON.parse(document.getElementById('data-horas').textContent),
+                backgroundColor: '#8b5cf6',
+                borderRadius: 4
+            }]
+        },
+        options: { 
+            ...commonOptions, 
+            plugins: { legend: { display: false } },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 6. Estados (Dona)
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: JSON.parse(document.getElementById('labels-est').textContent),
+            datasets: [{
+                data: JSON.parse(document.getElementById('data-est').textContent),
+                backgroundColor: JSON.parse(document.getElementById('colores-est').textContent),
+                borderWidth: 0
+            }]
+        },
+        options: { ...commonOptions, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } }, cutout: '70%' }
+    });
+});
+</script>
+{% endblock %}

@@ -780,3 +780,56 @@ body {
         right: 20px;
     }
 }
+
+
+/* Estilo base del círculo rojo con el número */
+.cart-counter {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: var(--color-carrito-activo, #e74c3c); /* Usa variable o rojo por defecto */
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 20;
+
+    /* Estado inicial: Oculto y pequeño (invisible) */
+    opacity: 0;
+    transform: scale(0);
+    
+    /* Animación suave tipo "rebote" al aparecer */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; /* Para que el clic pase a través del número al ícono */
+}
+
+/* Estado Visible: Se activa cuando JS añade la clase 'has-items' */
+.cart-counter.has-items {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* =========================================
+   ANIMACIÓN DE "LATIDO" (Heartbeat)
+   ========================================= */
+
+@keyframes fa-beat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.3); }
+    60% { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+/* Esta clase la añade JS temporalmente al ícono */
+.fa-beat {
+    animation: fa-beat 0.8s ease-in-out;
+    color: #e74c3c !important; /* Se pone rojo mientras late */
+}

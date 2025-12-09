@@ -1,0 +1,95 @@
+/* --- ESTILOS DE FAVORITOS --- */
+.tarjeta-producto {
+    position: relative; /* Necesario para posicionar el corazón */
+}
+
+.btn-favorito {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+    color: #ccc; /* Gris cuando no es favorito */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-favorito:hover {
+    transform: scale(1.1);
+    background: white;
+}
+
+.btn-favorito.activo {
+    color: #e74c3c; /* Rojo cuando es favorito */
+}
+
+.btn-favorito.activo i {
+    animation: latido 0.3s;
+}
+
+@keyframes latido {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* --- ESTILOS DE INCOMPATIBILIDAD DIETARIA --- */
+.producto-incompatible {
+    opacity: 0.7;
+    filter: grayscale(0.8); /* Lo pone en blanco y negro */
+    pointer-events: none; /* Evita clics (opcional) */
+}
+
+.producto-incompatible:hover {
+    /* Si el usuario insiste, le dejamos ver */
+    filter: grayscale(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.diet-warning-overlay {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 20;
+    text-align: center;
+    width: 80%;
+}
+
+.producto-incompatible .diet-warning-overlay {
+    display: block;
+}
+
+/* --- BADGES --- */
+.producto-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 5px;
+}
+.badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 600;
+}
+.badge-tacc { background-color: #f39c12; }
+.badge-vegano { background-color: #27ae60; }

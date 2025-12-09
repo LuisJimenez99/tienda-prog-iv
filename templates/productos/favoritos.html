@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/lista_productos.css' %}">
+<style>
+    .favoritos-header {
+        text-align: center;
+        padding: 3rem 1rem;
+        background-color: #f9f9f9;
+        margin-bottom: 2rem;
+    }
+
+    .favoritos-header h1 {
+        font-family: var(--fuente-tarjetas);
+        color: var(--color-titulo-tarjeta);
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .favoritos-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .empty-favorites {
+        text-align: center;
+        padding: 4rem 1rem;
+    }
+
+    .empty-favorites i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .btn-explorar {
+        margin-top: 20px;
+        display: inline-block;
+        background-color: var(--color-btn-principal-fondo);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+
+    .btn-explorar:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Encabezado -->
+<div class="favoritos-header">
+    <h1>Mis Favoritos ❤️</h1>
+    <p>Tus platos preferidos, guardados para pedir rápido.</p>
+</div>
+
+<!-- Lista de Productos -->
+<div class="contenedor-principal">
+    {% if productos %}
+    <div class="contenedor-grid-productos">
+        {% for producto in productos %}
+        <!-- Reutilizamos la misma tarjeta que en el inicio -->
+        {% include 'productos/partials/card_simple.html' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado Vacío -->
+    <div class="empty-favorites">
+        <i class="far fa-heart"></i>
+        <h2>Aún no tienes favoritos</h2>
+        <p>Explora nuestro menú y guarda lo que más te guste haciendo clic en el corazón.</p>
+        <a href="{% url 'lista_productos' %}" class="btn-explorar">Explorar Menú</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
