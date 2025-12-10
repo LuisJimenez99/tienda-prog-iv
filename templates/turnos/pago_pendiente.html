@@ -2,20 +2,63 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/pago_pendiente.css' %}">
+  <!-- FontAwesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="checkout-wrapper">
-    <div class="confirmacion-box">
-        <h2><i class="fas fa-clock"></i> Pago Pendiente</h2>
-        <p>Tu pago está siendo procesado. Esto es normal si elegiste pagar en un punto de pago en efectivo (como Rapipago o Pagofácil).</p>
-        <p class="resumen-confirmado">
-            Tu turno para el <strong>{{ turno.fecha|date:"l, d \d\e F" }}</strong> a las <strong>{{ turno.hora|time:"H:i" }} hs</strong> quedará confirmado una vez que se acredite el pago.
+<div class="pendiente-wrapper">
+    <div class="pendiente-card">
+        
+        <!-- Icono (Reloj o Check) -->
+        <div class="icon-container">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+
+        <h1>¡Reserva Registrada!</h1>
+        
+        <p>
+            Tu turno ha sido reservado temporalmente. <br>
+            Para confirmarlo definitivamente, por favor realiza la transferencia.
         </p>
-        <p>Recibirás un email de confirmación cuando esto ocurra. No necesitas hacer nada más.</p>
-        <a href="{% url 'inicio' %}" class="btn-principal" style="margin-top: 20px;">Volver al Inicio</a>
+
+        <!-- Resumen del Turno -->
+        {% if turno %}
+        <div class="detalle-turno">
+            <div class="detalle-row">
+                <span>Fecha:</span>
+                <strong>{{ turno.fecha|date:"l d F"|capfirst }}</strong>
+            </div>
+            <div class="detalle-row">
+                <span>Hora:</span>
+                <strong>{{ turno.hora|time:"H:i" }} hs</strong>
+            </div>
+            <div class="detalle-row">
+                <span>Total a transferir:</span>
+                <strong style="color: var(--color-btn-principal-fondo);">${{ settings.PRECIO_CONSULTA|default:"1500" }}</strong>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Datos Bancarios -->
+        <div class="datos-banco">
+            <h3>Datos de la Cuenta</h3>
+            <p class="banco-info">Alias: <strong>delu.photos</strong></p>
+            <!-- Puedes agregar CBU aquí si lo tienes en el contexto -->
+            <span class="copy-hint">Envíanos el comprobante para confirmar.</span>
+        </div>
+
+        <!-- Botones -->
+        <div class="acciones">
+            <!-- Botón WhatsApp (Reemplaza el número con el tuyo real) -->
+            <a href="https://wa.me/5491112345678?text=Hola,%20envío%20comprobante%20para%20el%20turno%20#{{ turno.id }}" target="_blank" class="btn-whatsapp">
+                <i class="fab fa-whatsapp"></i> Enviar Comprobante
+            </a>
+            
+            <a href="{% url 'inicio' %}" class="btn-volver">Volver al Inicio</a>
+        </div>
+
     </div>
 </div>
 {% endblock %}
-

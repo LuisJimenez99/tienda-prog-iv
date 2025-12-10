@@ -2,62 +2,100 @@
 {% load static %}
 
 {% block extra_css %}
+  <!-- Vinculamos el CSS mejorado -->
   <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
 {% endblock %}
 
 {% block content %}
-<script src="https://sdk.mercadopago.com/js/v2"></script>
-
+<!-- Contenedor principal con la clase correcta -->
 <div class="checkout-wrapper">
-    <h2>Confirma y Paga tu Turno</h2>
     
-    <div class="resumen-turno">
-        <h3>Resumen de tu Cita</h3>
-        <p><strong>Fecha:</strong> {{ turno.fecha|date:"l, d \d\e F \d\e Y" }}</p>
-        <p><strong>Hora:</strong> {{ turno.hora|time:"H:i" }} hs</p>
-        <p><strong>Precio:</strong> ${{ precio|floatformat:2 }}</p>
+    <div class="checkout-card">
+        <!-- Encabezado de la Tarjeta -->
+        <div class="card-header">
+            <h2>Confirmar Reserva</h2>
+            <p>Estás a un paso de agendar tu consulta.</p>
+        </div>
+
+        <!-- Resumen del Turno (Ticket) -->
+        <div class="turno-ticket">
+            <div class="ticket-row">
+                <span class="ticket-label"><i class="far fa-calendar-alt"></i> Fecha:</span>
+                <!-- Formato legible: Lunes 10 de Diciembre -->
+                <span class="ticket-value">{{ turno.fecha|date:"l d \d\e F"|capfirst }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="ticket-label"><i class="far fa-clock"></i> Hora:</span>
+                <span class="ticket-value">{{ turno.hora|time:"H:i" }} hs</span>
+            </div>
+            <div class="ticket-row">
+                <span class="ticket-label"><i class="fas fa-user-md"></i> Servicio:</span>
+                <span class="ticket-value">Nutrición General</span>
+            </div>
+            <hr class="ticket-divider">
+            <div class="ticket-row total">
+                <span class="ticket-label">Total a Pagar:</span>
+                <span class="ticket-value precio">${{ precio|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <!-- Selección de Pago -->
+        <div class="pago-section">
+            <h3>Selecciona forma de pago:</h3>
+
+            <!-- Opción 1: Mercado Pago -->
+            <div class="metodo-pago mp-box">
+                <div class="mp-header">
+                    <!-- Logo oficial de MP (puedes cambiar la URL si prefieres uno local) -->
+                    <img src="https://logotipoz.com/wp-content/uploads/2021/10/version-horizontal-large-logo-mercado-pago.webp" alt="Mercado Pago" class="mp-logo">
+                </div>
+                <p class="mp-desc">Tarjetas de crédito, débito o dinero en cuenta.</p>
+                <!-- Aquí el SDK de MP inyectará el botón de pago -->
+                <div id="wallet_container"></div>
+            </div>
+
+            <!-- Separador visual -->
+            <div class="separador-o"><span>O</span></div>
+
+            <!-- Opción 2: Transferencia Bancaria -->
+            <div class="metodo-pago transferencia-box">
+                <div class="transf-header">
+                    <i class="fas fa-university"></i>
+                    <h4>Transferencia Bancaria</h4>
+                </div>
+                <p class="transf-desc">
+                    Alias: <strong>{{ datos_pago.cbu_alias }}</strong><br>
+                    <small>Envía el comprobante por WhatsApp para confirmar.</small>
+                </p>
+                
+                <!-- Botón que lleva a la vista de confirmación manual -->
+                <a href="{% url 'confirmar_transferencia_turno' turno.id %}" class="btn-transferencia">
+                    Reservar con Transferencia
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="metodos-pago">
-        <div class="pago-opcion">
-            <h4>1. Paga online con Mercado Pago</h4>
-            <p>Tarjetas de crédito, débito y otros medios de pago. La confirmación es inmediata.</p>
-            
-            <!-- 2. Este es el contenedor donde Mercado Pago dibujará su botón de pago. -->
-            <div id="wallet_container" style="margin-top: 15px;"></div>
-        </div>
-        
-        <div class="pago-opcion">
-            <h4>2. Transferencia Bancaria</h4>
-            <p>Si eliges esta opción, finaliza la reserva y envía el comprobante por WhatsApp. Tu turno quedará pendiente de confirmación manual.</p>
-            <div class="datos-transferencia">
-                <strong>Alias/CBU:</strong> {{ datos_pago.cbu_alias|default:"No configurado" }}
-            </div>
-            <!-- Este botón te llevará a la página que crearemos en el futuro para manejar la confirmación por transferencia -->
-            <a href="{% url 'confirmar_reserva' %}" class="btn-principal" style="margin-top: 20px;">Finalizar con Transferencia</a>
-        </div>
-    </div>
 </div>
 
+<!-- SDK de Mercado Pago (Frontend) -->
+<script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
-    // 3. Este script inicializa el checkout de Mercado Pago.
-    //    Usa la Public Key que le pasamos desde la vista de Python.
-    const mp = new MercadoPago('{{ public_key }}', {
-        locale: 'es-AR' // Configuramos el idioma a español de Argentina
-    });
-
-    // Creamos el componente 'wallet' (el botón de pago) dentro del div 'wallet_container'.
+    // Inicializamos MP con la clave pública del contexto
+    const mp = new MercadoPago("{{ public_key }}");
+    const bricksBuilder = mp.bricks();
+    
+    // Creamos el botón de pago ("Wallet Brick")
     mp.bricks().create("wallet", "wallet_container", {
         initialization: {
-            // Le pasamos el ID de la preferencia de pago que generó nuestro backend.
-            preferenceId: "{{ preference_id }}",
+            preferenceId: "{{ preference_id }}", // ID generado en el backend
         },
         customization: {
             texts: {
-                valueProp: 'smart_option', // Muestra textos como "Paga con tu cuenta de Mercado Pago"
+                action: 'pay',
+                valueProp: 'security_details',
             },
-        }
+        },
     });
 </script>
 {% endblock %}
-

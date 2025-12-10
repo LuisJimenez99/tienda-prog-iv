@@ -1,137 +1,248 @@
 /* =================================
-   PÁGINA: CALENDARIO DE TURNOS
+   PÁGINA: AGENDA DE TURNOS (MODERNA)
    ================================= */
 
-/* Estilos del Calendario */
-.opcion-calendario-wrapper {
-  background-color: #fff;
-  padding: 60px 20px;
-}
-.opcion-calendario {
-  max-width: 900px;
-  margin: 0 auto;
-}
-.contenedor-turnos {
-  display: flex;
-  gap: 30px;
-}
-.calendario-grid {
-  flex: 1.5;
-}
-.horarios-disponibles {
-  flex: 1;
-}
-.mes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-.mes-header button {
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-}
-.mes-header button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.dias-semana {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  color: #999;
-  font-size: 0.8rem;
-  margin-bottom: 10px;
-}
-.dias-calendario {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-}
-.dia {
-  padding: 10px;
-  border-radius: 8px;
-}
-.dia.otro-mes {
-  color: #ccc;
-}
-.dia.disponible {
-  cursor: pointer;
-  font-weight: 600;
-}
-.dia.disponible:hover {
-  background-color: #f0f0f0;
-}
-.dia.hoy {
-  border: 2px solid var(--color-btn-principal-fondo, #78857A);
-  padding: 8px;
-}
-.dia.seleccionado {
-  background-color: var(--color-btn-principal-fondo, #78857A);
-  color: #fff;
-}
-.horarios-lista {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 15px;
-}
-.horario-item {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.horario-item:hover {
-  border-color: var(--color-btn-principal-fondo, #78857A);
-}
-.horario-item.seleccionado {
-  background-color: var(--color-btn-principal-fondo, #78857A);
-  color: #fff;
-  border-color: var(--color-btn-principal-fondo, #78857A);
-}
-.horarios-placeholder {
-  color: #999;
-  grid-column: 1 / -1;
-  text-align: center;
-}
-.titulo-seccion-turnos {
-  font-family: 'Lora', serif;
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-}
-.boton-confirmar {
-  display: block;
-  width: 100%;
-  padding: 15px;
-  background-color: var(--color-btn-principal-fondo, #78857A);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s ease;
-}
-.boton-confirmar:hover {
-  background-color: var(--color-btn-principal-hover, #647066);
-}
-.boton-confirmar:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.agenda-wrapper {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    min-height: 60vh;
 }
 
-@media (max-width: 768px) {
-  .contenedor-turnos {
+.agenda-header { 
+    text-align: center; 
+    margin-bottom: 2.5rem; 
+}
+
+.agenda-header h1 { 
+    font-family: var(--fuente-tarjetas, sans-serif); 
+    color: var(--color-titulo-tarjeta, #333); 
+    font-size: 2rem;
+    margin-bottom: 0.5rem; 
+}
+
+.agenda-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* --- CONTENEDOR PRINCIPAL (2 COLUMNAS) --- */
+.agenda-container {
+    display: flex;
+    gap: 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+/* --- COLUMNA 1: CALENDARIO (IZQUIERDA) --- */
+.col-calendario {
+    flex: 0 0 auto;
+    border-right: 1px solid #eee;
+    padding-right: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+/* === PERSONALIZACIÓN DE FLATPICKR (Tema NutriTienda) === */
+.flatpickr-calendar {
+    box-shadow: none !important;
+    border: none !important;
+    width: 300px !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    background: transparent !important;
+    color: #333 !important;
+    fill: #333 !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    font-weight: 700 !important;
+}
+
+/* Días seleccionados y rangos */
+.flatpickr-day.selected, 
+.flatpickr-day.startRange, 
+.flatpickr-day.endRange, 
+.flatpickr-day.selected.inRange, 
+.flatpickr-day.startRange.inRange, 
+.flatpickr-day.endRange.inRange, 
+.flatpickr-day.selected:focus, 
+.flatpickr-day.startRange:focus, 
+.flatpickr-day.endRange:focus, 
+.flatpickr-day.selected:hover, 
+.flatpickr-day.startRange:hover, 
+.flatpickr-day.endRange:hover {
+    background: var(--color-btn-principal-fondo, #4A6C48) !important;
+    border-color: var(--color-btn-principal-fondo, #4A6C48) !important;
+    color: var(--color-btn-principal-texto, #fff) !important;
+}
+
+/* Día actual (borde) */
+.flatpickr-day.today {
+    border-color: var(--color-btn-principal-fondo, #4A6C48) !important;
+}
+.flatpickr-day.today:hover {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+}
+
+
+/* --- COLUMNA 2: HORARIOS (DERECHA) --- */
+.col-horarios {
+    flex: 1;
+    padding-left: 10px;
+}
+
+.horarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.horarios-header h3 { 
+    margin: 0; 
+    color: #2c3e50; 
+    text-transform: capitalize; 
+    font-size: 1.3rem;
+}
+
+/* --- GRILLA DE HORARIOS --- */
+.grid-horarios {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.grid-horarios-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* BOTÓN DE HORA */
+.btn-hora {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-hora:hover {
+    border-color: var(--color-btn-principal-fondo, #4A6C48);
+    color: var(--color-btn-principal-fondo, #4A6C48);
+    background-color: #fcfcfc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.btn-hora.selected {
+    background-color: var(--color-btn-principal-fondo, #4A6C48);
+    color: white;
+    border-color: var(--color-btn-principal-fondo, #4A6C48);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* --- ÁREA DE CONFIRMACIÓN (NUEVO) --- */
+.confirm-action-area {
+    border-top: 1px dashed #e0e0e0;
+    padding-top: 20px;
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+.btn-confirmar-seleccion {
+    background-color: var(--color-btn-principal-fondo, #4A6C48);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 50px; /* Botón píldora */
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(74, 108, 72, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+    max-width: 300px;
+}
+
+.btn-confirmar-seleccion:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(74, 108, 72, 0.4);
+    filter: brightness(1.1);
+}
+
+/* ESTADOS DE CARGA Y VACÍO */
+.loading-spinner { 
+    color: var(--color-btn-principal-fondo, #4A6C48); 
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.empty-state-horarios {
+    text-align: center;
+    color: #9ca3af;
+    margin-top: 40px;
+    display: flex;
     flex-direction: column;
-  }
+    align-items: center;
+    gap: 10px;
+}
+
+.empty-state-horarios i {
+    font-size: 3rem;
+    opacity: 0.2;
+}
+
+.error-msg {
+    color: #ef4444;
+    text-align: center;
+    margin-top: 20px;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .agenda-container { 
+        flex-direction: column; 
+        align-items: center; 
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .col-calendario { 
+        border-right: none; 
+        border-bottom: 1px solid #eee; 
+        padding-right: 0; 
+        padding-bottom: 25px; 
+        width: 100%;
+    }
+    
+    .col-horarios {
+        width: 100%;
+        padding-left: 0;
+    }
+
+    .flatpickr-calendar {
+        margin: 0 auto;
+    }
 }

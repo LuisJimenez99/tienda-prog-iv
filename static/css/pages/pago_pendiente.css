@@ -1,0 +1,145 @@
+/* =========================================
+   ESTILOS DE CONFIRMACIÓN DE TRANSFERENCIA
+   ========================================= */
+
+/* --- 1. WRAPPER PRINCIPAL --- */
+.pendiente-wrapper {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: #f3f4f6; /* Gris suave */
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- 2. TARJETA CENTRAL --- */
+.pendiente-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 550px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    text-align: center; /* Todo centrado */
+    border-top: 6px solid var(--color-btn-principal-fondo, #4A6C48); /* Línea de color arriba */
+}
+
+/* --- 3. ICONO DE ESTADO --- */
+.icon-container {
+    width: 80px;
+    height: 80px;
+    background-color: #f0fdf4; /* Verde muy claro */
+    color: var(--color-btn-principal-fondo, #4A6C48);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px; /* Centrado */
+    font-size: 2.5rem;
+}
+
+.icon-container.pending {
+    background-color: #fffbeb; /* Amarillo claro */
+    color: #f59e0b; /* Naranja/Amarillo */
+}
+
+/* --- 4. TEXTOS --- */
+.pendiente-card h1 {
+    font-family: var(--fuente-tarjetas, serif);
+    color: #111827;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.pendiente-card p {
+    color: #4b5563;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* --- 5. DETALLES DEL TURNO (CAJA) --- */
+.detalle-turno {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.detalle-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #374151;
+}
+.detalle-row strong { color: #111827; }
+
+/* --- 6. DATOS BANCARIOS (DESTACADO) --- */
+.datos-banco {
+    background-color: #ecfdf5; /* Verde menta muy suave */
+    border: 1px dashed var(--color-btn-principal-fondo, #4A6C48);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.datos-banco h3 {
+    color: var(--color-btn-principal-fondo, #4A6C48);
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.banco-info {
+    font-size: 1.1rem;
+    color: #064e3b;
+    margin: 5px 0;
+}
+
+.copy-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 10px;
+    display: block;
+}
+
+/* --- 7. BOTONES DE ACCIÓN --- */
+.acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #25d366; /* Verde WhatsApp */
+    color: white;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
+}
+
+.btn-whatsapp:hover {
+    transform: translateY(-2px);
+    background-color: #128c7e;
+}
+
+.btn-volver {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.btn-volver:hover { color: #111827; text-decoration: underline; }

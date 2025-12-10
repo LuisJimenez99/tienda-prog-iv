@@ -2,126 +2,74 @@
 {% load static %}
 
 {% block extra_css %}
+  <!-- 1. Librería Flatpickr (El motor del calendario visual) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <!-- Estilos modernos para Flatpickr (Tema Airbnb) -->
+  <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+
+  <!-- 2. Nuestros estilos personalizados para la agenda -->
   <link rel="stylesheet" href="{% static 'css/pages/calendario.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="opcion-calendario-wrapper">
-    <div class="opcion-calendario">
-        <h1>Elige tu Turno</h1>
-        <p class="descripcion">Selecciona un día disponible en el calendario para ver los horarios. Luego, elige la hora que prefieras para tu consulta.</p>
+<div class="agenda-wrapper">
+    
+    <!-- ENCABEZADO -->
+    <div class="agenda-header">
+        <h1>Reservar Turno</h1>
+        <p>Selecciona un día disponible en el calendario para ver los horarios de consulta.</p>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL (2 COLUMNAS) -->
+    <div class="agenda-container">
         
-        <div class="contenedor-turnos">
-            
-            <!-- Calendario Grid -->
-            <div class="calendario-grid">
-                <div class="mes-header">
-                    <button id="prev-month" type="button" disabled>&lt;</button>
-                    <h3 id="month-name">{{ month_name }} {{ year }}</h3>
-                    <button id="next-month" type="button" disabled>&gt;</button>
-                </div>
-                <div class="dias-semana">
-                    <div>LU</div> <div>MA</div> <div>MI</div> <div>JU</div> <div>VI</div> <div>SA</div> <div>DO</div>
-                </div>
-                <div class="dias-calendario" id="dias-calendario">
-                    {% for week in month_calendar %}
-                        {% for day in week %}
-                            {% if day.month == current_month %}
-                                <div class="dia 
-                                    {% if day in dias_disponibles %}disponible{% endif %} 
-                                    {% if day == today %}hoy{% endif %}" 
-                                    data-date="{{ day|date:'Y-m-d' }}">
-                                    {{ day.day }}
-                                </div>
-                            {% else %}
-                                <div class="dia otro-mes">{{ day.day }}</div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-                </div>
+        <!-- COLUMNA 1: CALENDARIO INTERACTIVO -->
+        <div class="col-calendario">
+            <!-- Aquí Flatpickr inyectará el calendario -->
+            <div id="inline-calendar"></div>
+        </div>
+
+        <!-- COLUMNA 2: HORARIOS DISPONIBLES -->
+        <div class="col-horarios">
+            <div class="horarios-header">
+                <!-- Título dinámico (ej: "Viernes 12 de Octubre") -->
+                <h3 id="fecha-seleccionada-titulo">Selecciona una fecha</h3>
+                
+                <!-- Spinner de carga (oculto por defecto) -->
+                <span id="estado-loading" class="loading-spinner" style="display:none;">
+                    <i class="fas fa-circle-notch fa-spin"></i> Buscando...
+                </span>
             </div>
-            
-            <!-- Horarios Disponibles -->
-            <div class="horarios-disponibles">
-                <h3 id="horarios-titulo" class="titulo-seccion-turnos">Selecciona un día</h3>
-                <div id="horarios-lista" class="horarios-lista">
-                    <p class="horarios-placeholder">Los horarios disponibles aparecerán aquí.</p>
+
+            <!-- Grilla donde se dibujarán los botones de hora -->
+            <div id="lista-horarios" class="grid-horarios">
+                <div class="empty-state-horarios">
+                    <i class="far fa-calendar-alt"></i>
+                    <p>Elige un día en el calendario para ver la disponibilidad.</p>
                 </div>
-                <!-- El atributo type="button" es crucial para evitar que la página se recargue -->
-                <button class="boton-confirmar" type="button" disabled>Confirmar Turno</button>
             </div>
         </div>
     </div>
+
 </div>
 
+<!-- 
+    FORMULARIO OCULTO 
+    Este form no se ve, pero es el que JS llenará y enviará al backend 
+    cuando el usuario haga clic en un horario.
+-->
+<form id="form-reserva" method="POST" action="{% url 'reservar_turno' %}" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="fecha" id="input-fecha">
+    <input type="hidden" name="hora" id="input-hora">
+</form>
 
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const diasCalendario = document.getElementById('dias-calendario');
-    const horariosLista = document.getElementById('horarios-lista');
-    const horariosTitulo = document.getElementById('horarios-titulo');
-    const btnConfirmar = document.querySelector('.boton-confirmar');
-    let diaSeleccionado = null;
-    let horaSeleccionada = null;
-
-    diasCalendario.addEventListener('click', e => {
-        const diaClickeado = e.target.closest('.dia.disponible');
-        if (diaClickeado) {
-            if (diaSeleccionado) diaSeleccionado.classList.remove('seleccionado');
-            diaSeleccionado = diaClickeado;
-            diaSeleccionado.classList.add('seleccionado');
-            
-            const fecha = diaSeleccionado.dataset.date;
-            horariosTitulo.textContent = `Horarios para el ${new Date(fecha + 'T03:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}`;
-            horariosLista.innerHTML = '<p class="horarios-placeholder">Cargando...</p>';
-            btnConfirmar.disabled = true;
-            horaSeleccionada = null;
-
-            fetch(`/turnos/api/horarios/${fecha}/`)
-                .then(response => response.json())
-                .then(data => {
-                    horariosLista.innerHTML = '';
-                    if (data.horarios && data.horarios.length > 0) {
-                        data.horarios.forEach(hora => {
-                            const div = document.createElement('div');
-                            div.className = 'horario-item';
-                            div.textContent = hora;
-                            div.dataset.hora = hora;
-                            horariosLista.appendChild(div);
-                        });
-                    } else {
-                        horariosLista.innerHTML = '<p class="horarios-placeholder">No hay horarios disponibles para este día.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al obtener horarios:", error);
-                    horariosLista.innerHTML = '<p class="horarios-placeholder">Error al cargar horarios.</p>';
-                });
-        }
-    });
-
-    horariosLista.addEventListener('click', e => {
-        const horarioClickeado = e.target.closest('.horario-item');
-        if (horarioClickeado) {
-            if (horaSeleccionada) horaSeleccionada.classList.remove('seleccionado');
-            horaSeleccionada = horarioClickeado;
-            horaSeleccionada.classList.add('seleccionado');
-            btnConfirmar.disabled = false;
-        }
-    });
-
-    btnConfirmar.addEventListener('click', () => {
-        if (diaSeleccionado && horaSeleccionada) {
-            const fecha = diaSeleccionado.dataset.date;
-            const hora = horaSeleccionada.dataset.hora;
-            const checkoutUrl = `/turnos/checkout/?fecha=${fecha}&hora=${hora}`;
-            window.location.href = checkoutUrl;
-        } else {
-            alert("Por favor, asegúrate de seleccionar un día y una hora.");
-        }
-    });
-});
-</script>
 {% endblock %}
 
+{% block extra_js %}
+<!-- Lógica JS para conectar todo -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script> <!-- Idioma Español -->
+<script src="{% static 'js/calendario.js' %}"></script>
+{% endblock %}
