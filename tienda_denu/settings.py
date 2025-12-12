@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'usuarios',
     'carrito',
     'envios',
+    'panel_gestor',
     
 
     # 2. Paquetes de Terceros

@@ -1,0 +1,327 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Ficha: {{ paciente.first_name }} {{ paciente.last_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* CABECERA */
+    .ficha-header { background: white; padding: 30px; border-radius: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-sm); }
+    .big-avatar { width: 80px; height: 80px; background: var(--brand-color); color: white; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    
+    .tags-container { display: flex; gap: 10px; margin-top: 10px; }
+    .tag-diet { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .tag-success { background: #dcfce7; color: #166534; }
+    .tag-warning { background: #fef3c7; color: #92400e; }
+
+    /* LAYOUT PESTAÑAS */
+    .tabs-nav { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn {
+        padding: 10px 20px; background: none; border: none; cursor: pointer;
+        font-size: 1rem; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--brand-color); border-bottom-color: var(--brand-color); }
+    .tab-content { display: none; animation: fadeIn 0.3s; }
+    .tab-content.active { display: block; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* GRÁFICO */
+    .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); height: 350px; margin-bottom: 30px; }
+    
+    /* TABLA CONSULTAS (Responsive y Completa) */
+    .table-container { overflow-x: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+    .table-consulta { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .table-consulta th { text-align: left; color: #64748b; font-size: 0.85rem; padding: 12px; border-bottom: 2px solid #f1f5f9; white-space: nowrap; }
+    .table-consulta td { padding: 15px 12px; border-bottom: 1px dashed #e2e8f0; color: #334155; font-size: 0.95rem; }
+    
+    .btn-nueva-consulta {
+        background: var(--brand-color); color: white; padding: 10px 20px; border-radius: 8px; 
+        text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-left: auto;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-nueva-consulta:hover { background: #3a5a38; transform: translateY(-2px); }
+
+    .badge-antro { background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    
+    /* GRID COMERCIAL */
+    .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .section-box { background: white; border-radius: 12px; padding: 25px; box-shadow: var(--shadow-sm); }
+    
+    /* ESTADOS IMC */
+    .imc-alto { color: #f59e0b; } /* Amarillo/Naranja */
+    .imc-bajo { color: #ef4444; } /* Rojo */
+    .imc-ok   { color: #10b981; } /* Verde */
+
+    @media (max-width: 900px) { .ficha-grid { grid-template-columns: 1fr; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block panel_content %}
+    
+    <div class="ficha-header">
+        <!-- Avatar seguro -->
+        <div class="big-avatar">{{ paciente.first_name|default:paciente.username|slice:":1"|upper }}</div>
+        
+        <div style="flex: 1;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: #1e293b;">{{ paciente.first_name }} {{ paciente.last_name }}</h1>
+            <p style="margin: 5px 0; color: #64748b;">{{ paciente.email }} • Registrado: {{ paciente.date_joined|date:"d/m/Y" }}</p>
+            
+            <div class="tags-container">
+                {% for tag in etiquetas %}
+                    <span class="tag-diet tag-{{ tag.color }}">{{ tag.label }}</span>
+                {% empty %}
+                    <span style="color:#94a3b8; font-size: 0.85rem;">Sin restricciones dietarias</span>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Botón solo si ya existe la ficha clínica -->
+        {% if ficha_paciente %}
+            <a href="{% url 'panel_nueva_consulta' ficha_paciente.id %}" class="btn-nueva-consulta">
+                <i class="fas fa-plus"></i> Nueva Consulta
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-clinica')">🩺 Historia Clínica</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-comercial')">🛍️ Historial Comercial</button>
+    </div>
+
+    <!-- CONTENIDO 1: CLÍNICA (EVOLUCIÓN) -->
+    <div id="tab-clinica" class="tab-content active">
+        
+        {% if not ficha_paciente %}
+            <!-- ESTADO VACÍO CON ACCIÓN RÁPIDA -->
+            <div style="text-align: center; padding: 50px; background: white; border-radius: 16px; border: 2px dashed #e2e8f0; max-width: 600px; margin: 20px auto;">
+                <div style="width: 70px; height: 70px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;">
+                    <i class="fas fa-file-medical"></i>
+                </div>
+                
+                <h3 style="color: #1e293b; margin-bottom: 10px;">Ficha Clínica No Iniciada</h3>
+                <p style="color: #64748b; margin-bottom: 25px; line-height: 1.5;">
+                    El usuario <strong>{{ paciente.email }}</strong> compra en la tienda, pero aún no tiene datos clínicos (peso, altura, etc.) registrados.
+                </p>
+                
+                <!-- Enlace a la vista de creación rápida -->
+                <a href="{% url 'panel_crear_ficha_usuario' paciente.id %}" class="btn-nueva-consulta" style="display: inline-flex; float: none; padding: 12px 25px; font-size: 1rem;">
+                    <i class="fas fa-plus-circle"></i> Crear Ficha Clínica Ahora
+                </a>
+            </div>
+        {% else %}
+        
+            <!-- GRÁFICO DE EVOLUCIÓN -->
+            <div class="chart-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; color:#334155;">Evolución de Composición Corporal</h3>
+                </div>
+                <canvas id="evolutionChart"></canvas>
+            </div>
+
+            <!-- HISTORIAL DE CONSULTAS -->
+            <div class="table-container">
+                <h3 style="margin:0 0 20px 0; color:#334155;">Historial de Visitas</h3>
+                
+                <table class="table-consulta">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Peso (kg)</th>
+                            <th>IMC</th>
+                            <th>% Grasa</th>
+                            <th>% Músculo</th>
+                            <th>Pliegues (mm)</th>
+                            <th>Cintura (cm)</th>
+                            <th width="30%">Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in consultas %}
+                        <tr>
+                            <td><strong>{{ c.fecha|date:"d/m/Y" }}</strong></td>
+                            <td>{{ c.peso_actual }} kg</td>
+                            <td>
+                                <!-- Clase dinámica para el color del IMC -->
+                                <span style="font-weight:bold;" class="{% if c.imc > 25 %}imc-alto{% elif c.imc < 18.5 %}imc-bajo{% else %}imc-ok{% endif %}">
+                                    {{ c.imc }}
+                                </span>
+                            </td>
+                            
+                            <!-- Datos Antropométricos (Condicionales) -->
+                            <td>
+                                {% if c.realizo_antropometria and c.porcentaje_grasa %}
+                                    <span style="color:#eab308; font-weight:600;">{{ c.porcentaje_grasa }}%</span>
+                                {% else %}<span style="color:#ccc;">-</span>{% endif %}
+                            </td>
+                            
+                            <td>
+                                {% if c.realizo_antropometria and c.porcentaje_musculo %}
+                                    <span style="color:#3b82f6; font-weight:600;">{{ c.porcentaje_musculo }}%</span>
+                                {% else %}<span style="color:#ccc;">-</span>{% endif %}
+                            </td>
+
+                            <td>{{ c.sumatoria_pliegues|default:"-" }}</td>
+                            <td>{{ c.cintura|default:"-" }}</td>
+
+                            <td style="color: #64748b; font-size: 0.85rem; line-height: 1.4;">
+                                {{ c.notas_evolucion|default:"-"|truncatechars:100 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="8" style="text-align:center; padding: 40px;">No hay consultas registradas.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- CONTENIDO 2: COMERCIAL (COMPRAS Y TURNOS) -->
+    <div id="tab-comercial" class="tab-content">
+        <div class="ficha-grid">
+            <!-- Pedidos -->
+            <div class="section-box">
+                <h3 style="margin-bottom: 20px; color:#334155;"><i class="fas fa-shopping-bag"></i> Compras Realizadas</h3>
+                {% for p in pedidos %}
+                    <div style="border-bottom:1px dashed #eee; padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="color:#1e293b;">Pedido #{{ p.id }}</strong> 
+                            <small style="color:#64748b; margin-left: 5px;">{{ p.fecha_creacion|date:"d/m/y" }}</small>
+                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;">
+                                {{ p.items.count }} items • {{ p.get_estado_display }}
+                            </div>
+                        </div>
+                        <span style="font-weight:700; color:var(--brand-color); font-size:1.1rem;">${{ p.total|floatformat:0 }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color:#94a3b8; text-align:center; padding:20px;">Sin compras.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Turnos -->
+            <div class="section-box">
+                <h3 style="margin-bottom: 20px; color:#334155;"><i class="far fa-calendar-alt"></i> Agenda de Turnos</h3>
+                {% for t in turnos %}
+                    <div style="border-bottom:1px dashed #eee; padding:12px 0;">
+                        {{ t.fecha|date:"d/m/Y" }} - {{ t.hora }}
+                        <span style="float:right; font-size:0.8rem; font-weight:700; text-transform:uppercase;">{{ t.estado }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color:#94a3b8; text-align:center; padding:20px;">Sin turnos.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+<!-- DATOS PARA EL GRÁFICO (Injectados por Django) -->
+{{ labels_grafico|json_script:"chart-labels" }}
+{{ data_peso|json_script:"chart-peso" }}
+{{ data_grasa|json_script:"chart-grasa" }}
+{{ data_musculo|json_script:"chart-musculo" }}
+
+<script>
+    // Lógica de Pestañas
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    // Lógica del Gráfico
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('evolutionChart');
+        if (ctx) {
+            const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+            const dataPeso = JSON.parse(document.getElementById('chart-peso').textContent);
+            const dataGrasa = JSON.parse(document.getElementById('chart-grasa').textContent);
+            const dataMusculo = JSON.parse(document.getElementById('chart-musculo').textContent);
+
+            if (labels.length === 0) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Peso (kg)',
+                            data: dataPeso,
+                            borderColor: '#3b82f6', // Azul
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            yAxisID: 'y',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: '% Grasa',
+                            data: dataGrasa,
+                            borderColor: '#f59e0b', // Amarillo
+                            backgroundColor: '#f59e0b',
+                            borderWidth: 2,
+                            borderDash: [5, 5], 
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        },
+                        {
+                            label: '% Músculo',
+                            data: dataMusculo,
+                            borderColor: '#10b981', // Verde
+                            backgroundColor: '#10b981',
+                            borderWidth: 2,
+                            borderDash: [2, 2],
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + (context.dataset.yAxisID === 'y' ? ' kg' : '%');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            type: 'linear', display: true, position: 'left', 
+                            title: {display:true, text:'Peso (kg)'},
+                            grid: { color: '#f3f4f6' }
+                        },
+                        y1: { 
+                            type: 'linear', display: true, position: 'right', 
+                            title: {display:true, text:'Porcentaje %'}, 
+                            grid: {drawOnChartArea: false},
+                            min: 0, max: 50 
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

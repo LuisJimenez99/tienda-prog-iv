@@ -1,0 +1,171 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Configuración de Horarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bloqueos-container { max-width: 800px; margin: 0 auto; }
+    
+    /* Header con botón de añadir */
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .btn-add { 
+        background: var(--brand-color); color: white; padding: 10px 20px; 
+        border-radius: 8px; text-decoration: none; font-weight: 600; 
+        display: flex; align-items: center; gap: 8px; 
+        box-shadow: var(--shadow-sm); transition: 0.2s; 
+    }
+    .btn-add:hover { background: #3a5a38; transform: translateY(-2px); }
+
+    /* Caja de información */
+    .info-box {
+        background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1;
+        padding: 15px; border-radius: 8px; margin-bottom: 25px;
+        display: flex; gap: 10px; align-items: start;
+    }
+    
+    /* Lista de reglas */
+    .reglas-list { display: flex; flex-direction: column; gap: 15px; }
+    
+    .regla-card {
+        background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 20px; display: flex; justify-content: space-between; align-items: center;
+        transition: all 0.2s;
+    }
+    .regla-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    
+    /* Info de la regla */
+    .regla-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: #1e293b; }
+    .regla-time { color: #64748b; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+    .regla-time i { color: var(--brand-color); }
+
+    /* Acciones (Editar/Eliminar) */
+    .regla-actions { display: flex; gap: 15px; align-items: center; }
+    
+    .btn-icon-small { 
+        color: #94a3b8; font-size: 1rem; padding: 8px; border-radius: 6px; 
+        transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+        text-decoration: none;
+    }
+    .btn-icon-small:hover { background: #f1f5f9; color: var(--brand-color); }
+    
+    .btn-delete:hover { background: #fee2e2; color: #ef4444; }
+
+    /* SWITCH TOGGLE CSS */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; margin-left: 10px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute; cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #ccc; transition: .4s; border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute; content: "";
+        height: 18px; width: 18px;
+        left: 3px; bottom: 3px;
+        background-color: white; transition: .4s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--brand-color); }
+    input:checked + .slider:before { transform: translateX(20px); }
+    
+    /* Estado visual de tarjeta desactivada */
+    .regla-card.disabled { opacity: 0.6; background: #f8fafc; }
+    .regla-card.disabled .regla-info h4 { text-decoration: line-through; color: #94a3b8; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+<div class="bloqueos-container">
+    
+    <!-- Header con Botón de Nueva Regla -->
+    <div class="header-actions">
+        <h2 style="margin:0; color:#1e293b;">Mis Horarios</h2>
+        <a href="{% url 'regla_nueva' %}" class="btn-add">
+            <i class="fas fa-plus"></i> Nuevo Horario
+        </a>
+    </div>
+
+    <div class="info-box">
+        <i class="fas fa-info-circle" style="margin-top: 3px;"></i>
+        <div>
+            <strong>Control de Disponibilidad</strong><br>
+            Define tus días y horarios de atención. Usa el interruptor para desactivar días temporalmente (ej: feriados).
+        </div>
+    </div>
+
+    <!-- Lista de Reglas -->
+    <div class="reglas-list">
+        {% for regla in reglas %}
+        <div class="regla-card {% if not regla.activa %}disabled{% endif %}" id="card-{{ regla.id }}">
+            <div class="regla-info">
+                <h4>{{ regla.dia }}</h4>
+                <div class="regla-time">
+                    <span><i class="far fa-clock"></i> {{ regla.inicio }} - {{ regla.fin }} hs</span>
+                </div>
+            </div>
+            
+            <div class="regla-actions">
+                <!-- Botón Editar -->
+                <a href="{% url 'regla_editar' regla.id %}" class="btn-icon-small" title="Editar Horario">
+                    <i class="fas fa-pen"></i>
+                </a>
+                
+                <!-- Botón Eliminar -->
+                <a href="{% url 'regla_eliminar' regla.id %}" class="btn-icon-small btn-delete" 
+                   onclick="return confirm('¿Estás seguro de eliminar este horario?');" title="Eliminar Horario">
+                    <i class="fas fa-trash"></i>
+                </a>
+
+                <!-- Switch Activar/Desactivar -->
+                <label class="switch">
+                    <input type="checkbox" 
+                           {% if regla.activa %}checked{% endif %}
+                           data-id="{{ regla.id }}"
+                           onchange="toggleRegla(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+            <i class="far fa-calendar-times" style="font-size: 3rem; margin-bottom: 10px;"></i>
+            <p>No tienes horarios configurados.</p>
+            <a href="{% url 'regla_nueva' %}" style="color: var(--brand-color); font-weight: 600;">Crear el primero</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Script para el Switch -->
+<script>
+function toggleRegla(checkbox) {
+    const id = checkbox.dataset.id;
+    const card = document.getElementById(`card-${id}`);
+    
+    // Feedback visual inmediato
+    if (checkbox.checked) {
+        card.classList.remove('disabled');
+    } else {
+        card.classList.add('disabled');
+    }
+
+    // Llamada AJAX al servidor
+    fetch(`/panel/api/regla/${id}/toggle/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => console.log('Estado actualizado:', data.mensaje))
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Error al actualizar. Recarga la página.');
+        // Revertir cambio visual si falla
+        checkbox.checked = !checkbox.checked;
+    });
+}
+</script>
+{% endblock %}

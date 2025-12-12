@@ -1,44 +1,93 @@
 {% load static %}
-<div class="card-harvest-wrapper">
-  
-  <div class="product-img">
-  <a href="{% url 'detalle_producto' producto.id %}">
-    {% if producto.imagen %}
-        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-    {% else %}
-        <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}">
+
+<!-- Lógica de detección de dieta (Backend en el Frontend) -->
+{% with conflicto_dieta=False motivo_conflicto="" %}
+    
+    {% if user.is_authenticated %}
+        {% if user.perfil.es_vegetariano and not producto.es_vegetariano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene carne"></div>
+        {% elif user.perfil.es_vegano and not producto.es_vegano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene derivados animales"></div>
+        {% elif user.perfil.es_celiaco and not producto.es_sin_tacc %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene Gluten (TACC)"></div>
+        {% endif %}
     {% endif %}
-  </a>
-</div>
 
-  <div class="product-info">
-    <div class="product-text">
-      <h1>{{ producto.nombre }}</h1>
-      <h2>{{ producto.categoria.nombre|default:"Vianda" }}</h2>
-      <p>{{ producto.descripcion|truncatewords:20 }}</p>
-    </div>
+    <div class="tarjeta-harvest {% if producto.stock <= 0 %}agotado{% endif %} producto-card-js" 
+         data-id="{{ producto.id }}">
+        
+        <!-- Capa de advertencia dietaria (visible solo si hay conflicto) -->
+        <div class="diet-warning-overlay">
+            <span>🚫 No apto para tu dieta</span>
+        </div>
 
-    <p class="tarjeta-precio">${{ producto.precio|floatformat:2 }}</p>
+        <!-- Botón de Favorito (Corazón) -->
+        {% if user.is_authenticated %}
+        <button class="btn-favorito-harvest {% if user in producto.favoritos.all %}activo{% endif %}" 
+                data-id="{{ producto.id }}" 
+                onclick="toggleFavorito(this)" 
+                aria-label="Añadir a favoritos">
+            <i class="fas fa-heart"></i>
+        </button>
+        {% endif %}
 
-    <div class="tarjeta-botones">
-      {% if producto.stock > 0 %}
-      <a
-        href="{% url 'detalle_producto' producto.id %}"
-        class="btn-ver-producto"
-        >Ver Producto</a
-      >
-      <button
-        class="add-to-cart-btn"
-        data-id="{{ producto.id }}"
-        data-nombre="{{ producto.nombre }}"
-        data-precio="{{ producto.precio }}"
-        data-imagen="{{ producto.imagen.url }}"
-      >
-        Agregar
-      </button>
-      {% else %}
-      <span class="sin-stock-mensaje">Sin Stock</span>
-      {% endif %}
+        <!-- Imagen del Producto -->
+        <div class="harvest-img-box">
+            <a href="{% url 'detalle_producto' producto.id %}">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                {% else %}
+                    <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}" loading="lazy">
+                {% endif %}
+            </a>
+            
+            <!-- Etiquetas Nutricionales (Badges) -->
+            <div class="harvest-badges">
+                {% if producto.es_sin_tacc %}<span class="badge-h badge-tacc">Sin TACC</span>{% endif %}
+                {% if producto.es_vegano %}<span class="badge-h badge-vegano">Vegano</span>{% endif %}
+            </div>
+        </div>
+
+        <!-- Información y Precios -->
+        <div class="harvest-info">
+            <span class="harvest-cat">{{ producto.categoria.nombre|default:"General" }}</span>
+            
+            <h3>
+                <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
+            </h3>
+            
+            <div class="harvest-price-row">
+                <span class="price">${{ producto.precio|floatformat:0 }}</span>
+                
+                {% if producto.stock > 0 %}
+                <!-- Botón de Agregar (Rectangular Redondeado con Texto) -->
+                <button class="add-to-cart-btn btn-harvest-add" 
+                    data-id="{{ producto.id }}" 
+                    data-nombre="{{ producto.nombre }}" 
+                    data-precio="{{ producto.precio }}" 
+                    data-imagen="{{ producto.imagen.url }}">
+                    <i class="fas fa-shopping-basket"></i> AGREGAR
+                </button>
+                {% else %}
+                <span class="no-stock">Agotado</span>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    </div>
-</div>
+{% endwith %}
+
+<!-- Script para activar la advertencia visual de dieta -->
+<script>
+    (function() {
+        const scripts = document.getElementsByTagName('script');
+        const currentScript = scripts[scripts.length - 1];
+        const card = currentScript.previousElementSibling;
+        const conflictMarker = card ? card.previousElementSibling : null;
+        
+        if (conflictMarker && conflictMarker.getAttribute('data-set-conflicto') === 'true') {
+            card.classList.add('producto-incompatible');
+            const warningText = card.querySelector('.diet-warning-overlay span');
+            if(warningText) warningText.innerText = "⚠️ " + conflictMarker.getAttribute('data-motivo');
+        }
+    })();
+</script>

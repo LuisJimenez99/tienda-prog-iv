@@ -1,0 +1,82 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% block title %}Nueva Consulta{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); }
+    .section-title { color: #4A6C48; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; padding-bottom: 5px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; font-size: 0.9rem; }
+    
+    /* Caja Antropometría (oculta por defecto) */
+    #antro-box { display: none; background: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 20px; }
+    #antro-box.visible { display: block; animation: slideDown 0.3s; }
+    
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .btn-submit { width: 100%; background: var(--brand-color); color: white; padding: 15px; border: none; border-radius: 8px; font-weight: 700; margin-top: 25px; cursor: pointer; }
+    .btn-submit:hover { background: #3a5a38; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <h2 style="margin-top:0;">{{ titulo }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <h4 class="section-title">Datos Básicos</h4>
+        <div class="form-grid">
+            <div><label>Fecha</label> {{ form.fecha }}</div>
+            <div><label>Peso Actual (kg)</label> {{ form.peso_actual }}</div>
+            <div><label>Altura (m)</label> {{ form.altura }}</div>
+        </div>
+
+        <div style="margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                {{ form.realizo_antropometria }}
+                <span style="font-size: 1rem;">¿Se realizó Antropometría ISAK?</span>
+            </label>
+        </div>
+
+        <!-- SECCIÓN ANTROPOMETRÍA (DINÁMICA) -->
+        <div id="antro-box">
+            <h4 class="section-title" style="margin-top:0;">Mediciones Corporales</h4>
+            <div class="form-grid">
+                <div><label>% Grasa</label> {{ form.porcentaje_grasa }}</div>
+                <div><label>% Músculo</label> {{ form.porcentaje_musculo }}</div>
+                <div><label>Cintura (cm)</label> {{ form.cintura }}</div>
+                <div><label>Cadera (cm)</label> {{ form.cadera }}</div>
+                <div class="full-width"><label>Sumatoria 6 Pliegues (mm)</label> {{ form.sumatoria_pliegues }}</div>
+            </div>
+        </div>
+
+        <h4 class="section-title" style="margin-top: 25px;">Evolución y Notas</h4>
+        <div class="full-width">
+            {{ form.notas_evolucion }}
+        </div>
+
+        <button type="submit" class="btn-submit">Guardar Consulta</button>
+    </form>
+</div>
+
+<script>
+    // Lógica para mostrar/ocultar antropometría
+    const checkAntro = document.getElementById('id_realizo_antropometria');
+    const boxAntro = document.getElementById('antro-box');
+
+    function toggleAntro() {
+        if (checkAntro.checked) {
+            boxAntro.classList.add('visible');
+        } else {
+            boxAntro.classList.remove('visible');
+        }
+    }
+
+    checkAntro.addEventListener('change', toggleAntro);
+    // Ejecutar al inicio por si hay error de validación y vuelve marcado
+    toggleAntro();
+</script>
+{% endblock %}

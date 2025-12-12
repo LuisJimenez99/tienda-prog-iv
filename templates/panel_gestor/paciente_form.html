@@ -1,0 +1,155 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container { 
+        max-width: 700px; 
+        margin: 0 auto; 
+        background: white; 
+        padding: 40px; 
+        border-radius: 16px; 
+        box-shadow: var(--shadow-md); 
+    }
+    
+    .form-grid { 
+        display: grid; 
+        gap: 20px; 
+        grid-template-columns: 1fr 1fr; 
+    }
+    
+    .full-width { grid-column: 1 / -1; }
+    
+    label { 
+        display: block; 
+        margin-bottom: 8px; 
+        font-weight: 600; 
+        color: #374151; 
+        font-size: 0.9rem; 
+    }
+    
+    .form-input, select, textarea { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid #d1d5db; 
+        border-radius: 8px; 
+        font-size: 1rem; 
+        box-sizing: border-box; 
+        background: #f9fafb; 
+    }
+    
+    .form-input:focus { 
+        border-color: var(--brand-color); 
+        outline: none; 
+        background: white; 
+    }
+    
+    .checkbox-box { 
+        grid-column: 1 / -1; 
+        background: #f0fdf4; 
+        border: 1px solid #bbf7d0; 
+        padding: 15px; 
+        border-radius: 8px; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+    }
+    
+    .form-check-input { 
+        width: 20px; 
+        height: 20px; 
+        accent-color: var(--brand-color); 
+        cursor: pointer;
+    }
+    
+    .btn-submit { 
+        background: var(--brand-color); 
+        color: white; 
+        padding: 14px; 
+        border: none; 
+        border-radius: 8px; 
+        font-weight: 700; 
+        cursor: pointer; 
+        width: 100%; 
+        margin-top: 20px; 
+        transition: 0.2s; 
+    }
+    
+    .btn-submit:hover { 
+        background: #3a5a38; 
+        transform: translateY(-2px); 
+    }
+
+    .btn-cancel {
+        display: block; text-align: center; margin-top: 15px; 
+        color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    }
+    .btn-cancel:hover { color: #1e293b; text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <h2 style="margin-top:0; margin-bottom:25px; color:#1e293b; border-bottom:1px solid #eee; padding-bottom:15px;">{{ titulo }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="background:#fee2e2; color:#991b1b; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <strong>Error:</strong> Por favor revisa los campos marcados.
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-grid">
+            <div>
+                <label>Nombre</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}<small style="color:red">{{ form.nombre.errors.0 }}</small>{% endif %}
+            </div>
+            
+            <div>
+                <label>Apellido</label>
+                {{ form.apellido }}
+                {% if form.apellido.errors %}<small style="color:red">{{ form.apellido.errors.0 }}</small>{% endif %}
+            </div>
+            
+            <div class="full-width">
+                <label>Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<small style="color:red">{{ form.email.errors.0 }}</small>{% endif %}
+            </div>
+            
+            <div>
+                <label>Teléfono</label>
+                {{ form.telefono }}
+            </div>
+            
+            <div>
+                <label>Fecha Nacimiento</label>
+                {{ form.fecha_nacimiento }}
+            </div>
+            
+            <div class="full-width">
+                <label>Observaciones / Notas</label>
+                {{ form.observaciones }}
+            </div>
+
+            <!-- CHECKBOX MÁGICO (Crear Usuario Web) -->
+            <div class="checkbox-box">
+                {{ form.crear_usuario }}
+                <div>
+                    <label style="margin:0; cursor:pointer;" for="{{ form.crear_usuario.id_for_label }}">Crear Usuario Web</label>
+                    <small style="color:#64748b; display:block;">Permite al paciente iniciar sesión para comprar y ver recetas.</small>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Guardar Paciente</button>
+        <a href="{% url 'panel_pacientes' %}" class="btn-cancel">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

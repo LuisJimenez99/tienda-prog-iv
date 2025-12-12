@@ -1,0 +1,119 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+
+    label { display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 0.9rem; }
+    
+    .form-input { 
+        width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; 
+        font-size: 1rem; transition: 0.2s; box-sizing: border-box; 
+    }
+    .form-input:focus { border-color: var(--brand-color); outline: none; ring: 2px solid var(--brand-light); }
+
+    .checkbox-group { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9fafb; border-radius: 8px; }
+    .form-check-input { width: 20px; height: 20px; accent-color: var(--brand-color); }
+
+    .btn-submit { 
+        background: var(--brand-color); color: white; padding: 14px 30px; border: none; 
+        border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 20px; 
+        font-size: 1rem; transition: 0.2s;
+    }
+    .btn-submit:hover { background: #3a5a38; }
+
+    .current-img { margin-top: 10px; max-width: 100px; border-radius: 8px; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+    <div class="form-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h2 style="margin:0; color:#1e293b;">{{ titulo }}</h2>
+            <a href="{% url 'panel_inventario' %}" style="color:#64748b; text-decoration:none;">Cancelar</a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Errores generales -->
+            {% if form.errors %}
+                <div style="background:#fee2e2; color:#991b1b; padding:15px; border-radius:8px; margin-bottom:20px;">
+                    Por favor corrige los errores abajo.
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Información Básica -->
+                <div class="full-width">
+                    <label>Nombre del Producto</label>
+                    {{ form.nombre }}
+                </div>
+
+                <div>
+                    <label>Categoría</label>
+                    {{ form.categoria }}
+                </div>
+
+                <div>
+                    <label>Precio ($)</label>
+                    {{ form.precio }}
+                </div>
+
+                <div>
+                    <label>Stock (Unidades)</label>
+                    {{ form.stock }}
+                </div>
+
+                <!-- Imagen -->
+                <div>
+                    <label>Imagen</label>
+                    {{ form.imagen }}
+                    {% if producto.imagen %}
+                        <br>Actual: <a href="{{ producto.imagen.url }}" target="_blank">{{ producto.imagen.name }}</a>
+                    {% endif %}
+                </div>
+
+                <div class="full-width">
+                    <label>Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <!-- Opciones / Toggles -->
+                <div class="full-width" style="display:flex; gap:15px; flex-wrap:wrap;">
+                    <div class="checkbox-group">
+                        {{ form.disponible }} <label style="margin:0;">Disponible en Tienda</label>
+                    </div>
+                    <div class="checkbox-group">
+                        {{ form.destacado }} <label style="margin:0;">Destacado (Home)</label>
+                    </div>
+                </div>
+
+                <!-- Etiquetas Dietarias -->
+                <div class="full-width">
+                    <label style="margin-bottom:10px; display:block;">Etiquetas Nutricionales</label>
+                    <div style="display:flex; gap:15px;">
+                        <div class="checkbox-group">
+                            {{ form.es_vegetariano }} <label style="margin:0;">Vegetariano</label>
+                        </div>
+                        <div class="checkbox-group">
+                            {{ form.es_vegano }} <label style="margin:0;">Vegano</label>
+                        </div>
+                        <div class="checkbox-group">
+                            {{ form.es_sin_tacc }} <label style="margin:0;">Sin TACC</label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-submit">Guardar Producto</button>
+        </form>
+    </div>
+{% endblock %}

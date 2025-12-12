@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.sitemaps.views import sitemap # <-- Importar
+from django.contrib.sitemaps.views import sitemap 
 from django.http import HttpResponse
-from core.sitemaps import StaticViewSitemap, ProductoSitemap # <-- Importar
+from core.sitemaps import StaticViewSitemap, ProductoSitemap
 
 # Diccionario de sitemaps
 sitemaps = {
@@ -19,6 +19,7 @@ def robots_txt(request):
         "Disallow: /admin/",
         "Disallow: /carrito/",
         "Disallow: /mi-cuenta/",
+        "Disallow: /panel/", # <-- Importante: Ocultar el panel de los robots
         f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
@@ -34,10 +35,13 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('mi-cuenta/', include('usuarios.urls')),
     
-    # --- RUTAS DE DASHBOARD ADMIN ---
+    # --- RUTA DEL PANEL DE GESTIÓN (NUEVA) ---
+    path('panel/', include('panel_gestor.urls')),
+    
+    # --- RUTAS DE DASHBOARD ADMIN (Antiguo) ---
     path('admin/configuracion/', include('configuracion.admin_urls')), 
     
-    # --- RUTAS DE SEO (NUEVAS) ---
+    # --- RUTAS DE SEO ---
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', robots_txt),
 ]

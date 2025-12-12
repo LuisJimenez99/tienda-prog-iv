@@ -1,44 +1,75 @@
 {% load static %}
-<div class="card">
-    {% if producto.stock <= 0 %}
-        <div class="badge" style="background: #A1A1AA;">Agotado</div>
-    {% endif %}
-    <div class="img">
-    <a href="{% url 'detalle_producto' producto.id %}">
-        {% if producto.imagen %}
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-        {% else %}
-            <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}">
+
+{% with conflicto_dieta=False motivo_conflicto="" %}
+    {% if user.is_authenticated %}
+        {% if user.perfil.es_vegetariano and not producto.es_vegetariano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene carne"></div>
+        {% elif user.perfil.es_vegano and not producto.es_vegano %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene derivados animales"></div>
+        {% elif user.perfil.es_celiaco and not producto.es_sin_tacc %}
+            <div style="display:none;" data-set-conflicto="true" data-motivo="Contiene Gluten"></div>
         {% endif %}
-    </a>
-</div>
+    {% endif %}
 
-    <div class="info">
-        <div class="cat">{{ producto.categoria.nombre|default:"Vianda" }}</div>
-        <h2 class="title">{{ producto.nombre }}</h2>
-        <p class="desc">{{ producto.descripcion|truncatewords:15 }}</p>
+    <div class="tarjeta-hot {% if producto.stock <= 0 %}agotado{% endif %} producto-card-js" 
+         data-id="{{ producto.id }}">
+        
+        <div class="diet-warning-overlay"><span>🚫 No apto</span></div>
 
-        <div class="bottom">
-            <div class="price">
-                <span class="new">${{ producto.precio|floatformat:2 }}</span>
+        <!-- Etiqueta HOT -->
+        <div class="hot-badge">🔥 HOT</div>
+
+        <!-- BOTÓN FAVORITO (CORREGIDO) -->
+        {% if user.is_authenticated %}
+        <button class="btn-favorito-hot {% if user in producto.favoritos.all %}activo{% endif %}" 
+                data-id="{{ producto.id }}" 
+                onclick="toggleFavorito(this)"
+                aria-label="Añadir a favoritos">
+            <i class="fas fa-heart"></i>
+        </button>
+        {% endif %}
+
+        <div class="hot-img">
+             <a href="{% url 'detalle_producto' producto.id %}">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                {% else %}
+                    <img src="{% static 'images/placeholder_vianda.png' %}" alt="{{ producto.nombre }}" loading="lazy">
+                {% endif %}
+             </a>
+        </div>
+
+        <div class="hot-content">
+            <h3>{{ producto.nombre }}</h3>
+            <div class="hot-price">
+                <!-- Simulamos un precio anterior tachado para efecto visual -->
+                <span class="old-price">${{ producto.precio|add:"500"|floatformat:0 }}</span>
+                <span class="new-price">${{ producto.precio|floatformat:0 }}</span>
             </div>
-
+            
             {% if producto.stock > 0 %}
-            <button class="btn add-to-cart-btn"
-                data-id="{{ producto.id }}"
-                data-nombre="{{ producto.nombre }}"
-                data-precio="{{ producto.precio }}"
+            <button class="hot-add-btn add-to-cart-btn" 
+                data-id="{{ producto.id }}" 
+                data-nombre="{{ producto.nombre }}" 
+                data-precio="{{ producto.precio }}" 
                 data-imagen="{{ producto.imagen.url }}">
-                <span>Agregar</span>
-                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
+                COMPRAR AHORA
             </button>
             {% else %}
-             <button class="btn" disabled style="background: #A1A1AA; cursor: not-allowed;">Agotado</button>
+            <span class="hot-no-stock">SIN STOCK</span>
             {% endif %}
         </div>
     </div>
-</div>
+{% endwith %}
+
+<script>
+    (function() {
+        const scripts = document.getElementsByTagName('script');
+        const currentScript = scripts[scripts.length - 1];
+        const card = currentScript.previousElementSibling;
+        const conflictMarker = card ? card.previousElementSibling : null;
+        if (conflictMarker && conflictMarker.getAttribute('data-set-conflicto') === 'true') {
+            card.classList.add('producto-incompatible');
+        }
+    })();
+</script>

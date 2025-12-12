@@ -1,0 +1,105 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .btn-add { background: var(--brand-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); transition: 0.2s; }
+    .btn-add:hover { background: #3a5a38; transform: translateY(-2px); }
+
+    .product-table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .product-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    .product-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
+    .product-table tr:hover { background: #f8fafc; }
+
+    .img-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+    
+    .stock-badge { padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; }
+    .stock-high { background: #dcfce7; color: #166534; } /* Verde */
+    .stock-low { background: #fef3c7; color: #b45309; }   /* Amarillo */
+    .stock-out { background: #fee2e2; color: #991b1b; }   /* Rojo */
+
+    .actions-cell { display: flex; gap: 10px; }
+    .btn-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; text-decoration: none; transition: 0.2s; }
+    .btn-edit { background: #e0f2fe; color: #0284c7; }
+    .btn-delete { background: #fee2e2; color: #ef4444; }
+    .btn-edit:hover { background: #0284c7; color: white; }
+    .btn-delete:hover { background: #ef4444; color: white; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+    
+    <div class="header-actions">
+        <h2 style="margin:0; color:#1e293b;">Inventario de Productos</h2>
+        <a href="{% url 'producto_nuevo' %}" class="btn-add">
+            <i class="fas fa-plus"></i> Nuevo Producto
+        </a>
+    </div>
+
+    <!-- Buscador -->
+    <div style="background:white; padding:15px; border-radius:12px; margin-bottom:20px; box-shadow:var(--shadow-sm);">
+        <form method="get" style="display:flex; gap:10px;">
+            <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ search_query|default:'' }}" 
+                   style="flex:1; padding:10px; border:1px solid #e2e8f0; border-radius:8px; outline:none;">
+            <button type="submit" class="btn-filter" style="border:none; cursor:pointer;"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th width="70">Img</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td>
+                        {% if p.imagen %}
+                            <img src="{{ p.imagen.url }}" class="img-thumb">
+                        {% else %}
+                            <div class="img-thumb" style="background:#eee; display:flex; align-items:center; justify-content:center;">📷</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ p.nombre }}</strong><br>
+                        {% if p.destacado %}<small style="color:#f59e0b;">★ Destacado</small>{% endif %}
+                    </td>
+                    <td>{{ p.categoria.nombre|default:"-" }}</td>
+                    <td style="font-weight:600;">${{ p.precio|floatformat:0 }}</td>
+                    <td>
+                        {% if p.stock == 0 %}
+                            <span class="stock-badge stock-out">Sin Stock</span>
+                        {% elif p.stock < 10 %}
+                            <span class="stock-badge stock-low">{{ p.stock }} u.</span>
+                        {% else %}
+                            <span class="stock-badge stock-high">{{ p.stock }} u.</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-cell">
+                        <a href="{% url 'producto_editar' p.id %}" class="btn-icon btn-edit" title="Editar">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <a href="{% url 'producto_eliminar' p.id %}" class="btn-icon btn-delete" 
+                           onclick="return confirm('¿Seguro que quieres eliminar {{ p.nombre }}?');" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center; padding:40px;">No hay productos.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

@@ -1,102 +1,214 @@
-/* =================================
-   COMPONENTE: Card Harvest (CSS DESDE CERO)
-   ================================= */
+/* =========================================
+   TARJETA HARVEST (ESTILO ORGÁNICO)
+   ========================================= */
 
-.card-harvest-wrapper {
-  /* --- Estructura y Caja --- */
-  height: 414px;
-  width: 320px; /* Ancho similar a la tarjeta simple */
-  margin: 20px;
-  background-color: #ffffff;
-  border-radius: 12px; /* Mismo borde que la simple */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra similar */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Efecto hover */
+.tarjeta-harvest {
+    position: relative;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f3f4f6;
+    
+    /* --- DIMENSIONES --- */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 280px;
+    max-width: 340px;
+    margin: 0 auto;
 }
 
-.card-harvest-wrapper:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+.tarjeta-harvest:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
 
-.card-harvest-wrapper .product-img {
-  width: 100%;
-  height: 250px; /* Altura de imagen IGUAL a la tarjeta simple */
-  overflow: hidden;
+/* --- IMAGEN --- */
+.harvest-img-box {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f9f9f9;
 }
 
-.card-harvest-wrapper .product-img img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Asegura que la imagen cubra bien */
+.harvest-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
 }
 
-/* --- Contenido de Información --- */
-.card-harvest-wrapper .product-info {
-  padding: 20px; /* Padding igual a la tarjeta simple */
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1; /* Permite que esta sección ocupe espacio si es necesario */
-  /* NO FIJAMOS ALTURA AQUÍ */
+.tarjeta-harvest:hover .harvest-img-box img {
+    transform: scale(1.08);
 }
 
-.card-harvest-wrapper .product-text {
-  /* Este contenedor solo agrupa texto, no necesita estilos especiales ahora */
-  margin-bottom: 15px; /* Espacio antes del precio */
+/* --- BADGES (Etiquetas) --- */
+.harvest-badges {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 15;
 }
 
-.card-harvest-wrapper .product-text h1 {
-  /* Título Principal */
-  margin: 0 0 5px 0;
-  font-size: 1.25rem; /* Tamaño IGUAL a la tarjeta simple */
-  font-weight: 600;
-  line-height: 1.3;
-  /* CONECTADO AL ADMIN */
-  font-family: var(--fuente-tarjetas);
-  color: var(--color-titulo-tarjeta);
+.badge-h {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1f2937;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.card-harvest-wrapper .product-text h2 {
-  /* Subtítulo (Categoría) */
-  margin: 0 0 10px 0;
-  font-size: 11px; /* Más pequeño, como en el diseño Harvest */
-  font-family: 'Raleway', sans-serif; /* Fuente específica del diseño Harvest */
-  font-weight: 500;
-  text-transform: uppercase;
-  color: #b0b0b0; /* Un gris más suave */
-  letter-spacing: 0.1em;
+/* --- BOTÓN FAVORITO --- */
+.btn-favorito-harvest {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    background: white;
+    border: 1px solid #f3f4f6;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #cbd5e1;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    font-size: 1.2rem;
 }
 
-.card-harvest-wrapper .product-text p {
-  /* ... (margin, font-family, etc.) ... */
-  display: -webkit-box;
-  -webkit-line-clamp: 2; 
-  line-clamp: 2; /* <-- ¡AÑADE ESTA LÍNEA! */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: calc(1.5em * 2); 
+.btn-favorito-harvest:hover {
+    transform: scale(1.1);
+    color: #ef4444;
+    background: #fff;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
 
-/* --- Precio y Botones --- */
-.card-harvest-wrapper .tarjeta-precio {
-  font-family: 'Trocchi', serif; /* Fuente específica del diseño Harvest */
-  margin-top: auto; /* Empuja precio y botones abajo */
-  margin-bottom: 15px;
-  font-size: 1.5rem; /* Un poco más pequeño que en Harvest original */
-  font-weight: 500; /* Ligeramente más grueso */
-  color: #333; /* Color de texto estándar */
+.btn-favorito-harvest.activo {
+    color: #ef4444;
+    background-color: #fff1f2;
+    border-color: #ffe4e6;
 }
 
-/* Los botones usan los estilos de .tarjeta-botones de global.css */
-.card-harvest-wrapper .tarjeta-botones {
-  margin-top: 0;
+/* --- CONTENIDO --- */
+.harvest-info {
+    padding: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
-/* --- Estado Agotado (Opcional, igual que la simple) --- */
-.card-harvest-wrapper.agotado {
-  opacity: 0.7;
+.harvest-cat {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #9ca3af;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
+
+.harvest-info h3 {
+    margin: 0 0 12px;
+    font-family: var(--fuente-tarjetas, serif);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    font-weight: 600;
+}
+
+.harvest-info h3 a {
+    text-decoration: none;
+    color: #111827;
+    transition: color 0.2s;
+}
+
+.harvest-info h3 a:hover {
+    color: var(--color-btn-principal-fondo, #4A6C48);
+}
+
+/* --- PRECIO Y ACCIÓN --- */
+.harvest-price-row {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.harvest-price-row .price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-btn-principal-fondo, #4A6C48);
+}
+
+/* --- BOTÓN HARVEST CORREGIDO (RECTANGULAR REDONDEADO) --- */
+.btn-harvest-add {
+    background: var(--color-btn-principal-fondo, #4A6C48);
+    color: white;
+    border: none;
+    
+    /* Forma Rectangular Redondeada (Píldora) */
+    border-radius: 50px;
+    padding: 8px 20px; /* Espacio a los lados */
+    height: 38px;      /* Altura fija elegante */
+    
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Flexbox para alinear texto e icono */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espacio entre el icono y el texto */
+    
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-harvest-add:hover {
+    background: var(--color-btn-principal-hover, #3a5a38);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.btn-harvest-add:active {
+    transform: scale(0.95);
+}
+
+.no-stock {
+    font-size: 0.8rem;
+    color: #ef4444;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    background: #fee2e2;
+    border-radius: 6px;
+}
+
+/* --- DIETA INCOMPATIBLE --- */
+.producto-incompatible { opacity: 0.6; filter: grayscale(1); }
+.producto-incompatible:hover { opacity: 1; filter: grayscale(0.5); }
+.diet-warning-overlay { 
+    display: none; position: absolute; top: 50%; left: 50%; 
+    transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); 
+    color: white; padding: 6px 12px; border-radius: 20px; 
+    z-index: 20; width: 85%; text-align: center; 
+    backdrop-filter: blur(4px);
+}
+.producto-incompatible .diet-warning-overlay { display: block; }

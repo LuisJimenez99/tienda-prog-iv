@@ -1,0 +1,306 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Mi Agenda{% endblock %}
+
+{% block extra_css %}
+<!-- Reutilizamos el CSS de Flatpickr que ya tenemos -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    /* Layout de Agenda */
+    .agenda-layout { display: flex; gap: 30px; height: calc(100vh - 140px); flex-wrap: wrap; }
+    
+    /* Columna Calendario */
+    .cal-col { width: 320px; flex-shrink: 0; background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; height: fit-content; }
+    
+    /* Columna Detalles */
+    .list-col { flex: 1; background: white; border-radius: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; min-width: 300px; }
+    
+    .list-header { padding: 20px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .list-header h3 { margin: 0; color: var(--text-main); font-size: 1.2rem; }
+    
+    .turnos-scroll { padding: 20px; overflow-y: auto; flex: 1; }
+    
+    /* Tarjeta de Turno */
+    .turno-card { 
+        display: flex; align-items: center; gap: 20px; 
+        padding: 15px 20px; margin-bottom: 15px; 
+        border: 1px solid var(--border-color); border-radius: 12px;
+        transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .turno-card:hover { transform: translateX(5px); border-color: var(--brand-color); }
+    
+    /* Línea de color lateral según estado */
+    .turno-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+    .turno-card.confirmado::before { background: #10b981; } /* Verde */
+    .turno-card.pendiente::before { background: #f59e0b; } /* Amarillo */
+    .turno-card.cancelado::before { background: #ef4444; } /* Rojo */
+    
+    .turno-hora { font-size: 1.2rem; font-weight: 700; color: var(--text-main); min-width: 60px; }
+    .turno-info { flex: 1; }
+    .paciente-nombre { display: block; font-weight: 600; font-size: 1rem; color: #1e293b; }
+    .paciente-email { font-size: 0.85rem; color: #64748b; }
+    
+    .turno-status { 
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase; 
+        padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .status-confirmado { background: #dcfce7; color: #166534; }
+    .status-pendiente { background: #fef3c7; color: #92400e; }
+    .status-cancelado { background: #fee2e2; color: #991b1b; }
+
+    /* Botones de Acción */
+    .turno-actions { display: flex; gap: 8px; }
+    .btn-icon { 
+        width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; 
+        background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .btn-icon:hover { transform: translateY(-2px); }
+    
+    .btn-confirm { color: #10b981; border-color: #d1fae5; }
+    .btn-confirm:hover { background: #10b981; color: white; }
+    
+    .btn-reschedule { color: #3b82f6; border-color: #dbeafe; }
+    .btn-reschedule:hover { background: #3b82f6; color: white; }
+    
+    .btn-cancel { color: #ef4444; border-color: #fee2e2; }
+    .btn-cancel:hover { background: #ef4444; color: white; }
+
+    /* Estado Vacío */
+    .empty-day { text-align: center; color: #94a3b8; margin-top: 50px; }
+    .empty-day i { font-size: 3rem; margin-bottom: 15px; opacity: 0.3; }
+
+    /* Modal Reagendar */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .modal-title { margin-top: 0; margin-bottom: 20px; color: #1e293b; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; color: #475569; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+    
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-modal { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-close { background: #f1f5f9; color: #475569; }
+    .btn-save { background: var(--brand-color); color: white; }
+
+    /* Flatpickr Custom */
+    .flatpickr-calendar { box-shadow: none !important; border: none !important; }
+    .flatpickr-day.selected { background: var(--brand-color) !important; border-color: var(--brand-color) !important; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .agenda-layout { flex-direction: column; height: auto; }
+        .cal-col { width: 100%; box-sizing: border-box; }
+        .list-col { min-height: 400px; }
+    }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+
+<div class="agenda-layout">
+    <!-- COLUMNA 1: NAVEGACIÓN -->
+    <div class="cal-col">
+        <div id="admin-calendar"></div>
+        <div style="margin-top: 20px; width: 100%; text-align: center;">
+            <a href="{% url 'panel_bloqueos' %}" class="btn-back-store" style="justify-content: center;">
+                <i class="fas fa-cog"></i> Configurar Disponibilidad
+            </a>
+        </div>
+    </div>
+
+    <!-- COLUMNA 2: LISTA DE TURNOS -->
+    <div class="list-col">
+        <div class="list-header">
+            <h3 id="titulo-fecha">Hoy</h3>
+            <span class="badge" id="contador-turnos" style="background:#e2e8f0; padding:4px 10px; border-radius:20px; font-size:0.8rem; color:#475569;">0 citas</span>
+        </div>
+        
+        <div class="turnos-scroll" id="lista-turnos">
+            <!-- Aquí se inyectan los turnos con JS -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA REAGENDAR -->
+<div id="modalReagendar" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title">Reagendar Turno</h3>
+        <input type="hidden" id="reagendar-id">
+        
+        <div class="form-group">
+            <label>Nueva Fecha:</label>
+            <input type="text" id="reagendar-fecha" class="form-control" placeholder="Selecciona fecha">
+        </div>
+        <div class="form-group">
+            <label>Nueva Hora:</label>
+            <input type="time" id="reagendar-hora" class="form-control">
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-modal btn-close" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn-modal btn-save" onclick="guardarReagendamiento()">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const listContainer = document.getElementById('lista-turnos');
+        const titleDate = document.getElementById('titulo-fecha');
+        const counter = document.getElementById('contador-turnos');
+        let fechaActualStr = new Date().toISOString().split('T')[0];
+
+        // 1. Inicializar Calendario Lateral
+        flatpickr("#admin-calendar", {
+            inline: true,
+            locale: "es",
+            defaultDate: "today",
+            onChange: function(selectedDates, dateStr) {
+                fechaActualStr = dateStr;
+                cargarTurnos(dateStr, selectedDates[0]);
+            }
+        });
+
+        // 2. Inicializar Picker del Modal
+        flatpickr("#reagendar-fecha", { locale: "es", minDate: "today", dateFormat: "Y-m-d" });
+
+        // Cargar hoy al inicio
+        cargarTurnos(fechaActualStr, new Date());
+
+        function cargarTurnos(dateStr, dateObj) {
+            listContainer.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+            
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+            const fechaTexto = dateObj.toLocaleDateString('es-ES', opciones);
+            titleDate.textContent = fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1);
+
+            fetch(`/panel/api/turnos-dia/?fecha=${dateStr}`)
+                .then(r => r.json())
+                .then(data => renderizarLista(data.turnos))
+                .catch(err => console.error(err));
+        }
+
+        function renderizarLista(turnos) {
+            listContainer.innerHTML = '';
+            counter.textContent = `${turnos.length} citas`;
+
+            if (turnos.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-day">
+                        <i class="far fa-calendar-check"></i>
+                        <p>No tienes turnos programados para este día.</p>
+                    </div>`;
+                return;
+            }
+
+            turnos.forEach(t => {
+                // Crear botones según el estado
+                let botones = '';
+                if (t.estado_code !== 'cancelado') {
+                    if (t.estado_code === 'pendiente') {
+                        botones += `<button class="btn-icon btn-confirm" onclick="gestionTurno(${t.id}, 'confirmar')" title="Confirmar Manualmente"><i class="fas fa-check"></i></button>`;
+                    }
+                    botones += `<button class="btn-icon btn-reschedule" onclick="abrirReagendar(${t.id}, '${fechaActualStr}', '${t.hora}')" title="Posponer / Reagendar"><i class="far fa-clock"></i></button>`;
+                    botones += `<button class="btn-icon btn-cancel" onclick="gestionTurno(${t.id}, 'cancelar')" title="Cancelar"><i class="fas fa-times"></i></button>`;
+                } else {
+                    botones = `<small style="color:#ef4444; font-weight:600;">CANCELADO</small>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = `turno-card ${t.estado_code}`;
+                card.innerHTML = `
+                    <div class="turno-hora">${t.hora}</div>
+                    <div class="turno-info">
+                        <span class="paciente-nombre">${t.paciente}</span>
+                        <span class="paciente-email">${t.email}</span>
+                    </div>
+                    <div>
+                        <span class="turno-status status-${t.estado_code}">${t.estado}</span>
+                    </div>
+                    <div class="turno-actions" style="margin-left: 15px;">
+                        ${botones}
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // --- FUNCIONES GLOBALES PARA EL JS ---
+        window.gestionTurno = function(id, accion) {
+            const mensaje = accion === 'cancelar' ? '¿Estás seguro de CANCELAR este turno?' : '¿Confirmar este turno manualmente?';
+            if (!confirm(mensaje)) return;
+
+            fetch(`/panel/api/turno/${id}/gestion/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accion: accion })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar la lista
+                    cargarTurnos(fechaActualStr, new Date(fechaActualStr + 'T00:00:00'));
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        };
+
+        window.abrirReagendar = function(id, fecha, hora) {
+            document.getElementById('reagendar-id').value = id;
+            
+            // Fix para Flatpickr: necesitamos acceder a la instancia del input
+            const fpInstance = document.getElementById('reagendar-fecha')._flatpickr;
+            if(fpInstance) fpInstance.setDate(fecha);
+            
+            document.getElementById('reagendar-hora').value = hora;
+            document.getElementById('modalReagendar').classList.add('active');
+        };
+
+        window.cerrarModal = function() {
+            document.getElementById('modalReagendar').classList.remove('active');
+        };
+
+        window.guardarReagendamiento = function() {
+            const id = document.getElementById('reagendar-id').value;
+            const fecha = document.getElementById('reagendar-fecha').value;
+            const hora = document.getElementById('reagendar-hora').value;
+
+            if(!fecha || !hora) {
+                alert("Por favor selecciona fecha y hora");
+                return;
+            }
+
+            fetch(`/panel/api/turno/${id}/gestion/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accion: 'reagendar', fecha: fecha, hora: hora })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    cerrarModal();
+                    // Recargamos la lista (el turno desaparecerá de hoy si se cambió de día)
+                    cargarTurnos(fechaActualStr, new Date(fechaActualStr + 'T00:00:00'));
+                    alert('Turno reagendado correctamente.');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        };
+    });
+</script>
+{% endblock %}

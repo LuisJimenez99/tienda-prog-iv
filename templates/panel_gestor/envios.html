@@ -1,0 +1,109 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Logística y Envíos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-envios { background: #fff; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: var(--shadow-sm); }
+    .kpi-envios h3 { margin: 0; font-size: 1.8rem; color: #1e293b; }
+    .kpi-envios p { margin: 0; color: #64748b; font-size: 0.9rem; text-transform: uppercase; font-weight: 600; }
+    
+    .table-container { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); overflow-x: auto; }
+    
+    .route-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .route-table th { text-align: left; padding: 15px; background: #f8fafc; color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #e2e8f0; }
+    .route-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.95rem; }
+    .route-table tr:hover { background: #f8fafc; }
+
+    .badge-estado { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .bg-preparacion { background: #fef3c7; color: #b45309; }
+    .bg-despachado { background: #dbeafe; color: #1e40af; }
+
+    .address-cell { max-width: 250px; }
+    .address-main { font-weight: 600; display: block; }
+    .address-sub { font-size: 0.85rem; color: #64748b; }
+
+    .btn-print { background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+    .btn-print:hover { background: #1e293b; }
+    
+    /* Estilos solo para impresión */
+    @media print {
+        .sidebar, .top-bar, .btn-print { display: none !important; }
+        .main-wrapper { margin: 0; padding: 0; }
+        .dashboard-container { padding: 0; }
+        body { background: white; height: auto; overflow: visible; }
+    }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #334155;">Hoja de Ruta</h2>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Lista</button>
+    </div>
+
+    <div class="kpi-envios">
+        <div>
+            <p>Paquetes a Entregar</p>
+            <h3>{{ total_a_enviar }}</h3>
+        </div>
+        <div style="text-align: right;">
+            <p>Zonas / Ciudades</p>
+            <h3>{{ ciudades_count }}</h3>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="route-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Cliente</th>
+                    <th>Dirección de Entrega</th>
+                    <th>Envío</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pedidos %}
+                <tr>
+                    <td><strong>#{{ p.id }}</strong></td>
+                    <td>
+                        <span class="badge-estado {% if p.estado == 'en_preparacion' %}bg-preparacion{% else %}bg-despachado{% endif %}">
+                            {{ p.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {{ p.cliente.first_name }} {{ p.cliente.last_name }}<br>
+                        <small style="color:#64748b;">{{ p.telefono_contacto }}</small>
+                    </td>
+                    <td class="address-cell">
+                        <span class="address-main">{{ p.direccion_envio|default:"Retiro en Local" }}</span>
+                        <span class="address-sub">{{ p.ciudad_envio|default:"-" }} (CP: {{ p.codigo_postal_envio }})</span>
+                    </td>
+                    <td>{{ p.metodo_envio_elegido }}</td>
+                    <td>
+                        {% if p.estado == 'en_preparacion' %}
+                        <a href="{% url 'cambiar_estado_pedido' p.id 'despachado' %}" class="btn-action" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+                            <i class="fas fa-paper-plane"></i> Despachar
+                        </a>
+                        {% else %}
+                        <span style="color: #10b981;"><i class="fas fa-check"></i> Listo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        No hay envíos pendientes por ahora.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
