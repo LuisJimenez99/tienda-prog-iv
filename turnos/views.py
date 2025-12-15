@@ -7,28 +7,41 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-import json  # <-- ¡AQUÍ ESTABA EL FALTANTE!
+import json
 import mercadopago
 
-from django.template.loader import render_to_string
-from pynliner import Pynliner
 from django.core.mail import send_mail
 
 from .models import ReglaDisponibilidad, TurnoReservado
-from configuracion.models import DatosPago, Servicio, AparienciaConfig
+from configuracion.models import DatosPago, Servicio, AparienciaConfig, ConfigPrecio  # <-- Importamos ConfigPrecio
 
 # ========================================================
 # 1. VISTA PRINCIPAL (Calendario)
 # ========================================================
 def calendario_view(request):
+    """
+    Renderiza la estructura HTML. 
+    Flatpickr (JS) se encargará de pedir los datos a la API.
+    """
     servicios = Servicio.objects.filter(tipo_servicio='TURNO', activo=True)
-    return render(request, 'turnos/calendario.html', {'servicios': servicios})
+    
+    # Obtenemos el precio actual para mostrarlo si hiciera falta
+    config_precios = ConfigPrecio.objects.first()
+    precio_actual = config_precios.precio_consulta if config_precios else 1500.00
+
+    return render(request, 'turnos/calendario.html', {
+        'servicios': servicios,
+        'precio_consulta': precio_actual
+    })
 
 
 # ========================================================
-# 2. API DE HORARIOS
+# 2. API DE HORARIOS (Lógica corregida)
 # ========================================================
 def horarios_disponibles_api(request):
+    """
+    Recibe ?fecha=YYYY-MM-DD y devuelve los horarios libres.
+    """
     date_str = request.GET.get('fecha')
     if not date_str:
         return JsonResponse({'error': 'Fecha requerida'}, status=400)
@@ -41,19 +54,22 @@ def horarios_disponibles_api(request):
     if fecha < timezone.now().date():
         return JsonResponse({'horarios': []})
 
+    # 1. Buscamos TODAS las reglas para ese día
     dia_semana_num = fecha.weekday()
     reglas = ReglaDisponibilidad.objects.filter(dia_semana=dia_semana_num, activa=True)
 
+    # 2. Buscamos horas YA ocupadas
     horas_reservadas = set(
         TurnoReservado.objects.filter(
             fecha=fecha, 
-            estado__in=['confirmado', 'pendiente']
+            estado__in=['confirmado', 'pendiente', 'esperando_confirmacion']
         ).values_list('hora', flat=True)
     )
 
     horarios_posibles = set() 
     duracion_turno = timedelta(minutes=60) 
 
+    # 3. Generamos slots
     for regla in reglas:
         hora_actual = datetime.combine(fecha, regla.hora_inicio)
         hora_fin = datetime.combine(fecha, regla.hora_fin)
@@ -75,7 +91,7 @@ def horarios_disponibles_api(request):
 
 
 # ========================================================
-# 3. RESERVAR
+# 3. RESERVAR (Crear Turno)
 # ========================================================
 @login_required
 def reservar_turno(request):
@@ -99,7 +115,7 @@ def reservar_turno(request):
 
 
 # ========================================================
-# 4. CHECKOUT (CORREGIDO Y SEGURO)
+# 4. CHECKOUT (Mercado Pago con Precio Dinámico)
 # ========================================================
 @login_required
 def checkout_turno_view(request, turno_id):
@@ -109,6 +125,12 @@ def checkout_turno_view(request, turno_id):
         messages.info(request, "Este turno ya está confirmado.")
         return redirect('inicio')
 
+    # 1. OBTENER PRECIO DINÁMICO (NUEVO)
+    config_precios = ConfigPrecio.objects.first()
+    # Si no existe configuración, usamos un valor por defecto seguro
+    precio_actual = float(config_precios.precio_consulta) if config_precios else 1500.00
+
+    # 2. Configurar SDK
     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
     host = request.build_absolute_uri('/')[:-1] 
 
@@ -116,30 +138,28 @@ def checkout_turno_view(request, turno_id):
     url_failure = request.build_absolute_uri(reverse('pago_fallido'))
     url_pending = request.build_absolute_uri(reverse('pago_pendiente'))
 
+    # 3. Datos del Pagador
+    payer_email = request.user.email if request.user.email else "test_user_123@test.com"
+
     preference_data = {
         "items": [{
             "title": f"Consulta Nutricional - {turno.fecha} {turno.hora}",
             "quantity": 1,
-            "unit_price": float(settings.PRECIO_CONSULTA),
+            "unit_price": precio_actual, # <-- USAMOS EL PRECIO DINÁMICO
             "currency_id": "ARS"
         }],
         "payer": { 
-            "email": request.user.email if request.user.email else "test_user_123@test.com"
+            "email": payer_email 
         },
         "back_urls": {
             "success": url_success,
             "failure": url_failure,
             "pending": url_pending,
         },
-        # --- CORRECCIÓN PARA LOCALHOST ---
-        # Comentamos esta línea porque MP rechaza auto-retorno a 127.0.0.1
-        # "auto_return": "approved", 
-        # ---------------------------------
+        # "auto_return": "approved", # Comentado para evitar error en localhost
         "external_reference": f"turno-{turno.id}",
     }
     
-    # print(f"📦 ENVIANDO A MP: {json.dumps(preference_data, indent=2)}")
-
     try:
         preference_response = sdk.preference().create(preference_data)
         
@@ -158,7 +178,7 @@ def checkout_turno_view(request, turno_id):
     contexto = {
         'public_key': settings.MERCADO_PAGO_PUBLIC_KEY, 
         'preference_id': preference_id,
-        'precio': settings.PRECIO_CONSULTA, 
+        'precio': precio_actual, # Pasamos el precio correcto al template
         'datos_pago': DatosPago.objects.first(), 
         'turno': turno,
     }
@@ -172,31 +192,33 @@ def checkout_turno_view(request, turno_id):
 def confirmar_transferencia_turno_view(request, turno_id):
     turno = get_object_or_404(TurnoReservado, id=turno_id, cliente=request.user)
 
+    # Obtenemos precio para mostrar en el email/pantalla
+    config_precios = ConfigPrecio.objects.first()
+    precio_actual = config_precios.precio_consulta if config_precios else 1500.00
+
     if turno.estado == 'pendiente':
         try:
             apariencia_config = AparienciaConfig.objects.first()
             datos_pago = DatosPago.objects.first()
             
             subject = f"Reserva de Turno #{turno.id} - Pendiente de Transferencia"
-            context = {
-                'pedido': None,
-                'cliente': request.user,
-                'datos_pago': datos_pago,
-                'apariencia_config': apariencia_config,
-                'turno': turno
-            }
             
             mensaje = f"""
             Hola {request.user.first_name},
             Has reservado un turno para el {turno.fecha} a las {turno.hora}.
-            Transfiere ${settings.PRECIO_CONSULTA} al Alias: {datos_pago.cbu_alias}.
+            Transfiere ${precio_actual} al Alias: {datos_pago.cbu_alias}.
             """
             
             send_mail(subject, mensaje, settings.DEFAULT_FROM_EMAIL, [request.user.email])
         except Exception as e:
             print(f"Error enviando email turno: {e}")
 
-    return render(request, 'turnos/pago_pendiente.html', {'turno': turno})
+    # Pasamos el precio al contexto también
+    return render(request, 'turnos/pago_pendiente.html', {
+        'turno': turno, 
+        'precio': precio_actual,
+        'datos_pago': DatosPago.objects.first()
+    })
 
 
 # ========================================================

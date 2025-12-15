@@ -5,28 +5,39 @@
 
 {% block extra_css %}
 <style>
+    /* ... (Mismos estilos de siempre) ... */
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .btn-add { background: var(--brand-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); transition: 0.2s; }
+    .btn-add:hover { background: #3a5a38; transform: translateY(-2px); }
     .search-box { display: flex; gap: 10px; margin-bottom: 25px; background: white; padding: 15px; border-radius: 12px; box-shadow: var(--shadow-sm); }
     .search-input { flex: 1; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; outline: none; }
     .search-input:focus { border-color: var(--brand-color); }
-    
-    .patient-card { 
-        background: white; border-radius: 12px; padding: 20px; 
-        display: flex; justify-content: space-between; align-items: center;
-        border: 1px solid #e2e8f0; margin-bottom: 15px; transition: transform 0.2s;
-    }
+    .patient-card { background: white; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; margin-bottom: 15px; transition: transform 0.2s; }
     .patient-card:hover { transform: translateX(5px); border-color: var(--brand-color); }
-    
     .p-avatar { width: 45px; height: 45px; background: #e0f2fe; color: #0369a1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; margin-right: 15px; }
     .p-info h4 { margin: 0; color: #1e293b; font-size: 1.1rem; }
     .p-info span { color: #64748b; font-size: 0.9rem; }
     
     .btn-ver-ficha { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
     .btn-ver-ficha:hover { background: var(--brand-color); color: white; border-color: var(--brand-color); }
+
+    .btn-vincular { background: #fff7ed; border: 1px solid #fdba74; color: #c2410c; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+    .btn-vincular:hover { background: #ffedd5; }
+
+    .badge-web { background: #dcfce7; color: #166534; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 700; text-transform: uppercase; }
+    .badge-pendiente { background: #fef3c7; color: #92400e; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 700; text-transform: uppercase; }
 </style>
 {% endblock %}
 
 {% block panel_content %}
     
+    <div class="header-actions">
+        <h2 style="margin:0; color:#1e293b;">Pacientes y Usuarios</h2>
+        <a href="{% url 'panel_paciente_nuevo' %}" class="btn-add">
+            <i class="fas fa-user-plus"></i> Nuevo Paciente
+        </a>
+    </div>
+
     <div class="search-box">
         <form method="get" style="display: flex; width: 100%; gap: 10px;">
             <input type="text" name="q" class="search-input" placeholder="Buscar por nombre o email..." value="{{ search_query|default:'' }}">
@@ -35,29 +46,47 @@
     </div>
 
     <div class="patients-list">
-        {% for p in pacientes %}
+        {% for p in pacientes_lista %}
         <div class="patient-card">
             <div style="display: flex; align-items: center;">
-                <!-- CORRECCIÓN AQUÍ: Usamos slice y default para evitar el error con nombres vacíos -->
                 <div class="p-avatar">
-                    {{ p.first_name|default:p.email|slice:":1"|upper }}
+                    {{ p.inicial }}
                 </div>
                 <div class="p-info">
-                    <h4>{{ p.first_name }} {{ p.last_name }}</h4>
+                    <h4 style="display:flex; align-items:center;">
+                        {{ p.nombre }} {{ p.apellido }}
+                        
+                        {% if p.tiene_usuario %}
+                            <span class="badge-web" title="Usuario Web Activo">WEB</span>
+                        {% endif %}
+                        
+                        {% if p.tipo == 'USUARIO_WEB' %}
+                            <span class="badge-pendiente" title="Falta crear ficha clínica">SIN FICHA</span>
+                        {% endif %}
+                    </h4>
                     <span>{{ p.email }}</span>
-                    <!-- Verificamos si tiene perfil antes de acceder al teléfono -->
-                    {% if p.perfil.telefono %} 
-                        <span style="margin-left: 10px; color: #94a3b8;">• {{ p.perfil.telefono }}</span>
-                    {% endif %}
+                    {% if p.telefono %} <span style="margin-left: 10px; color: #94a3b8;">• {{ p.telefono }}</span>{% endif %}
                 </div>
             </div>
             <div>
-                <a href="{% url 'panel_detalle_paciente' p.id %}" class="btn-ver-ficha">Ver Ficha</a>
+                {% if p.tipo == 'PACIENTE' %}
+                    <!-- CASO 1: Paciente clínico (con o sin usuario) -->
+                    <!-- El ID es de la tabla PACIENTE -->
+                    <a href="{% url 'panel_detalle_paciente' p.id %}" class="btn-ver-ficha">Ver Ficha</a>
+                
+                {% else %}
+                    <!-- CASO 2: Usuario web sin ficha clínica -->
+                    <!-- El ID es de la tabla USER. Lo mandamos a crear ficha. -->
+                    <a href="{% url 'panel_crear_ficha_usuario' p.id %}" class="btn-vincular">
+                        <i class="fas fa-magic"></i> Crear Ficha
+                    </a>
+                {% endif %}
             </div>
         </div>
         {% empty %}
         <div style="text-align: center; padding: 40px; color: #94a3b8;">
-            No se encontraron pacientes.
+            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;"></i>
+            <p>No se encontraron pacientes ni usuarios.</p>
         </div>
         {% endfor %}
     </div>

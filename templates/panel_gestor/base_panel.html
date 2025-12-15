@@ -1,252 +1,133 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Profesional | NutriTienda</title>
-
+    
     <!-- Iconos y Fuentes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             /* Paleta de Colores Moderna (Verde Profesional) */
-            --bg-body: #f8fafc;
-            /* Fondo gris casi blanco */
-            --bg-sidebar: #ffffff;
-            /* Sidebar blanco */
-            --text-main: #1e293b;
-            /* Texto oscuro */
-            --text-muted: #64748b;
-            /* Texto secundario */
-            --brand-color: #4A6C48;
-            /* Tu verde de marca */
-            --brand-light: #e6f0e6;
-            /* Verde muy suave para hovers */
+            --bg-body: #f8fafc;        /* Fondo gris casi blanco */
+            --bg-sidebar: #ffffff;     /* Sidebar blanco */
+            --text-main: #1e293b;      /* Texto oscuro */
+            --text-muted: #64748b;     /* Texto secundario */
+            --brand-color: #4A6C48;    /* Tu verde de marca */
+            --brand-light: #e6f0e6;    /* Verde muy suave para hovers */
             --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        
+        * { box-sizing: border-box; }
 
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-body);
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg-body); 
             color: var(--text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
         }
-
+        
         /* --- SIDEBAR (Menú Lateral) --- */
-        .sidebar {
-            width: 280px;
-            background: var(--bg-sidebar);
+        .sidebar { 
+            width: 280px; 
+            background: var(--bg-sidebar); 
             border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0; 
             transition: var(--transition);
             z-index: 50;
         }
 
-        .sidebar-header {
-            height: 70px;
-            padding: 0 25px;
-            display: flex;
-            align-items: center;
+        .sidebar-header { 
+            height: 70px; 
+            padding: 0 25px; 
+            display: flex; 
+            align-items: center; 
             gap: 12px;
             border-bottom: 1px solid var(--border-color);
         }
+        
+        .logo-text { font-size: 1.1rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        .logo-icon { color: var(--brand-color); font-size: 1.4rem; }
 
-        .logo-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-        }
-
-        .logo-icon {
-            color: var(--brand-color);
-            font-size: 1.4rem;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            padding: 25px 15px;
-            overflow-y: auto;
-        }
-
-        .menu-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            font-weight: 700;
-            padding: 0 10px 10px;
-            margin-top: 15px;
-            display: block;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 10px;
+        .sidebar-menu { flex: 1; padding: 25px 15px; overflow-y: auto; }
+        .menu-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; padding: 0 10px 10px; margin-top: 15px; display: block; }
+        
+        .menu-item { 
+            display: flex; align-items: center; gap: 12px; 
+            padding: 12px 15px; 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            border-radius: 10px; 
             margin-bottom: 5px;
             font-weight: 500;
             transition: var(--transition);
         }
-
-        .menu-item:hover {
-            background: var(--brand-light);
-            color: var(--brand-color);
-        }
-
-        .menu-item.active {
-            background: var(--brand-color);
-            color: white;
+        
+        .menu-item:hover { background: var(--brand-light); color: var(--brand-color); }
+        
+        .menu-item.active { 
+            background: var(--brand-color); 
+            color: white; 
             box-shadow: 0 4px 12px rgba(74, 108, 72, 0.25);
         }
-
-        .sidebar-footer {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            background: #f1f5f9;
-        }
-
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            background: var(--brand-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .user-info small {
-            display: block;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
+        
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: #f1f5f9; }
+        .user-avatar { width: 35px; height: 35px; background: var(--brand-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .user-info small { display: block; color: var(--text-muted); font-size: 0.75rem; }
 
         /* --- MAIN CONTENT --- */
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .top-bar {
-            height: 70px;
-            background: rgba(255, 255, 255, 0.8);
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .top-bar { 
+            height: 70px; 
+            background: rgba(255,255,255,0.8); 
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            position: sticky;
-            top: 0;
-            z-index: 40;
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0 30px; 
+            position: sticky; top: 0; z-index: 40;
         }
 
-        .page-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .btn-toggle-menu {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: var(--text-main);
-        }
-
+        .page-title { font-size: 1.25rem; font-weight: 700; margin: 0; }
+        
+        .btn-toggle-menu { display: none; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-main); }
+        
         .btn-back-store {
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
+            text-decoration: none; font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border-color); transition: var(--transition);
         }
+        .btn-back-store:hover { background: white; border-color: var(--brand-color); color: var(--brand-color); }
 
-        .btn-back-store:hover {
-            background: white;
-            border-color: var(--brand-color);
-            color: var(--brand-color);
-        }
-
-        .content-scroll {
-            padding: 30px;
-            overflow-y: auto;
-            height: 100%;
-        }
+        .content-scroll { padding: 30px; overflow-y: auto; height: 100%; }
 
         /* RESPONSIVE (Móvil) */
         @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                left: -280px;
-                height: 100%;
-                box-shadow: var(--shadow-md);
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .btn-toggle-menu {
-                display: block;
-                margin-right: 15px;
-            }
-
-            .content-scroll {
-                padding: 15px;
-            }
-
-            .top-bar {
-                padding: 0 15px;
-            }
+            .sidebar { position: absolute; left: -280px; height: 100%; box-shadow: var(--shadow-md); }
+            .sidebar.open { left: 0; }
+            .btn-toggle-menu { display: block; margin-right: 15px; }
+            .content-scroll { padding: 15px; }
+            .top-bar { padding: 0 15px; }
         }
     </style>
-
+    
     {% block extra_css %}{% endblock %}
 </head>
-
 <body>
 
     <!-- MENÚ LATERAL -->
@@ -255,45 +136,50 @@
             <i class="fas fa-leaf logo-icon"></i>
             <span class="logo-text">Panel NutriTienda</span>
         </div>
-
+        
         <div class="sidebar-menu">
             <span class="menu-label">Principal</span>
-
+            
             <!-- Inicio -->
-            <a href="{% url 'panel_home' %}"
-                class="menu-item {% if request.resolver_match.url_name == 'panel_home' %}active{% endif %}">
+            <a href="{% url 'panel_home' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_home' %}active{% endif %}">
                 <i class="fas fa-th-large"></i> Inicio
             </a>
-
+            
             <span class="menu-label">Gestión</span>
-            <a href="{% url 'panel_inventario' %}" class="menu-item">
-    <i class="fas fa-boxes"></i> Inventario
-</a>
+            
             <!-- Agenda -->
-            <a href="{% url 'panel_agenda' %}"
-                class="menu-item {% if request.resolver_match.url_name == 'panel_agenda' %}active{% endif %}">
+            <a href="{% url 'panel_agenda' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_agenda' %}active{% endif %}">
                 <i class="far fa-calendar-check"></i> Agenda
             </a>
-
-            <!-- Horarios / Bloqueos (NUEVO) -->
-            <a href="{% url 'panel_bloqueos' %}"
-                class="menu-item {% if request.resolver_match.url_name == 'panel_bloqueos' %}active{% endif %}">
+            
+            <!-- Horarios / Bloqueos -->
+            <a href="{% url 'panel_bloqueos' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_bloqueos' %}active{% endif %}">
                 <i class="fas fa-power-off"></i> Horarios / Bloqueos
             </a>
 
             <!-- Cocina / Pedidos -->
-            <a href="{% url 'panel_cocina' %}"
-                class="menu-item {% if request.resolver_match.url_name == 'panel_cocina' %}active{% endif %}">
+            <a href="{% url 'panel_cocina' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_cocina' %}active{% endif %}">
                 <i class="fas fa-utensils"></i> Cocina / Pedidos
             </a>
-
-            <a href="{% url 'panel_envios' %}"
-                class="menu-item {% if request.resolver_match.url_name == 'panel_envios' %}active{% endif %}">
+            
+            <a href="{% url 'panel_envios' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_envios' %}active{% endif %}">
                 <i class="fas fa-truck"></i> Envíos
             </a>
-            <a href="{% url 'panel_pacientes' %}"
-                class="menu-item {% if 'paciente' in request.resolver_match.url_name %}active{% endif %}">
+            
+            <span class="menu-label">Personas</span>
+            <a href="{% url 'panel_pacientes' %}" class="menu-item {% if 'paciente' in request.resolver_match.url_name %}active{% endif %}">
                 <i class="fas fa-users"></i> Pacientes
+            </a>
+
+            <span class="menu-label">Administración</span>
+            
+            <a href="{% url 'panel_inventario' %}" class="menu-item {% if 'inventario' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-boxes"></i> Inventario
+            </a>
+            
+            <!-- ¡NUEVO ENLACE: Configuración! -->
+            <a href="{% url 'panel_configuracion' %}" class="menu-item {% if request.resolver_match.url_name == 'panel_configuracion' %}active{% endif %}">
+                <i class="fas fa-cog"></i> Configuración
             </a>
         </div>
 
@@ -317,12 +203,12 @@
                 </button>
                 <h2 class="page-title">{% block title %}Resumen{% endblock %}</h2>
             </div>
-
+            
             <a href="{% url 'inicio' %}" class="btn-back-store" target="_blank">
                 <i class="fas fa-external-link-alt"></i> Ver Tienda
             </a>
         </header>
-
+        
         <div class="content-scroll">
             {% block panel_content %}{% endblock %}
         </div>
@@ -334,8 +220,7 @@
             sidebar.classList.toggle('open');
         }
     </script>
-
+    
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

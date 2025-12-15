@@ -6,7 +6,7 @@
 <style>
     /* Banner de Bienvenida (Verde Gradiente) */
     .welcome-banner {
-        background: linear-gradient(135deg, #92c090 0%, #2e4a2c 100%);
+        background: linear-gradient(135deg, #4A6C48 0%, #2e4a2c 100%);
         color: white;
         padding: 30px;
         border-radius: 16px;
@@ -81,6 +81,7 @@
     .icon-turnos { background: #e0f2fe; color: #0284c7; } /* Azul */
     .icon-cocina { background: #fef3c7; color: #d97706; } /* Amarillo */
     .icon-envios { background: #dcfce7; color: #16a34a; } /* Verde */
+    .icon-subs   { background: #f3e8ff; color: #7e22ce; } /* Violeta */
 
     /* Sección Acciones Rápidas */
     .actions-grid { 
@@ -133,10 +134,26 @@
         <p>Aquí tienes un vistazo rápido de lo que necesitas atender hoy para mantener el negocio funcionando.</p>
     </div>
 
-    <!-- 2. Tarjetas de Estadísticas (LINKS FUNCIONALES) -->
+    <!-- 2. Tarjetas de Estadísticas (KPIs) -->
     <div class="stats-grid">
         
-        <!-- Tarjeta: Turnos Hoy -> Link a Agenda -->
+        <!-- Tarjeta: Suscripciones (NUEVO) -->
+        <a href="{% url 'panel_suscripciones' %}" class="stat-card">
+            <div class="stat-info">
+                <h3>{{ suscripciones_activas }}</h3>
+                <p>Suscripciones Activas</p>
+                {% if suscripciones_venciendo > 0 %}
+                    <span style="color: #d97706; font-size: 0.8rem; font-weight: 700; display:block; margin-top:5px;">
+                        ⚠️ {{ suscripciones_venciendo }} por vencer pronto
+                    </span>
+                {% endif %}
+            </div>
+            <div class="stat-icon icon-subs">
+                <i class="fas fa-crown"></i>
+            </div>
+        </a>
+
+        <!-- Tarjeta: Turnos Hoy -->
         <a href="{% url 'panel_agenda' %}" class="stat-card">
             <div class="stat-info">
                 <h3>{{ turnos_hoy }}</h3>
@@ -147,7 +164,7 @@
             </div>
         </a>
 
-        <!-- Tarjeta: Cocina -> Link a Cocina (Filtrado por pagado) -->
+        <!-- Tarjeta: Cocina (Filtrado por pagado) -->
         <a href="{% url 'panel_cocina' %}?estado=pagado" class="stat-card">
             <div class="stat-info">
                 <h3>{{ pedidos_cocina }}</h3>
@@ -158,10 +175,9 @@
             </div>
         </a>
 
-        <!-- Tarjeta: Envíos -> Link a Envíos -->
+        <!-- Tarjeta: Envíos -->
         <a href="{% url 'panel_envios' %}" class="stat-card">
             <div class="stat-info">
-                <!-- Puedes conectar esto a la vista real si lo deseas -->
                 <h3>Ver</h3> 
                 <p>Envíos Pendientes</p>
             </div>
@@ -171,29 +187,29 @@
         </a>
     </div>
 
-    <!-- 3. Acciones Rápidas (CONECTADAS) -->
+    <!-- 3. Acciones Rápidas -->
     <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem;">Acciones Rápidas</h3>
     
     <div class="actions-grid">
-        <!-- Nuevo Turno: Lleva a la agenda -->
+        <!-- Nuevo Turno -->
         <a href="{% url 'panel_agenda' %}" class="action-btn">
             <i class="fas fa-plus-circle"></i>
             Nuevo Turno
         </a>
         
-        <!-- Exportar: Descarga el Excel -->
+        <!-- Exportar Comanda -->
         <a href="{% url 'exportar_comanda' %}" class="action-btn">
             <i class="fas fa-file-export"></i>
             Exportar Comanda
         </a>
         
-        <!-- Nuevo Paciente: AHORA APUNTA AL NUEVO FORMULARIO -->
+        <!-- Nuevo Paciente -->
         <a href="{% url 'panel_paciente_nuevo' %}" class="action-btn">
             <i class="fas fa-user-plus"></i>
             Nuevo Paciente
         </a>
         
-        <!-- Ver Inventario: Link al Panel de Inventario (o Admin si prefieres) -->
+        <!-- Ver Inventario -->
         <a href="{% url 'panel_inventario' %}" class="action-btn">
             <i class="fas fa-clipboard-list"></i>
             Ver Inventario

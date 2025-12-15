@@ -1,7 +1,7 @@
 {% extends 'panel_gestor/base_panel.html' %}
 {% load static %}
 
-{% block title %}Ficha: {{ paciente.first_name }} {{ paciente.last_name }}{% endblock %}
+{% block title %}Ficha: {{ paciente.nombre }} {{ paciente.apellido }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,13 +13,14 @@
     .tag-diet { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
     .tag-success { background: #dcfce7; color: #166534; }
     .tag-warning { background: #fef3c7; color: #92400e; }
+    .tag-secondary { background: #f1f5f9; color: #64748b; }
 
     /* LAYOUT PESTAÑAS */
-    .tabs-nav { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+    .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
     .tab-btn {
-        padding: 10px 20px; background: none; border: none; cursor: pointer;
+        padding: 12px 20px; background: none; border: none; cursor: pointer;
         font-size: 1rem; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent;
-        transition: all 0.2s;
+        transition: all 0.2s; white-space: nowrap;
     }
     .tab-btn.active { color: var(--brand-color); border-bottom-color: var(--brand-color); }
     .tab-content { display: none; animation: fadeIn 0.3s; }
@@ -27,10 +28,8 @@
     
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* GRÁFICO */
+    /* GRÁFICO & TABLAS */
     .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); height: 350px; margin-bottom: 30px; }
-    
-    /* TABLA CONSULTAS (Responsive y Completa) */
     .table-container { overflow-x: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); }
     .table-consulta { width: 100%; border-collapse: collapse; min-width: 800px; }
     .table-consulta th { text-align: left; color: #64748b; font-size: 0.85rem; padding: 12px; border-bottom: 2px solid #f1f5f9; white-space: nowrap; }
@@ -39,7 +38,7 @@
     .btn-nueva-consulta {
         background: var(--brand-color); color: white; padding: 10px 20px; border-radius: 8px; 
         text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-left: auto;
-        display: flex; align-items: center; gap: 8px;
+        display: flex; align-items: center; gap: 8px; cursor: pointer; border: none;
     }
     .btn-nueva-consulta:hover { background: #3a5a38; transform: translateY(-2px); }
 
@@ -49,275 +48,351 @@
     .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
     .section-box { background: white; border-radius: 12px; padding: 25px; box-shadow: var(--shadow-sm); }
     
-    /* ESTADOS IMC */
-    .imc-alto { color: #f59e0b; } /* Amarillo/Naranja */
-    .imc-bajo { color: #ef4444; } /* Rojo */
-    .imc-ok   { color: #10b981; } /* Verde */
+    .imc-alto { color: #f59e0b; } .imc-bajo { color: #ef4444; } .imc-ok { color: #10b981; }
+    
+    /* --- NUEVO: ARCHIVOS ADJUNTOS --- */
+    .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .file-card { 
+        background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; 
+        text-align: center; transition: transform 0.2s; position: relative; 
+    }
+    .file-card:hover { transform: translateY(-3px); border-color: var(--brand-color); }
+    .file-icon { font-size: 3rem; color: #cbd5e1; margin-bottom: 10px; }
+    .file-name { font-weight: 600; color: #334155; font-size: 0.9rem; word-break: break-word; }
+    .file-date { font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 5px; }
+    .btn-delete-file { position: absolute; top: 10px; right: 10px; color: #ef4444; cursor: pointer; opacity: 0.5; }
+    .btn-delete-file:hover { opacity: 1; }
 
-    @media (max-width: 900px) { .ficha-grid { grid-template-columns: 1fr; } }
+    /* --- NUEVO: PLAN ALIMENTARIO --- */
+    .diet-editor { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 20px; font-family: 'Courier New', monospace; line-height: 1.6; min-height: 400px; resize: vertical; box-sizing: border-box; }
+    .diet-editor:focus { outline: none; border-color: var(--brand-color); }
+    .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+    /* --- ESTILOS DE MEMBRESÍA --- */
+    .subs-card { 
+        background: white; border: 1px solid #e2e8f0; border-left: 5px solid #cbd5e1; 
+        padding: 25px; border-radius: 12px; margin-bottom: 30px; 
+        display: flex; justify-content: space-between; align-items: center; 
+        box-shadow: var(--shadow-sm);
+    }
+    .subs-card.active { border-left-color: #22c55e; background: #f0fdf4; }
+    
+    .subs-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .subs-info p { margin: 0; color: #64748b; font-size: 0.9rem; }
+    
+    .badge-status { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 700; }
+    .bg-active { background: #dcfce7; color: #166534; }
+    .bg-inactive { background: #f1f5f9; color: #64748b; }
+
+    .subs-actions { display: flex; gap: 10px; }
+    .btn-action-small { 
+        padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; 
+        text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.2s; 
+        cursor: pointer; border: 1px solid transparent; background: transparent;
+    }
+    .btn-add-time { border-color: #0ea5e9; color: #0284c7; background: white; }
+    .btn-add-time:hover { background: #e0f2fe; }
+    .btn-cancel-subs { border-color: #ef4444; color: #b91c1c; background: white; }
+    .btn-cancel-subs:hover { background: #fef2f2; }
+
+    /* Modales */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .modal-title { margin-top: 0; margin-bottom: 20px; color: #1e293b; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+    .btn-modal { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-close { background: #f1f5f9; color: #475569; }
+    .btn-save { background: #3b82f6; color: white; display: inline-flex; align-items: center;}
+    .btn-save:hover { background: #2563eb; }
+
+    @media (max-width: 900px) { 
+        .ficha-grid { grid-template-columns: 1fr; } 
+        .subs-card { flex-direction: column; text-align: center; gap: 15px; }
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block panel_content %}
     
+    <!-- HEADER -->
     <div class="ficha-header">
-        <!-- Avatar seguro -->
-        <div class="big-avatar">{{ paciente.first_name|default:paciente.username|slice:":1"|upper }}</div>
-        
+        <div class="big-avatar">{{ paciente.nombre|slice:":1"|upper }}</div>
         <div style="flex: 1;">
-            <h1 style="margin: 0; font-size: 1.8rem; color: #1e293b;">{{ paciente.first_name }} {{ paciente.last_name }}</h1>
-            <p style="margin: 5px 0; color: #64748b;">{{ paciente.email }} • Registrado: {{ paciente.date_joined|date:"d/m/Y" }}</p>
-            
+            <h1 style="margin: 0; font-size: 1.8rem; color: #1e293b;">{{ paciente.nombre }} {{ paciente.apellido }}</h1>
+            <p style="margin: 5px 0; color: #64748b;">
+                {{ paciente.email }} • Registrado: {{ paciente.fecha_creacion|date:"d/m/Y" }}
+            </p>
             <div class="tags-container">
                 {% for tag in etiquetas %}
                     <span class="tag-diet tag-{{ tag.color }}">{{ tag.label }}</span>
-                {% empty %}
-                    <span style="color:#94a3b8; font-size: 0.85rem;">Sin restricciones dietarias</span>
                 {% endfor %}
             </div>
         </div>
-        
-        <!-- Botón solo si ya existe la ficha clínica -->
-        {% if ficha_paciente %}
-            <a href="{% url 'panel_nueva_consulta' ficha_paciente.id %}" class="btn-nueva-consulta">
-                <i class="fas fa-plus"></i> Nueva Consulta
-            </a>
-        {% endif %}
+        <!-- Botón Nueva Consulta (Siempre Visible) -->
+        <a href="{% url 'panel_nueva_consulta' paciente.id %}" class="btn-nueva-consulta">
+            <i class="fas fa-plus"></i> Nueva Consulta
+        </a>
     </div>
 
-    <!-- PESTAÑAS DE NAVEGACIÓN -->
+    <!-- PESTAÑAS -->
     <div class="tabs-nav">
         <button class="tab-btn active" onclick="openTab(event, 'tab-clinica')">🩺 Historia Clínica</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-plan')">🍎 Plan Alimentario</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-archivos')">📂 Archivos</button>
         <button class="tab-btn" onclick="openTab(event, 'tab-comercial')">🛍️ Historial Comercial</button>
     </div>
 
-    <!-- CONTENIDO 1: CLÍNICA (EVOLUCIÓN) -->
+    <!-- 1. CLÍNICA -->
     <div id="tab-clinica" class="tab-content active">
-        
-        {% if not ficha_paciente %}
-            <!-- ESTADO VACÍO CON ACCIÓN RÁPIDA -->
-            <div style="text-align: center; padding: 50px; background: white; border-radius: 16px; border: 2px dashed #e2e8f0; max-width: 600px; margin: 20px auto;">
-                <div style="width: 70px; height: 70px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;">
-                    <i class="fas fa-file-medical"></i>
+        <!-- Gráfico -->
+        <div class="chart-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; color:#334155;">Evolución de Composición Corporal</h3>
+            </div>
+            {% if consultas %}
+                <canvas id="evolutionChart"></canvas>
+            {% else %}
+                <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#9ca3af; flex-direction:column;">
+                    <i class="fas fa-chart-area" style="font-size:3rem; margin-bottom:10px; opacity:0.3;"></i>
+                    <p>Aún no hay consultas con datos para graficar. ¡Carga la primera!</p>
                 </div>
-                
-                <h3 style="color: #1e293b; margin-bottom: 10px;">Ficha Clínica No Iniciada</h3>
-                <p style="color: #64748b; margin-bottom: 25px; line-height: 1.5;">
-                    El usuario <strong>{{ paciente.email }}</strong> compra en la tienda, pero aún no tiene datos clínicos (peso, altura, etc.) registrados.
-                </p>
-                
-                <!-- Enlace a la vista de creación rápida -->
-                <a href="{% url 'panel_crear_ficha_usuario' paciente.id %}" class="btn-nueva-consulta" style="display: inline-flex; float: none; padding: 12px 25px; font-size: 1rem;">
-                    <i class="fas fa-plus-circle"></i> Crear Ficha Clínica Ahora
+            {% endif %}
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container">
+            <h3 style="margin:0 0 20px 0; color:#334155;">Historial de Visitas</h3>
+            <table class="table-consulta">
+                <thead>
+                    <tr><th>Fecha</th><th>Peso (kg)</th><th>IMC</th><th>% Grasa</th><th>% Músculo</th><th>Pliegues</th><th>Cintura</th><th width="30%">Notas</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in consultas %}
+                    <tr>
+                        <td><strong>{{ c.fecha|date:"d/m/Y" }}</strong></td>
+                        <td>{{ c.peso_actual }} kg</td>
+                        <td><span style="font-weight:bold;" class="{% if c.imc > 25 %}imc-alto{% elif c.imc < 18.5 %}imc-bajo{% else %}imc-ok{% endif %}">{{ c.imc }}</span></td>
+                        <td>{% if c.realizo_antropometria and c.porcentaje_grasa %}<span style="color:#eab308; font-weight:600;">{{ c.porcentaje_grasa }}%</span>{% else %}-{% endif %}</td>
+                        <td>{% if c.realizo_antropometria and c.porcentaje_musculo %}<span style="color:#3b82f6; font-weight:600;">{{ c.porcentaje_musculo }}%</span>{% else %}-{% endif %}</td>
+                        <td>{{ c.sumatoria_pliegues|default:"-" }}</td>
+                        <td>{{ c.cintura|default:"-" }}</td>
+                        <td style="color: #64748b; font-size: 0.85rem; line-height: 1.4;">{{ c.notas_evolucion|default:"-"|truncatechars:100 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" style="text-align:center; padding: 40px;">No hay consultas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. PLAN ALIMENTARIO (NUEVO) -->
+    <div id="tab-plan" class="tab-content">
+        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+            <form method="POST" action="{% url 'guardar_plan_alimentacion' paciente.id %}">
+                {% csrf_token %}
+                <div class="plan-header">
+                    <h3 style="margin:0; color:#334155;">Plan Actual</h3>
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Guardar Cambios</button>
+                </div>
+                {{ form_plan.contenido }}
+                <p style="font-size:0.85rem; color:#666; margin-top:10px;">Última actualización: {{ ultimo_plan.fecha_creacion|default:"Nunca" }}</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. ARCHIVOS (NUEVO) -->
+    <div id="tab-archivos" class="tab-content">
+        <!-- Formulario Subida -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px dashed #e2e8f0; margin-bottom: 30px; text-align:center;">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'subir_archivo_paciente' paciente.id %}" style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                {% csrf_token %}
+                {{ form_archivo.titulo }}
+                {{ form_archivo.archivo }}
+                <button type="submit" class="btn-save" style="margin:0;"><i class="fas fa-upload"></i> Subir</button>
+            </form>
+        </div>
+
+        <!-- Lista Archivos -->
+        <div class="files-grid">
+            {% for archivo in archivos %}
+            <div class="file-card">
+                <a href="{% url 'eliminar_archivo' archivo.id %}" class="btn-delete-file" onclick="return confirm('¿Borrar archivo?')"><i class="fas fa-trash"></i></a>
+                <a href="{{ archivo.archivo.url }}" target="_blank" style="text-decoration:none; color:inherit;">
+                    <div class="file-icon">
+                        {% if archivo.es_imagen %}
+                            <i class="far fa-image" style="color:#3b82f6;"></i>
+                        {% else %}
+                            <i class="far fa-file-pdf" style="color:#ef4444;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="file-name">{{ archivo.titulo }}</div>
+                    <span class="file-date">{{ archivo.fecha_subida|date:"d M Y" }}</span>
                 </a>
             </div>
-        {% else %}
-        
-            <!-- GRÁFICO DE EVOLUCIÓN -->
-            <div class="chart-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0; color:#334155;">Evolución de Composición Corporal</h3>
+            {% empty %}
+            <p style="grid-column:1/-1; text-align:center; color:#999;">No hay archivos adjuntos.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 4. COMERCIAL -->
+    <div id="tab-comercial" class="tab-content">
+        {% if usuario_web %}
+            <!-- Tarjeta Suscripción -->
+            <div class="subs-card {% if usuario_web.perfil.es_cliente_activo %}active{% endif %}">
+                <div class="subs-info">
+                    <h3>Membresía Recetario {% if usuario_web.perfil.es_cliente_activo %}<span class="badge-status bg-active">ACTIVA</span>{% else %}<span class="badge-status bg-inactive">INACTIVA</span>{% endif %}</h3>
+                    {% if usuario_web.perfil.es_cliente_activo %}<p>Vence el: <strong>{{ usuario_web.perfil.suscripcion_activa_hasta|date:"d \d\e F \d\e Y" }}</strong></p>{% else %}<p>Sin acceso premium.</p>{% endif %}
                 </div>
-                <canvas id="evolutionChart"></canvas>
+                <div class="subs-actions">
+                    <button class="btn-action-small btn-add-time" data-url="{% url 'extender_suscripcion_manual' usuario_web.id %}" data-email="{{ usuario_web.email }}" onclick="abrirModalExtender(this)"><i class="fas fa-calendar-plus"></i> +30 Días</button>
+                    {% if usuario_web.perfil.es_cliente_activo %}
+                    <button class="btn-action-small btn-cancel-subs" data-url="{% url 'cancelar_suscripcion_manual' usuario_web.id %}" data-email="{{ usuario_web.email }}" onclick="abrirModalRevocar(this)"><i class="fas fa-ban"></i> Revocar</button>
+                    {% endif %}
+                </div>
             </div>
 
-            <!-- HISTORIAL DE CONSULTAS -->
-            <div class="table-container">
-                <h3 style="margin:0 0 20px 0; color:#334155;">Historial de Visitas</h3>
-                
-                <table class="table-consulta">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Peso (kg)</th>
-                            <th>IMC</th>
-                            <th>% Grasa</th>
-                            <th>% Músculo</th>
-                            <th>Pliegues (mm)</th>
-                            <th>Cintura (cm)</th>
-                            <th width="30%">Notas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for c in consultas %}
-                        <tr>
-                            <td><strong>{{ c.fecha|date:"d/m/Y" }}</strong></td>
-                            <td>{{ c.peso_actual }} kg</td>
-                            <td>
-                                <!-- Clase dinámica para el color del IMC -->
-                                <span style="font-weight:bold;" class="{% if c.imc > 25 %}imc-alto{% elif c.imc < 18.5 %}imc-bajo{% else %}imc-ok{% endif %}">
-                                    {{ c.imc }}
-                                </span>
-                            </td>
-                            
-                            <!-- Datos Antropométricos (Condicionales) -->
-                            <td>
-                                {% if c.realizo_antropometria and c.porcentaje_grasa %}
-                                    <span style="color:#eab308; font-weight:600;">{{ c.porcentaje_grasa }}%</span>
-                                {% else %}<span style="color:#ccc;">-</span>{% endif %}
-                            </td>
-                            
-                            <td>
-                                {% if c.realizo_antropometria and c.porcentaje_musculo %}
-                                    <span style="color:#3b82f6; font-weight:600;">{{ c.porcentaje_musculo }}%</span>
-                                {% else %}<span style="color:#ccc;">-</span>{% endif %}
-                            </td>
-
-                            <td>{{ c.sumatoria_pliegues|default:"-" }}</td>
-                            <td>{{ c.cintura|default:"-" }}</td>
-
-                            <td style="color: #64748b; font-size: 0.85rem; line-height: 1.4;">
-                                {{ c.notas_evolucion|default:"-"|truncatechars:100 }}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="8" style="text-align:center; padding: 40px;">No hay consultas registradas.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <!-- Grids Compras y Turnos -->
+            <div class="ficha-grid">
+                <div class="section-box">
+                    <h3 style="margin-bottom: 20px; color:#334155;"><i class="fas fa-shopping-bag"></i> Compras</h3>
+                    {% for p in pedidos %}
+                        <div style="border-bottom:1px dashed #eee; padding:12px 0; display:flex; justify-content:space-between;">
+                            <div><strong>#{{ p.id }}</strong> <small>{{ p.fecha_creacion|date:"d/m/y" }}</small> <span style="font-size:0.8rem; color:#94a3b8;">{{ p.get_estado_display }}</span></div>
+                            <span style="font-weight:700; color:var(--brand-color);">${{ p.total|floatformat:0 }}</span>
+                        </div>
+                    {% empty %}
+                        <p style="color:#94a3b8; text-align:center;">Sin compras.</p>
+                    {% endfor %}
+                </div>
+                <div class="section-box">
+                    <h3 style="margin-bottom: 20px; color:#334155;"><i class="far fa-calendar-alt"></i> Agenda</h3>
+                    {% for t in turnos %}
+                        <div style="border-bottom:1px dashed #eee; padding:12px 0;">
+                            {{ t.fecha|date:"d/m/Y" }} - {{ t.hora }} <span style="float:right; font-size:0.8rem; font-weight:700;">{{ t.estado }}</span>
+                        </div>
+                    {% empty %}
+                        <p style="color:#94a3b8; text-align:center;">Sin turnos.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <!-- Estado Vacío -->
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 2px dashed #e2e8f0; max-width: 600px; margin: 0 auto;">
+                <div style="width: 70px; height: 70px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 style="color:#1e293b; margin-bottom:10px;">Paciente sin acceso Web</h3>
+                <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 25px;">Este paciente solo tiene ficha clínica.</p>
+                <button onclick="abrirModalUsuario()" class="btn-nueva-consulta" style="display:inline-flex; float:none; background:#3b82f6; width: auto; justify-content: center;">
+                    <i class="fas fa-magic"></i> Dar acceso a la Web
+                </button>
             </div>
         {% endif %}
     </div>
 
-    <!-- CONTENIDO 2: COMERCIAL (COMPRAS Y TURNOS) -->
-    <div id="tab-comercial" class="tab-content">
-        <div class="ficha-grid">
-            <!-- Pedidos -->
-            <div class="section-box">
-                <h3 style="margin-bottom: 20px; color:#334155;"><i class="fas fa-shopping-bag"></i> Compras Realizadas</h3>
-                {% for p in pedidos %}
-                    <div style="border-bottom:1px dashed #eee; padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong style="color:#1e293b;">Pedido #{{ p.id }}</strong> 
-                            <small style="color:#64748b; margin-left: 5px;">{{ p.fecha_creacion|date:"d/m/y" }}</small>
-                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;">
-                                {{ p.items.count }} items • {{ p.get_estado_display }}
-                            </div>
-                        </div>
-                        <span style="font-weight:700; color:var(--brand-color); font-size:1.1rem;">${{ p.total|floatformat:0 }}</span>
-                    </div>
-                {% empty %}
-                    <p style="color:#94a3b8; text-align:center; padding:20px;">Sin compras.</p>
-                {% endfor %}
+<!-- MODAL CREAR USUARIO -->
+<div id="modalCrearUsuario" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title">Crear Usuario Web</h3>
+        <p class="modal-text">Estás a punto de crear una cuenta para <strong>{{ paciente.nombre }}</strong>.</p>
+        <form method="POST" action="{% url 'panel_crear_usuario_paciente' paciente.id %}">
+            {% csrf_token %}
+            <div class="form-group"><label>Email (Usuario)</label><input type="email" name="email" class="form-control" value="{{ paciente.email }}" required></div>
+            <div class="form-group"><label>Contraseña</label><input type="text" name="password" class="form-control" value="Nutri2025" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-close" onclick="cerrarModalId('modalCrearUsuario')">Cancelar</button>
+                <button type="submit" class="btn-modal btn-save">Confirmar</button>
             </div>
+        </form>
+    </div>
+</div>
 
-            <!-- Turnos -->
-            <div class="section-box">
-                <h3 style="margin-bottom: 20px; color:#334155;"><i class="far fa-calendar-alt"></i> Agenda de Turnos</h3>
-                {% for t in turnos %}
-                    <div style="border-bottom:1px dashed #eee; padding:12px 0;">
-                        {{ t.fecha|date:"d/m/Y" }} - {{ t.hora }}
-                        <span style="float:right; font-size:0.8rem; font-weight:700; text-transform:uppercase;">{{ t.estado }}</span>
-                    </div>
-                {% empty %}
-                    <p style="color:#94a3b8; text-align:center; padding:20px;">Sin turnos.</p>
-                {% endfor %}
-            </div>
+<!-- MODAL EXTENDER -->
+<div id="modalExtender" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title" style="color: #0284c7;">Regalar Suscripción</h3>
+        <p class="modal-text">¿Confirmas agregar <strong>30 días</strong> a <span id="ext-email" class="modal-highlight"></span>?</p>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-close" onclick="cerrarModalId('modalExtender')">Cancelar</button>
+            <a href="#" id="btn-confirm-extender" class="btn-modal btn-save">Confirmar</a>
         </div>
     </div>
+</div>
 
-<!-- DATOS PARA EL GRÁFICO (Injectados por Django) -->
+<!-- MODAL REVOCAR -->
+<div id="modalRevocar" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title" style="color: #ef4444;">Revocar Acceso</h3>
+        <p class="modal-text">¿Estás seguro que deseas quitar el acceso a <span id="rev-email" class="modal-highlight"></span>?</p>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-close" onclick="cerrarModalId('modalRevocar')">Cancelar</button>
+            <a href="#" id="btn-confirm-revocar" class="btn-modal btn-danger" style="background:#ef4444;">Sí, Revocar</a>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
 {{ labels_grafico|json_script:"chart-labels" }}
 {{ data_peso|json_script:"chart-peso" }}
 {{ data_grasa|json_script:"chart-grasa" }}
 {{ data_musculo|json_script:"chart-musculo" }}
 
 <script>
-    // Lógica de Pestañas
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
-        }
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
         tablinks = document.getElementsByClassName("tab-btn");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
         document.getElementById(tabName).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
 
-    // Lógica del Gráfico
+    function abrirModalUsuario() { document.getElementById('modalCrearUsuario').classList.add('active'); }
+    function abrirModalExtender(btn) {
+        document.getElementById('ext-email').textContent = btn.dataset.email;
+        document.getElementById('btn-confirm-extender').href = btn.dataset.url;
+        document.getElementById('modalExtender').classList.add('active');
+    }
+    function abrirModalRevocar(btn) {
+        document.getElementById('rev-email').textContent = btn.dataset.email;
+        document.getElementById('btn-confirm-revocar').href = btn.dataset.url;
+        document.getElementById('modalRevocar').classList.add('active');
+    }
+    function cerrarModalId(id) { document.getElementById(id).classList.remove('active'); }
+
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('evolutionChart');
         if (ctx) {
             const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+            if (labels.length === 0) return;
             const dataPeso = JSON.parse(document.getElementById('chart-peso').textContent);
             const dataGrasa = JSON.parse(document.getElementById('chart-grasa').textContent);
             const dataMusculo = JSON.parse(document.getElementById('chart-musculo').textContent);
-
-            if (labels.length === 0) return;
 
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'Peso (kg)',
-                            data: dataPeso,
-                            borderColor: '#3b82f6', // Azul
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 3,
-                            yAxisID: 'y',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: '% Grasa',
-                            data: dataGrasa,
-                            borderColor: '#f59e0b', // Amarillo
-                            backgroundColor: '#f59e0b',
-                            borderWidth: 2,
-                            borderDash: [5, 5], 
-                            yAxisID: 'y1',
-                            tension: 0.1
-                        },
-                        {
-                            label: '% Músculo',
-                            data: dataMusculo,
-                            borderColor: '#10b981', // Verde
-                            backgroundColor: '#10b981',
-                            borderWidth: 2,
-                            borderDash: [2, 2],
-                            yAxisID: 'y1',
-                            tension: 0.1
-                        }
+                        { label: 'Peso (kg)', data: dataPeso, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, yAxisID: 'y', tension: 0.3, fill: true },
+                        { label: '% Grasa', data: dataGrasa, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2, borderDash: [5, 5], yAxisID: 'y1', tension: 0.1 },
+                        { label: '% Músculo', data: dataMusculo, borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 2, borderDash: [2, 2], yAxisID: 'y1', tension: 0.1 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { position: 'top' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y + (context.dataset.yAxisID === 'y' ? ' kg' : '%');
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top' } },
                     scales: {
-                        y: { 
-                            type: 'linear', display: true, position: 'left', 
-                            title: {display:true, text:'Peso (kg)'},
-                            grid: { color: '#f3f4f6' }
-                        },
-                        y1: { 
-                            type: 'linear', display: true, position: 'right', 
-                            title: {display:true, text:'Porcentaje %'}, 
-                            grid: {drawOnChartArea: false},
-                            min: 0, max: 50 
-                        }
+                        y: { type: 'linear', display: true, position: 'left', title: {display:true, text:'Peso (kg)'}, grid: { color: '#f3f4f6' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: {display:true, text:'Porcentaje %'}, grid: {drawOnChartArea: false}, min: 0, max: 50 }
                     }
                 }
             });

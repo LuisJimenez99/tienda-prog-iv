@@ -1,82 +1,498 @@
 {% extends 'panel_gestor/base_panel.html' %}
-{% block title %}Nueva Consulta{% endblock %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); }
-    .section-title { color: #4A6C48; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; padding-bottom: 5px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .full-width { grid-column: 1 / -1; }
-    label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; font-size: 0.9rem; }
-    
-    /* Caja Antropometría (oculta por defecto) */
-    #antro-box { display: none; background: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 20px; }
-    #antro-box.visible { display: block; animation: slideDown 0.3s; }
-    
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    .btn-submit { width: 100%; background: var(--brand-color); color: white; padding: 15px; border: none; border-radius: 8px; font-weight: 700; margin-top: 25px; cursor: pointer; }
-    .btn-submit:hover { background: #3a5a38; }
+    /* LAYOUT PRINCIPAL */
+    .consulta-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        /* Columna ancha para datos, angosta para resumen */
+        gap: 30px;
+        align-items: start;
+    }
+
+    /* TARJETAS */
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .card-header-c {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px dashed #f1f5f9;
+    }
+
+    .card-header-c h3 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 1.1rem;
+    }
+
+    .card-header-c i {
+        color: var(--brand-color);
+        font-size: 1.2rem;
+    }
+
+    /* GRID DE INPUTS */
+    .input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    /* INPUTS ESTILIZADOS */
+    .form-input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: all 0.2s;
+        background: #f8fafc;
+    }
+
+    .form-input:focus,
+    textarea:focus {
+        border-color: var(--brand-color);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(74, 108, 72, 0.1);
+        outline: none;
+    }
+
+    /* SWITCH ANTROPOMETRÍA */
+    .antro-switch-container {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .antro-switch-container:hover {
+        background: #dcfce7;
+    }
+
+    /* CAJA ANTROPOMETRÍA (OCULTA) */
+    #antro-content {
+        display: none;
+        overflow: hidden;
+        animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #antro-content.visible {
+        display: block;
+    }
+
+    /* TARJETA LATERAL (RESUMEN EN VIVO) */
+    .summary-card {
+        background: #1e293b;
+        color: white;
+        padding: 25px;
+        border-radius: 16px;
+        position: sticky;
+        top: 100px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .imc-display {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .imc-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .imc-label {
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        opacity: 0.7;
+    }
+
+    .imc-status {
+        margin-top: 15px;
+        padding: 8px 15px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* BOTONES */
+    .btn-submit {
+        width: 100%;
+        background: var(--brand-color);
+        color: white;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        background: #3a5a38;
+    }
+
+    .btn-cancel {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Estilos Horarios (NUEVO) */
+    .slots-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .slot-mini {
+        padding: 8px 4px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background: white;
+        text-align: center;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #64748b;
+    }
+
+    .slot-mini:hover {
+        border-color: var(--brand-color);
+        color: var(--brand-color);
+    }
+
+    .slot-mini.selected {
+        background: var(--brand-color);
+        color: white;
+        border-color: var(--brand-color);
+        font-weight: 700;
+    }
+
+    .loading-slots {
+        text-align: center;
+        color: #94a3b8;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 900px) {
+        .consulta-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            order: -1;
+            position: relative;
+            top: 0;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block panel_content %}
-<div class="form-container">
-    <h2 style="margin-top:0;">{{ titulo }}</h2>
-    
-    <form method="post">
-        {% csrf_token %}
-        
-        <h4 class="section-title">Datos Básicos</h4>
-        <div class="form-grid">
-            <div><label>Fecha</label> {{ form.fecha }}</div>
-            <div><label>Peso Actual (kg)</label> {{ form.peso_actual }}</div>
-            <div><label>Altura (m)</label> {{ form.altura }}</div>
+
+<h2 style="margin-bottom:30px; color:#1e293b;">{{ titulo }}</h2>
+
+<form method="post" id="consultaForm">
+    {% csrf_token %}
+
+    <div class="consulta-wrapper">
+
+        <!-- COLUMNA IZQUIERDA: FORMULARIOS -->
+        <div class="form-column">
+
+            <!-- 1. DATOS BÁSICOS -->
+            <div class="form-card">
+                <div class="card-header-c">
+                    <i class="fas fa-heartbeat"></i>
+                    <h3>Signos Vitales</h3>
+                </div>
+
+                <div class="input-grid">
+                    <div class="full-width">
+                        <label>Fecha de Consulta</label>
+                        {{ form.fecha }}
+                    </div>
+                    <div>
+                        <label>Peso (kg)</label>
+                        {{ form.peso_actual }}
+                    </div>
+                    <div>
+                        <label>Altura (mts)</label>
+                        {{ form.altura }}
+                        <small style="color:#94a3b8; font-size:0.75rem;">Ej: 1.75</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ACTIVADOR ANTROPOMETRÍA -->
+            <div class="form-card"
+                style="padding: 0; overflow: hidden; border: none; background: transparent; box-shadow: none;">
+                <label class="antro-switch-container" for="{{ form.realizo_antropometria.id_for_label }}">
+                    <div
+                        style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        {{ form.realizo_antropometria }}
+                    </div>
+                    <div>
+                        <span style="font-weight: 700; color: #166534; font-size: 1.05rem;">Registrar Antropometría
+                            ISAK</span>
+                        <small style="display: block; color: #15803d;">Activa esto para cargar pliegues y
+                            perímetros.</small>
+                    </div>
+                </label>
+            </div>
+
+            <!-- 3. DATOS ANTROPOMÉTRICOS (DESPLEGABLE) -->
+            <div id="antro-content" class="form-card">
+                <div class="card-header-c">
+                    <i class="fas fa-ruler-combined"></i>
+                    <h3>Mediciones Corporales</h3>
+                </div>
+
+                <div class="input-grid">
+                    <div><label>% Grasa</label> {{ form.porcentaje_grasa }}</div>
+                    <div><label>% Músculo</label> {{ form.porcentaje_musculo }}</div>
+                    <div><label>Cintura (cm)</label> {{ form.cintura }}</div>
+                    <div><label>Cadera (cm)</label> {{ form.cadera }}</div>
+                    <div class="full-width">
+                        <label>Sumatoria 6 Pliegues (mm)</label>
+                        {{ form.sumatoria_pliegues }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. NOTAS -->
+            <div class="form-card">
+                <div class="card-header-c">
+                    <i class="fas fa-sticky-note"></i>
+                    <h3>Evolución y Notas</h3>
+                </div>
+                {{ form.notas_evolucion }}
+            </div>
+
+            <!-- 5. AGENDAR SEGUIMIENTO (NUEVO) -->
+            <div class="form-card" style="border-left: 5px solid var(--brand-color);">
+                <div class="card-header-c"><i class="far fa-calendar-plus"></i>
+                    <h3>Agendar Próxima Cita (Opcional)</h3>
+                </div>
+                <div class="input-grid">
+                    <div>
+                        <label>Fecha Próxima</label>
+                        {{ form.proxima_fecha }}
+                    </div>
+                    <div>
+                        <label>Hora Seleccionada</label>
+                        <!-- Input donde se guardará la hora elegida -->
+                        {{ form.proxima_hora }}
+                    </div>
+                </div>
+                <!-- Contenedor dinámico de horarios (AJAX) -->
+                <div style="margin-top: 15px;">
+                    <label style="margin-bottom: 10px; display:block;">Horarios Disponibles:</label>
+                    <div id="slots-container" class="slots-grid">
+                        <span style="color:#94a3b8; font-size:0.9rem;">Selecciona una fecha para ver horarios.</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Guardar y Finalizar</button>
+            <a href="javascript:history.back()" class="btn-cancel">Cancelar</a>
+
         </div>
 
-        <div style="margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px;">
-            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                {{ form.realizo_antropometria }}
-                <span style="font-size: 1rem;">¿Se realizó Antropometría ISAK?</span>
-            </label>
-        </div>
+        <!-- COLUMNA DERECHA: RESUMEN EN VIVO -->
+        <div class="summary-column">
+            <div class="summary-card">
+                <div style="opacity:0.7; font-size:0.9rem; font-weight:600; text-transform:uppercase;">Resumen en Vivo
+                </div>
 
-        <!-- SECCIÓN ANTROPOMETRÍA (DINÁMICA) -->
-        <div id="antro-box">
-            <h4 class="section-title" style="margin-top:0;">Mediciones Corporales</h4>
-            <div class="form-grid">
-                <div><label>% Grasa</label> {{ form.porcentaje_grasa }}</div>
-                <div><label>% Músculo</label> {{ form.porcentaje_musculo }}</div>
-                <div><label>Cintura (cm)</label> {{ form.cintura }}</div>
-                <div><label>Cadera (cm)</label> {{ form.cadera }}</div>
-                <div class="full-width"><label>Sumatoria 6 Pliegues (mm)</label> {{ form.sumatoria_pliegues }}</div>
+                <div class="imc-display">
+                    <div class="imc-label">Índice de Masa Corporal</div>
+                    <div class="imc-number" id="live-imc">--</div>
+                    <div class="imc-status" id="live-status">Esperando datos...</div>
+                </div>
+
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 25px 0;">
+
+                <div style="font-size: 0.9rem;">
+                    <p style="margin-bottom: 5px;">📅 Fecha: <strong id="live-date">-</strong></p>
+                    <p>⚖️ Peso: <strong id="live-weight">-</strong></p>
+                </div>
             </div>
         </div>
 
-        <h4 class="section-title" style="margin-top: 25px;">Evolución y Notas</h4>
-        <div class="full-width">
-            {{ form.notas_evolucion }}
-        </div>
+    </div>
+</form>
+{% endblock %}
 
-        <button type="submit" class="btn-submit">Guardar Consulta</button>
-    </form>
-</div>
-
+{% block extra_js %}
 <script>
-    // Lógica para mostrar/ocultar antropometría
-    const checkAntro = document.getElementById('id_realizo_antropometria');
-    const boxAntro = document.getElementById('antro-box');
+    document.addEventListener('DOMContentLoaded', function () {
 
-    function toggleAntro() {
-        if (checkAntro.checked) {
-            boxAntro.classList.add('visible');
-        } else {
-            boxAntro.classList.remove('visible');
+        // --- 1. TOGGLE ANTROPOMETRÍA ---
+        const checkAntro = document.getElementById('id_realizo_antropometria');
+        const boxAntro = document.getElementById('antro-content');
+
+        function toggleAntro() {
+            if (checkAntro.checked) {
+                boxAntro.classList.add('visible');
+            } else {
+                boxAntro.classList.remove('visible');
+            }
         }
-    }
+        checkAntro.addEventListener('change', toggleAntro);
+        toggleAntro(); // Inicial
 
-    checkAntro.addEventListener('change', toggleAntro);
-    // Ejecutar al inicio por si hay error de validación y vuelve marcado
-    toggleAntro();
+        // --- 2. CALCULADORA IMC EN TIEMPO REAL ---
+        const inputPeso = document.getElementById('id_peso_actual');
+        const inputAltura = document.getElementById('id_altura');
+        const inputFecha = document.getElementById('id_fecha');
+
+        const displayIMC = document.getElementById('live-imc');
+        const displayStatus = document.getElementById('live-status');
+        const displayWeight = document.getElementById('live-weight');
+        const displayDate = document.getElementById('live-date');
+
+        function calcularIMC() {
+            const peso = parseFloat(inputPeso.value);
+            const altura = parseFloat(inputAltura.value);
+
+            // Actualizar resumen
+            if (peso) displayWeight.textContent = peso + ' kg';
+            if (inputFecha.value) displayDate.textContent = inputFecha.value;
+
+            if (peso > 0 && altura > 0) {
+                // Fórmula IMC: Peso / (Altura * Altura)
+                const imc = (peso / (altura * altura)).toFixed(2);
+                displayIMC.textContent = imc;
+
+                // Determinar estado y color
+                let estado = "";
+                let color = "";
+
+                if (imc < 18.5) { estado = "Bajo Peso"; color = "#f59e0b"; } // Amarillo
+                else if (imc < 24.9) { estado = "Peso Normal"; color = "#10b981"; } // Verde
+                else if (imc < 29.9) { estado = "Sobrepeso"; color = "#f97316"; } // Naranja
+                else { estado = "Obesidad"; color = "#ef4444"; } // Rojo
+
+                displayStatus.textContent = estado;
+                displayStatus.style.color = color;
+                displayStatus.style.background = "white"; // Fondo blanco para resaltar
+            } else {
+                displayIMC.textContent = "--";
+                displayStatus.textContent = "Complete peso y altura";
+                displayStatus.style.background = "rgba(255,255,255,0.1)";
+                displayStatus.style.color = "white";
+            }
+        }
+
+        // Escuchar cambios
+        inputPeso.addEventListener('input', calcularIMC);
+        inputAltura.addEventListener('input', calcularIMC);
+        inputFecha.addEventListener('change', calcularIMC);
+
+        // --- 3. AGENDAR PRÓXIMA CITA (AJAX) ---
+        const inputNextDate = document.getElementById('next-date');
+        const inputNextTime = document.getElementById('next-time');
+        const slotsContainer = document.getElementById('slots-container');
+
+        if (inputNextDate) {
+            inputNextDate.addEventListener('change', function () {
+                const fecha = this.value;
+                if (!fecha) return;
+
+                slotsContainer.innerHTML = '<div class="loading-slots"><i class="fas fa-spinner fa-spin"></i> Buscando disponibilidad...</div>';
+                inputNextTime.value = ''; // Reset hora
+
+                // Llamamos a la API de turnos que ya tienes
+                fetch(`/turnos/api/horarios/?fecha=${fecha}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        slotsContainer.innerHTML = '';
+                        if (data.horarios && data.horarios.length > 0) {
+                            data.horarios.forEach(hora => {
+                                const btn = document.createElement('div');
+                                btn.className = 'slot-mini';
+                                btn.textContent = hora;
+                                btn.onclick = function () {
+                                    // Marcar seleccionado visualmente
+                                    document.querySelectorAll('.slot-mini').forEach(b => b.classList.remove('selected'));
+                                    btn.classList.add('selected');
+                                    // Llenar el input real
+                                    inputNextTime.value = hora;
+                                };
+                                slotsContainer.appendChild(btn);
+                            });
+                        } else {
+                            slotsContainer.innerHTML = '<div class="loading-slots" style="color:#ef4444;">Sin horarios libres.</div>';
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        slotsContainer.innerHTML = '<div class="loading-slots">Error al cargar.</div>';
+                    });
+            });
+        }
+    });
 </script>
 {% endblock %}

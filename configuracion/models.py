@@ -3,6 +3,8 @@ from colorfield.fields import ColorField
 from imagekit.models import ProcessedImageField # <-- 1. Importar
 from imagekit.processors import ResizeToFit, Transpose
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 
 class DatosPago(models.Model):
     cbu_alias = models.CharField(max_length=255, help_text="Tu CBU o Alias para transferencias.")
@@ -164,3 +166,36 @@ class EmailConfig(models.Model):
 
     def __str__(self):
         return self.get_tipo_display()
+
+
+class ConfigPrecio(models.Model):
+    """
+    Modelo único (Singleton) para guardar precios globales.
+    """
+    precio_consulta = models.DecimalField(
+        max_digits=10, decimal_places=2, 
+        default=1500.00, 
+        verbose_name="Precio de Consulta (Turno)"
+    )
+    
+    precio_recetario_mensual = models.DecimalField(
+        max_digits=10, decimal_places=2, 
+        default=3000.00, 
+        verbose_name="Precio Recetario (Mensual)"
+    )
+    
+    # Podemos agregar más precios aquí en el futuro (ej: planes trimestrales)
+
+    def __str__(self):
+        return "Configuración de Precios"
+
+    class Meta:
+        verbose_name = "Configuración de Precios"
+        verbose_name_plural = "Configuración de Precios"
+
+    # Método para asegurar que solo haya uno
+    def save(self, *args, **kwargs):
+        if not self.pk and ConfigPrecio.objects.exists():
+            # Si ya existe uno, actualizamos el primero en lugar de crear otro
+            return ConfigPrecio.objects.first()
+        return super(ConfigPrecio, self).save(*args, **kwargs)

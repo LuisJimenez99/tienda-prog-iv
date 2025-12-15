@@ -1,0 +1,105 @@
+{% extends 'panel_gestor/base_panel.html' %}
+{% load static %}
+
+{% block title %}Configuración de Precios{% endblock %}
+
+{% block extra_css %}
+<style>
+    .config-container { 
+        max-width: 600px; 
+        margin: 0 auto; 
+        background: white; 
+        padding: 40px; 
+        border-radius: 16px; 
+        box-shadow: var(--shadow-md); 
+    }
+    
+    .header-icon {
+        width: 60px; height: 60px; 
+        background: #f0fdf4; color: var(--brand-color); 
+        border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        font-size: 1.8rem; margin: 0 auto 15px;
+    }
+
+    .form-group { margin-bottom: 25px; }
+    
+    label { 
+        display: block; margin-bottom: 8px; 
+        font-weight: 700; color: #1e293b; font-size: 0.95rem; 
+    }
+    
+    .input-wrapper { position: relative; }
+    
+    .currency-symbol {
+        position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+        color: #64748b; font-weight: 600;
+    }
+
+    .form-input { 
+        width: 100%; padding: 12px 12px 12px 35px; /* Espacio para el $ */
+        border: 1px solid #d1d5db; border-radius: 8px; 
+        font-size: 1.1rem; font-weight: 600; color: #334155;
+        box-sizing: border-box; background: #f9fafb;
+    }
+    
+    .form-input:focus { 
+        border-color: var(--brand-color); outline: none; background: white; 
+        box-shadow: 0 0 0 3px rgba(74, 108, 72, 0.1);
+    }
+
+    .help-text { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
+
+    .btn-submit { 
+        background: var(--brand-color); color: white; padding: 15px; 
+        border: none; border-radius: 8px; font-weight: 700; cursor: pointer; 
+        width: 100%; margin-top: 10px; font-size: 1rem; transition: 0.2s; 
+    }
+    .btn-submit:hover { background: #3a5a38; transform: translateY(-2px); }
+
+    .btn-cancel {
+        display: block; text-align: center; margin-top: 20px; 
+        color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+    <div class="config-container">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="header-icon">
+                <i class="fas fa-tag"></i>
+            </div>
+            <h2 style="margin:0; color:#1e293b;">Precios de Servicios</h2>
+            <p style="color:#64748b; margin: 5px 0 0;">Define el valor actual de tus servicios profesionales.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Precio Consulta -->
+            <div class="form-group">
+                <label for="{{ form.precio_consulta.id_for_label }}">Precio de Consulta (Turno)</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    {{ form.precio_consulta }}
+                </div>
+                <div class="help-text">Este valor se cobrará en Mercado Pago al reservar un turno.</div>
+            </div>
+
+            <!-- Precio Recetario -->
+            <div class="form-group">
+                <label for="{{ form.precio_recetario_mensual.id_for_label }}">Precio Recetario (Mensual)</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    {{ form.precio_recetario_mensual }}
+                </div>
+                <div class="help-text">Valor de la suscripción mensual para acceder al contenido premium.</div>
+            </div>
+
+            <button type="submit" class="btn-submit">Actualizar Precios</button>
+            <a href="{% url 'panel_home' %}" class="btn-cancel">Cancelar</a>
+        </form>
+    </div>
+{% endblock %}

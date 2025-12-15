@@ -2,44 +2,243 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/servicios.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- FontAwesome para los íconos de los servicios -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* --- 1. HERO SECTION (Encabezado) --- */
+    .servicios-hero {
+        text-align: center;
+        padding: 80px 20px 60px;
+        background: linear-gradient(to bottom, #fdfbf7 0%, #f4f6f9 100%); /* Degradado sutil */
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+    
+    .servicios-hero h1 {
+        font-family: var(--fuente-tarjetas, serif);
+        font-size: 3rem;
+        color: #1e293b;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+    }
+    
+    .servicios-hero p {
+        font-size: 1.1rem;
+        color: #64748b;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* --- 2. GRID SYSTEM --- */
+    .servicios-container {
+        max-width: 1200px;
+        margin: 0 auto 100px;
+        padding: 0 20px;
+    }
+
+    .servicios-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 40px;
+    }
+
+    /* --- 3. TARJETA DE SERVICIO (DISEÑO PREMIUM) --- */
+    .servicio-card {
+        background: white;
+        border-radius: 24px; /* Bordes muy redondeados */
+        padding: 40px 30px;
+        text-align: center;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto rebote suave */
+        border: 1px solid rgba(0,0,0,0.04);
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08); /* Sombra elegante */
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .servicio-card:hover {
+        transform: translateY(-10px); /* Se eleva */
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+        border-color: rgba(var(--color-btn-principal-fondo), 0.3);
+    }
+
+    /* Icono Flotante */
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--color-btn-principal-fondo); /* Usa el color del admin */
+        background-color: #f8fafc; /* Fondo gris muy claro por defecto */
+        border: 2px solid var(--color-btn-principal-fondo);
+        transition: all 0.3s ease;
+    }
+
+    /* Al pasar el mouse, el icono se llena de color */
+    .servicio-card:hover .icon-wrapper {
+        background-color: var(--color-btn-principal-fondo);
+        color: white;
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    .servicio-title {
+        font-family: var(--fuente-tarjetas, serif);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 15px;
+    }
+
+    .servicio-desc {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 30px;
+        flex-grow: 1; /* Empuja el precio hacia abajo */
+    }
+
+    /* Separador sutil */
+    .divider {
+        height: 1px;
+        width: 50px;
+        background-color: #e2e8f0;
+        margin: 0 auto 25px;
+    }
+
+    /* Precio */
+    .price-tag {
+        margin-bottom: 25px;
+    }
+    
+    .price-currency {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+        vertical-align: top;
+    }
+    
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--color-btn-principal-fondo);
+        line-height: 1;
+    }
+    
+    .price-period {
+        display: block;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Botón de Acción */
+    .btn-service {
+        display: inline-block;
+        width: 100%;
+        padding: 16px;
+        border-radius: 50px;
+        background-color: var(--color-btn-principal-fondo);
+        color: var(--color-btn-principal-texto, white);
+        text-decoration: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-service:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        filter: brightness(1.1);
+    }
+    
+    /* Estado deshabilitado */
+    .btn-disabled {
+        background-color: #e2e8f0;
+        color: #94a3b8;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .btn-disabled:hover { transform: none; box-shadow: none; filter: none; }
+
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="servicios-wrapper">
-    
-    <div class="servicios-header">
-        <h1 class="servicios-titulo">Planes y Servicios</h1>
-        <p class="servicios-subtitulo">Elige el plan que mejor se adapta a tus objetivos.</p>
-    </div>
 
-    <div class="plan-grid">
+<!-- Hero Section -->
+<div class="servicios-hero">
+    <h1>Planes y Servicios</h1>
+    <p>Descubre nuestras opciones diseñadas para mejorar tu estilo de vida y alimentación.</p>
+</div>
+
+<div class="servicios-container">
+    <div class="servicios-grid">
         
         {% for servicio in servicios %}
-        <div class="plan-card">
+        <div class="servicio-card">
             
-            {% if servicio.icono %}
-            <div class="plan-icon">
-                <i class="{{ servicio.icono }}"></i>
-            </div>
-            {% endif %}
-            
-            <h3 class="plan-nombre">{{ servicio.nombre }}</h3>
-            <p class="plan-descripcion">{{ servicio.descripcion }}</p>
-            
-            <div class="plan-precio">
-                ${{ servicio.precio|floatformat:0 }}
+            <!-- 1. Icono Dinámico -->
+            <div class="icon-wrapper">
+                <!-- Usamos el icono del admin o uno por defecto -->
+                <i class="{{ servicio.icono|default:'fas fa-star' }}"></i>
             </div>
             
+            <!-- 2. Título y Descripción -->
+            <h2 class="servicio-title">{{ servicio.nombre }}</h2>
+            <div class="servicio-desc">
+                {{ servicio.descripcion|linebreaks }}
+            </div>
+            
+            <div class="divider"></div>
+
+            <!-- 3. Precio Dinámico (Lógica de Negocio) -->
+            <div class="price-tag">
+                <span class="price-currency">$</span>
+                <span class="price-amount">
+                    {% if servicio.tipo_servicio == 'TURNO' %}
+                        {{ precio_consulta_global|floatformat:0 }}
+                    {% elif servicio.tipo_servicio == 'RECETARIO' %}
+                        {{ precio_recetario_global|floatformat:0 }}
+                    {% else %}
+                        {{ servicio.precio|floatformat:0 }}
+                    {% endif %}
+                </span>
+                
+                {% if servicio.tipo_servicio == 'RECETARIO' %}
+                    <span class="price-period">/ mes</span>
+                {% elif servicio.tipo_servicio == 'TURNO' %}
+                    <span class="price-period">por sesión</span>
+                {% else %}
+                    <span class="price-period">único</span>
+                {% endif %}
+            </div>
+
+            <!-- 4. Botón de Acción -->
             {% if servicio.tipo_servicio == 'TURNO' %}
-                <a href="{% url 'calendario' %}" class="btn-principal">
-                    Reservar Turno
+                <a href="{% url 'calendario' %}" class="btn-service">
+                    Reservar Cita <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                 </a>
+            
             {% elif servicio.tipo_servicio == 'RECETARIO' %}
-                <a href="{% url 'checkout_recetario' %}" class="btn-principal">
-                    Comprar Acceso
+                <a href="{% url 'checkout_recetario' %}" class="btn-service">
+                    Suscribirse Ahora <i class="fas fa-star" style="margin-left: 8px;"></i>
                 </a>
+            
+            {% else %}
+                <span class="btn-service btn-disabled">Próximamente</span>
             {% endif %}
             
         </div>
@@ -47,4 +246,5 @@
 
     </div>
 </div>
+
 {% endblock %}

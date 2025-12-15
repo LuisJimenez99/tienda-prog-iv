@@ -78,3 +78,31 @@ class Consulta(models.Model):
         if self.altura > 0:
             return round(float(self.peso_actual) / (float(self.altura) ** 2), 2)
         return 0
+
+class ArchivoPaciente(models.Model):
+    """
+    Estudios médicos, fotos o documentos adjuntos.
+    """
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='archivos')
+    archivo = models.FileField(upload_to='pacientes_archivos/')
+    titulo = models.CharField(max_length=100, verbose_name="Nombre del Archivo")
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titulo} ({self.paciente})"
+
+    def es_imagen(self):
+        name = self.archivo.name.lower()
+        return name.endswith('.jpg') or name.endswith('.png') or name.endswith('.jpeg') or name.endswith('.webp')
+
+class PlanAlimentacion(models.Model):
+    """
+    La dieta o pauta alimentaria actual del paciente.
+    """
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='planes')
+    contenido = models.TextField(help_text="Escribe aquí el plan detallado.")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Plan {self.fecha_creacion.strftime('%d/%m/%Y')} - {self.paciente}"

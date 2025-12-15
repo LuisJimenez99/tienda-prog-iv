@@ -1,72 +1,90 @@
 {% load static %}
 
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Tienda de Viandas</title>
     
-    <!-- === INICIO DEL BLOQUE DE ESTILOS DINÁMICOS === -->
+    <!-- Bloque de Estilos Dinámicos (Motor de Temas) -->
     <style>
+    :root {
+        --color-fondo-body: {{ apariencia_config.color_fondo_body }};
+        --color-navbar: {{ apariencia_config.navbar_color_fondo }};
+        --color-footer: {{ apariencia_config.navbar_color_fondo }};
+        --color-nav-link: {{ apariencia_config.navbar_color_enlaces }};
+        --color-btn-principal-fondo: {{ apariencia_config.boton_color_principal_fondo }};
+        --color-btn-principal-texto: {{ apariencia_config.boton_color_principal_texto }};
+        --color-btn-principal-hover: {{ apariencia_config.boton_color_principal_hover }};
+        --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
+        --fuente-tarjetas: {{ apariencia_config.fuente_tarjetas|safe }};
+        --color-titulo-tarjeta: {{ apariencia_config.color_titulo_tarjeta }};
+        --color-desc-tarjeta: {{ apariencia_config.color_desc_tarjeta }};
+        --card-btn-principal-fondo: {{ apariencia_config.card_btn_principal_fondo }};
+        --card-btn-principal-texto: {{ apariencia_config.card_btn_principal_texto }};
+        --card-btn-principal-hover: {{ apariencia_config.card_btn_principal_hover }};
+        --card-btn-secundario-borde: {{ apariencia_config.card_btn_secundario_borde }};
+        --color-carrito-activo: {{ apariencia_config.color_carrito_activo }};
+    }
+    </style>
     
-:root {
-    /* Colores Base */
-    --color-fondo-body: {{ apariencia_config.color_fondo_body }};
+    <!-- Librerías Externas -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    /* Colores de Navbar y Footer */
-    --color-navbar: {{ apariencia_config.navbar_color_fondo }};
-    --color-footer: {{ apariencia_config.navbar_color_fondo }};
-    --color-nav-link: {{ apariencia_config.navbar_color_enlaces }};
+    <!-- CSS del Proyecto -->
+    <link rel="stylesheet" href="{% static 'css/base/global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/card_hot_sale.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/card_harvest.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/card_simple.css' %}">
 
-    /* Colores de Botones Principales */
-    --color-btn-principal-fondo: {{ apariencia_config.boton_color_principal_fondo }};
-    --color-btn-principal-texto: {{ apariencia_config.boton_color_principal_texto }};
-    --color-btn-principal-hover: {{ apariencia_config.boton_color_principal_hover }};
-
-    /* Colores de Botones Secundarios */
-    --color-btn-secundario-borde: {{ apariencia_config.boton_color_secundario_borde }};
-
-    
-    --fuente-tarjetas: {{ apariencia_config.fuente_tarjetas|safe }};
-    --color-titulo-tarjeta: {{ apariencia_config.color_titulo_tarjeta }};
-    --color-desc-tarjeta: {{ apariencia_config.color_desc_tarjeta }};
-    --card-btn-principal-fondo: {{ apariencia_config.card_btn_principal_fondo }};
-    --card-btn-principal-texto: {{ apariencia_config.card_btn_principal_texto }};
-    --card-btn-principal-hover: {{ apariencia_config.card_btn_principal_hover }};
-    --card-btn-secundario-borde: {{ apariencia_config.card_btn_secundario_borde }};
-    --color-carrito-activo: {{ apariencia_config.color_carrito_activo }};
-}
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<link rel="stylesheet" href="{% static 'css/base/global.css' %}">
-
-<link rel="stylesheet" href="{% static 'css/components/card_simple.css' %}">
-
-<link rel="stylesheet" href="{% static 'css/components/card_hot_sale.css' %}">
-<link rel="stylesheet" href="{% static 'css/components/card_harvest.css' %}">
-
-{% block extra_css %}{% endblock %}
+    {% block extra_css %}{% endblock %}
 
 </head>
-<div id="custom-alert" class="custom-alert">
-    <span id="custom-alert-message"></span>
+
+<!-- Agregamos clase 'has-admin-bar' si es staff para ajustar el header (margin-top) -->
+<body class="{% if user.is_staff %}has-admin-bar{% endif %}">
+
+<!-- === BARRA DE ADMINISTRACIÓN (SOLO STAFF) === -->
+{% if user.is_staff %}
+<div class="admin-bar">
+    <div class="admin-bar-left">
+        <a href="{% url 'panel_home' %}" class="admin-link">
+            <i class="fas fa-tachometer-alt"></i> Panel de Gestión
+        </a>
+        <span style="color:#475569;">|</span>
+        <a href="{% url 'panel_agenda' %}" class="admin-link">
+            <i class="far fa-calendar-alt"></i> Agenda
+        </a>
+        <a href="{% url 'panel_cocina' %}" class="admin-link">
+            <i class="fas fa-utensils"></i> Cocina
+        </a>
+    </div>
+    <div class="admin-bar-right">
+        <span style="color:#94a3b8;">Hola, {{ user.first_name|default:"Admin" }}</span>
+        <!-- Aquí podrías poner un botón de 'Editar Página' si tuvieras un CMS -->
+    </div>
 </div>
-<body>
-{% csrf_token %}
+{% endif %}
+<!-- ============================================== -->
+
+<!-- Header Principal -->
 <header>
     {% include 'header_content.html' %}
 </header>
 
+<!-- Alerta Flotante (Toast) -->
+<div id="custom-alert" class="custom-alert">
+    <span id="custom-alert-message"></span>
+</div>
+
+<!-- Contenido Principal -->
 <main>
     {% block content %}
     {% endblock %}
 </main>
 
-<!-- === INICIO DEL MINI-CARRITO FLOTANTE === -->
-<!-- Esta es la estructura que debe estar oculta por el CSS -->
+<!-- === MINI-CARRITO FLOTANTE === -->
 <div id="mini-cart-overlay" class="mini-cart-overlay"></div>
 <div id="mini-cart" class="mini-cart">
     <div class="mini-cart-header">
@@ -88,26 +106,28 @@
         <a href="#" class="btn-checkout">Finalizar Compra</a>
     </div>
 </div>
-<!-- === FIN DEL MINI-CARRITO FLOTANTE === -->
 
-{% include 'footer_content.html' %}
+<!-- === BOTÓN FLOTANTE WHATSAPP === -->
 {% if apariencia_config.footer_link_whatsapp %}
 <a href="{{ apariencia_config.footer_link_whatsapp }}" class="btn-wsp-flotante" target="_blank" aria-label="Chatear por WhatsApp">
-    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="white">
-        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-    </svg>
+    <!-- Icono SVG de WhatsApp o FontAwesome -->
+    <i class="fab fa-whatsapp"></i>
 </a>
 {% endif %}
 
+<!-- Footer -->
+{% include 'footer_content.html' %}
+
+<!-- Scripts Globales -->
 <script src="{% static 'js/notifications.js' %}"></script>
 <script src="{% static 'js/cart.js' %}"></script>
 <script src="{% static 'js/search.js' %}"></script>
-
 <script src="{% static 'js/shipping_calculator.js' %}"></script>
 <script src="{% static 'js/carousel.js' %}"></script>
-
 <script src="{% static 'js/main.js' %}"></script>
-{% block extra_js %}
-{% endblock %}
+
+<!-- Scripts Específicos de cada página -->
+{% block extra_js %}{% endblock %}
+
 </body>
 </html>

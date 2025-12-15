@@ -2,53 +2,78 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/pages/servicios.css' %}">
+  <!-- Reutilizamos el CSS moderno que creamos para el checkout de turnos -->
+  <!-- Si quieres uno específico, avísame, pero este funciona perfecto -->
+  <link rel="stylesheet" href="{% static 'css/pages/checkout_turno.css' %}">
 {% endblock %}
 
 {% block content %}
-<script src="https://sdk.mercadopago.com/js/v2"></script>
+<div class="checkout-wrapper">
+    
+    <div class="checkout-card">
+        <!-- Encabezado -->
+        <div class="card-header">
+            <h2>Suscripción Premium</h2>
+            <p>Accede a todo nuestro contenido exclusivo de recetas.</p>
+        </div>
 
-<div class="servicios-wrapper">
-    <div class="servicios-header">
-        <h1 class="servicios-titulo">Finalizar Compra</h1>
-        <p class="servicios-subtitulo">Estás a un paso de obtener tu acceso.</p>
-    </div>
-
-    <div class="plan-grid">
-        <div class="plan-card" style="width: 400px; max-width: 90%;">
-            
-            <div class="plan-icon">
-                <i class="{{ servicio.icono|default:'fas fa-book-open' }}"></i>
+        <!-- Ticket Resumen -->
+        <div class="turno-ticket">
+            <div class="ticket-row">
+                <span class="ticket-label"><i class="fas fa-book-open"></i> Plan:</span>
+                <span class="ticket-value">{{ servicio.nombre }}</span>
             </div>
             
-            <h3 class="plan-nombre">{{ servicio.nombre }}</h3>
-            
-            <div class="plan-precio" style="margin-bottom: 30px;">
-                ${{ servicio.precio|floatformat:0 }}
+            <div class="ticket-row">
+                <span class="ticket-label"><i class="far fa-clock"></i> Duración:</span>
+                <span class="ticket-value">Mensual (Renovable)</span>
             </div>
             
-            <div id="wallet_container"></div>
+            <hr class="ticket-divider">
+            
+            <div class="ticket-row total">
+                <span class="ticket-label">Total a Pagar:</span>
+                
+                <!-- ¡AQUÍ ESTÁ LA CORRECCIÓN! -->
+                <!-- Usamos 'precio' (el dinámico) en lugar de 'servicio.precio' -->
+                <span class="ticket-value precio">${{ precio|floatformat:0 }}</span>
+            </div>
+        </div>
 
+        <!-- Botón de Pago -->
+        <div class="pago-section">
+            <h3>Finalizar Suscripción:</h3>
+
+            <div class="metodo-pago mp-box">
+                <div class="mp-header">
+                    <img src="https://logotipoz.com/wp-content/uploads/2021/10/version-horizontal-large-logo-mercado-pago.webp" alt="Mercado Pago" class="mp-logo">
+                </div>
+                <p class="mp-desc">Pago seguro con Tarjeta, Débito o Dinero en Cuenta.</p>
+                
+                <!-- Botón de MP -->
+                <div id="wallet_container"></div>
+            </div>
         </div>
     </div>
+
 </div>
 
+<!-- SDK Mercado Pago -->
+<script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
-    // 1. Inicializa Mercado Pago con tu Llave Pública
-    const mp = new MercadoPago('{{ public_key }}', {
-        locale: 'es-AR'
-    });
-
-    // 2. Crea el botón de pago
+    const mp = new MercadoPago("{{ public_key }}");
+    const bricksBuilder = mp.bricks();
+    
     mp.bricks().create("wallet", "wallet_container", {
         initialization: {
-            preferenceId: "{{ preference_id }}", // El ID que pasamos desde la vista
+            preferenceId: "{{ preference_id }}",
         },
         customization: {
             texts: {
-                valueProp: 'smart_option',
+                action: 'pay',
+                valueProp: 'security_details',
             },
-        }
+        },
     });
 </script>
 {% endblock %}
